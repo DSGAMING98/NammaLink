@@ -1,0 +1,15 @@
+# Local environment files may contain secrets.
+.env
+.env.*
+!.env.example
+
+# Planned Next.js build and dependencies.
+node_modules/
+.next/
+out/
+
+# Local datasets and generated outputs.
+data/raw/
+data/processed/
+*.gtfs.zip
+

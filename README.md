@@ -62,8 +62,8 @@ Repository and workspace audit performed on **29 October 2026** against Git comm
 
 | Evidence level | Finding |
 | --- | --- |
-| **Verified in repository** | One file exists: `README.md`. |
-| **Verified in repository** | No application source, `package.json`, lockfile, environment example, tests, CI workflow, deployment configuration, database schema, or API integration exists. |
+| **Verified in repository** | Documentation plus a blank environment template and secret-protection rules exist: `README.md`, `.env.example`, and `.gitignore`. |
+| **Verified in repository** | No application source, `package.json`, lockfile, tests, CI workflow, deployment configuration, database schema, or API integration exists. |
 | **Verified in local data** | BMTC and BMRCL static GTFS tables, three BMRCL ridership workbooks, two KML maps, a Majestic platform CSV, and an older BMTC CSV bundle were inspected outside the Git repository. |
 | **Verified from external documentation** | Google Routes API supports transit requests in general, with important restrictions documented below. The official documentation does not certify the exact quality or completeness of Bengaluru results. |
 | **Planned** | Next.js application, Journey Contract model, recovery engine, Google Maps Platform integration, persistence, testing, and deployment. |
@@ -351,14 +351,20 @@ cp .env.example .env.local
 npm run dev
 ```
 
-Proposed environment-variable names:
+Copy the committed blank template to `.env.local`, then fill only the services you enable. The local file is ignored by Git.
 
 ```dotenv
 # Browser key: visible to clients; restrict to allowed HTTPS referrers and Maps JavaScript API.
 NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=replace_with_restricted_browser_key
+NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID=replace_with_map_id
 
-# Server-only key: never prefix with NEXT_PUBLIC_.
-GOOGLE_MAPS_SERVER_API_KEY=replace_with_restricted_server_key
+# Server-only keys: never prefix with NEXT_PUBLIC_.
+GOOGLE_ROUTES_API_KEY=replace_with_restricted_routes_key
+GOOGLE_PLACES_API_KEY=replace_with_restricted_places_key
+GOOGLE_GEOCODING_API_KEY=replace_with_restricted_geocoding_key
+
+# Public Overpass instances normally use a URL, not an API key.
+OVERPASS_API_URL=https://overpass-api.de/api/interpreter
 
 # Add only if Supabase is adopted.
 NEXT_PUBLIC_SUPABASE_URL=replace_with_project_url
@@ -366,7 +372,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=replace_with_anon_key
 SUPABASE_SERVICE_ROLE_KEY=replace_with_server_only_service_role_key
 ```
 
-An `.env.example` should be committed when code first consumes these variables. Actual `.env` files and credentials must never be committed.
+`.env.example` contains blank, safe-to-share slots. Put real values only in `.env.local`. Actual `.env` files and credentials must never be committed.
 
 ## Directory structure
 
@@ -374,6 +380,8 @@ An `.env.example` should be committed when code first consumes these variables. 
 
 ```text
 NammaLink/
+├── .env.example              # Blank, safe-to-share variable template
+├── .gitignore                # Excludes local secrets and generated data
 └── README.md
 ```
 
@@ -504,7 +512,7 @@ NammaLink aligns with **UN Sustainable Development Goal 11: Sustainable Cities a
 - Provenance and licence for `BMTC Route with coordinates.zip`.
 - Licence or permission clarification for the Majestic platform CSV/KML.
 - A source manifest, automated GTFS validator output, and repeatable refresh process.
-- Application code, tests, environment template, CI, and deployment configuration.
+- Application code, tests, CI, and deployment configuration.
 
 ## Contributing and licence
 
