@@ -12,7 +12,8 @@ Last updated: 29 October 2026
 | Nearby-stop search | Implemented and tested | Great-circle radius search is covered by routing tests; production spatial index remains planned |
 | Transit routing | Implemented and tested | Bounded schedule enumerator, Pareto pruning, and real central-demo integration tests pass |
 | Arrive-by and Journey Contract constraints | Implemented and tested | Deadline, safety buffer, walking, transfers, and five ranking preferences are enforced in pure TypeScript |
-| Mobile-first journey UI | In progress | Responsive landing and Journey Contract concept are implemented; form and results are not connected yet |
+| Journey API | Implemented and tested | Zod-validated POST endpoint returns source-labelled schedule results; API tests cover valid and invalid requests |
+| Mobile-first journey UI | Implemented and tested | Interactive Journey Contract and itinerary timeline verified in desktop and 390×844 browser views |
 | Google Maps / Places / Routes integration | Blocked | Variables are present, but two minimal Places API probes returned HTTP 403; no keys were exposed |
 | Journey disruption reporting | Planned | No persistence or workflow yet |
 | Recovery simulation | Planned | Required end-to-end demonstration not yet implemented |

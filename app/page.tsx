@@ -1,10 +1,5 @@
 import { capabilityStatus, statusLabel } from "@/lib/status";
-
-const routeMetrics = [
-  ["Arrival deadline", "09:00"],
-  ["Maximum walking", "800 m"],
-  ["Transfers", "1 preferred"],
-];
+import { JourneyPlanner } from "@/app/components/journey-planner";
 
 export default function HomePage() {
   return (
@@ -31,35 +26,7 @@ export default function HomePage() {
           </div>
         </div>
 
-        <div className="journeyPanel" id="journey" aria-label="Journey preview">
-          <div className="panelHeader">
-            <div>
-              <p className="smallLabel">Journey contract</p>
-              <h2>Campus commute</h2>
-            </div>
-            <span className="sourceBadge">Scheduled</span>
-          </div>
-
-          <div className="routeLine" aria-label="Jain Global Campus to Alliance University">
-            <span className="routeDot originDot" />
-            <div><small>FROM</small><strong>Jain Global Campus</strong><span>Jakkasandra</span></div>
-            <span className="routeStem" />
-            <span className="routeDot destinationDot" />
-            <div><small>TO</small><strong>Alliance University</strong><span>Central Campus, Anekal</span></div>
-          </div>
-
-          <div className="contractGrid">
-            {routeMetrics.map(([label, value]) => (
-              <div key={label}><span>{label}</span><strong>{value}</strong></div>
-            ))}
-          </div>
-
-          <button className="disabledSearch" type="button" disabled>
-            Route engine initializing
-            <span className="pulse" aria-hidden="true" />
-          </button>
-          <p className="panelNote">No route result is shown until the verified schedule engine is connected.</p>
-        </div>
+        <JourneyPlanner />
       </section>
 
       <section className="principleStrip" aria-label="Product principles">

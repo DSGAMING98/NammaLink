@@ -8,10 +8,10 @@ describe("project capability status", () => {
     expect(statusLabel("blocked")).toBe("External data needed");
   });
 
-  it("does not label planned capabilities as verified", () => {
-    const planned = capabilityStatus.filter((item) => item.status === "planned");
-    expect(planned.length).toBeGreaterThan(0);
-    expect(planned.every((item) => statusLabel(item.status) !== "Verified static data")).toBe(true);
+  it("does not label blocked capabilities as verified", () => {
+    const blocked = capabilityStatus.filter((item) => item.status === "blocked");
+    expect(blocked.length).toBeGreaterThan(0);
+    expect(blocked.every((item) => statusLabel(item.status) !== "Verified static data")).toBe(true);
   });
 });
 

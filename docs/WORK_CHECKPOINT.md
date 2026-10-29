@@ -4,15 +4,15 @@ Updated: 29 October 2026
 
 ## Current phase
 
-Phase 2 — Core route optimization.
+Phase 3 — Map and journey experience.
 
 ## Last completed task
 
-Generated a reproducible bounded BMTC fixture and implemented the tested schedule router, arrive-by search, hard Journey Contract constraints, Pareto filtering, and central Jain–Banashankari–Alliance-area integration proof.
+Connected the central-demo router to a validated Next.js API and responsive Journey Contract/results interface. Verified the real browser flow on desktop and mobile widths.
 
 ## Last verified working commit
 
-Application foundation: `05e00df` on `main`. The data-and-routing milestone is ready for its verified commit.
+Data and routing core: `91e0995` on `main`. The interactive journey milestone is ready for its verified commit.
 
 ## Completed features
 
@@ -28,10 +28,13 @@ Application foundation: `05e00df` on `main`. The data-and-routing milestone is r
 - Arrive-by deadline and safety buffer, walking and transfer limits, and direct-only enforcement.
 - Fastest, least-waiting, least-walking, direct-preferred, and direct-only ranking.
 - Real scheduled central-demo connection test and explicit no-direct-service result.
+- Zod-validated journey-planning API with provenance in every response.
+- Interactive arrive-by, walking, transfer, and ranking controls.
+- Mobile itinerary timeline with route, stop, wait, walk, transfer, and source evidence.
 
 ## Incomplete features
 
-Full-feed preprocessing/spatial indexing, interactive journey planning, recovery, authentication, notification, ML, low-connectivity, operator-insight, and deployment remain incomplete.
+Arbitrary place search/maps, full-feed preprocessing/spatial indexing, recovery, authentication, notification, ML, low-connectivity, operator-insight, and deployment remain incomplete.
 
 ## Tests run
 
@@ -46,6 +49,9 @@ Full-feed preprocessing/spatial indexing, interactive journey planning, recovery
 - `npm run data:build`: passed; 3 routes, 216 stops, 53 trips, and 1,343 stop times generated.
 - `npm run test:run`: passed, 11 tests across 4 files after the routing milestone.
 - `npm run typecheck`: passed after the routing milestone.
+- `npm run test:run`: passed, 13 tests across 5 files after API/UI integration.
+- `npm run build`: passed with static `/` and dynamic `/api/journeys` routes.
+- Browser flow: passed on desktop and 390×844 mobile viewport; central result rendered with no console warning/error.
 
 ## Dataset limitations
 
@@ -63,7 +69,7 @@ Variables are populated locally. Two minimal Google Places API probes returned H
 
 ## Exact next implementation step
 
-Commit and push the data-and-routing milestone, then expose the router through a validated API and connect the landing page to an interactive Journey Contract/results flow.
+Commit and push the interactive journey milestone, then implement typed disruption states and a clearly labelled simulated incident that invalidates the selected trip and produces a recovery result.
 
 ## Restore commands
 
@@ -79,7 +85,7 @@ Read `docs/PROJECT_AUDIT.md`, `docs/IMPLEMENTATION_STATUS.md`, and this checkpoi
 
 ## Known bugs
 
-No verified runtime bugs in the tested bounded router. Full-feed request-time enumeration is intentionally unsupported; the diagnostic cap protects the prototype from runaway searches.
+No verified runtime bugs in the tested bounded router or central UI flow. The form currently uses the fixed central demonstration campuses; arbitrary geocoded places and map rendering are not implemented.
 
 ## Deployment state
 
@@ -87,7 +93,7 @@ Not deployed. The local production build passes; no verified public URL exists.
 
 ## Uncommitted work
 
-Fixture generator, bounded dataset, transit domain/router/tests, algorithm documentation, and checkpoint updates created in this milestone.
+Journey API, responsive interactive planner, API tests, initial evaluation report, generated Next.js agent rules, and checkpoint updates created in this milestone.
 
 ## Evidence supporting claims
 

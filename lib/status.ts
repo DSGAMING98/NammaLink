@@ -14,8 +14,8 @@ export const capabilityStatus: CapabilityStatus[] = [
   },
   {
     label: "Constraint-aware route search",
-    status: "planned",
-    detail: "Transit engine implementation is the next milestone.",
+    status: "verified-static",
+    detail: "The central campus journey is connected to the tested scheduled routing engine.",
   },
   {
     label: "Live vehicle and disruption feeds",
