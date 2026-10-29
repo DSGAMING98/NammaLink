@@ -4,15 +4,15 @@ Updated: 29 October 2026
 
 ## Current phase
 
-Phase 8 — Operator insights.
+Phase 9/10 — Production hardening and delivery.
 
 ## Last completed task
 
-Implemented and browser-verified a schedule-supply insights section with trip counts, service spans, direction-aware median headways, and explicit limits on fleet-utilization claims.
+Completed the professional README and required architecture, ML, competitor, and hackathon demonstration documents, aligned to the tested implementation and known limitations.
 
 ## Last verified working commit
 
-Low-connectivity support: `6085479` on `main`. The operator-insights milestone is ready for its verified commit.
+Operator insights: `c12d309` on `main`. Final documentation and hardening changes are ready for clean verification and their delivery commit.
 
 ## Completed features
 
@@ -40,6 +40,8 @@ Low-connectivity support: `6085479` on `main`. The operator-insights milestone i
 - Deduplicated, 20-item local report queue with explicit no-upload semantics.
 - Tested bounded schedule analysis for route supply, headways, service spans, stop coverage, and route overlap.
 - Responsive operator insight section that explicitly distinguishes scheduled supply from actual fleet utilization.
+- Architecture, algorithms, ML decision record, evaluation, competitor research, and hackathon demo documentation.
+- Professional setup, environment, verification, privacy, security, attribution, and roadmap README.
 
 ## Incomplete features
 
@@ -86,7 +88,7 @@ Variables are populated locally. Two minimal Google Places API probes returned H
 
 ## Exact next implementation step
 
-Commit and push operator insights, then complete architecture, ML, competitor, demo, security/privacy, and README documentation before final clean-build verification.
+Run final clean tests, strict type-check, production build, secret/status review, commit and push delivery documentation, then verify the remote commit and leave the repository clean.
 
 ## Restore commands
 
@@ -110,7 +112,7 @@ Not deployed. The local production build passes; no verified public URL exists.
 
 ## Uncommitted work
 
-Schedule-insight engine, responsive operator section, tests, evaluation/status documentation, and checkpoint updates created in this milestone.
+README replacement plus architecture, ML, competitor, and hackathon demonstration documents and final checkpoint alignment.
 
 ## Evidence supporting claims
 

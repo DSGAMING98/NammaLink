@@ -20,7 +20,7 @@ Last updated: 29 October 2026
 | Authentication / moderation | Planned | Supabase variables present; backend state unverified |
 | Notifications | Planned | In-app first; no external delivery provider verified |
 | ML delay prediction | Blocked | No labelled observed arrival/delay data found |
-| Schedule-based ETA baseline | Planned | Does not require ML labels |
+| Schedule-based ETA baseline | Implemented and tested | GTFS times plus explicit walking/waiting; every output labelled scheduled |
 | Low-connectivity mode | Partially implemented | Connection status, saved journey, local report queue, manifest, and service-worker shell cache implemented; full offline device test remains |
 | Operator insights | Implemented and tested | Bounded route trip counts, service spans, direction-aware median headways, and shared-stop analysis; explicitly not actual fleet utilization |
 | Deployment | Planned | Application builds locally; no deployment has been created or verified |
