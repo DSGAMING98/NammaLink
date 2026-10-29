@@ -15,8 +15,8 @@ Last updated: 29 October 2026
 | Journey API | Implemented and tested | Zod-validated POST endpoint returns source-labelled schedule results; API tests cover valid and invalid requests |
 | Mobile-first journey UI | Implemented and tested | Interactive Journey Contract and itinerary timeline verified in desktop and 390×844 browser views |
 | Google Maps / Places / Routes integration | Blocked | Variables are present, but two minimal Places API probes returned HTTP 403; no keys were exposed |
-| Journey disruption reporting | Planned | No persistence or workflow yet |
-| Recovery simulation | Planned | Required end-to-end demonstration not yet implemented |
+| Journey disruption evidence | Partially implemented | Typed report states and transparent scoring are tested; submission, persistence, and moderation UI remain |
+| Recovery simulation | Simulated for demonstration | Verified-labelled synthetic incident preserves the completed leg and returns the next feasible continuation with a deadline violation |
 | Authentication / moderation | Planned | Supabase variables present; backend state unverified |
 | Notifications | Planned | In-app first; no external delivery provider verified |
 | ML delay prediction | Blocked | No labelled observed arrival/delay data found |

@@ -124,6 +124,7 @@ export function planJourneys(network: TransitNetwork, request: PlanRequest): Pla
   const routesById = new Map(network.routes.map((route) => [route.id, route]));
   const calendarsById = new Map((network.calendars ?? []).map((calendar) => [calendar.service_id, calendar]));
   const activeTrips = network.trips.filter((trip) => {
+    if (request.excludedTripIds?.includes(trip.id)) return false;
     const calendar = calendarsById.get(trip.serviceId);
     return !calendar || serviceRuns(calendar, request.serviceDate);
   });
@@ -141,10 +142,11 @@ export function planJourneys(network: TransitNetwork, request: PlanRequest): Pla
 
   const requestedTime = parseGtfsTime(request.departAfter ?? request.arriveBy!);
   const safetySeconds = (request.safetyBufferMinutes ?? 0) * 60;
-  const latestArrival = request.arriveBy ? requestedTime - safetySeconds : Number.POSITIVE_INFINITY;
+  const explicitDeadline = request.arriveBy ?? request.arrivalDeadline;
+  const latestArrival = explicitDeadline ? parseGtfsTime(explicitDeadline) - safetySeconds : Number.POSITIVE_INFINITY;
   const horizonSeconds = (request.searchHorizonMinutes ?? 5 * 60) * 60;
   const searchStart = request.departAfter ? requestedTime : Math.max(0, latestArrival - horizonSeconds);
-  const searchEnd = request.departAfter ? requestedTime + horizonSeconds : latestArrival;
+  const searchEnd = request.departAfter ? Math.min(requestedTime + horizonSeconds, latestArrival) : latestArrival;
   const accessStops = nearbyStops(network.stops, request.origin, request.maxWalkingMeters).slice(0, 12);
   const destinationDistances = new Map(network.stops.map((stop) => [stop.id, distanceMeters(stop, request.destination)]));
   const transferNeighbors = new Map<string, Array<{ stop: TransitStop; distance: number }>>();

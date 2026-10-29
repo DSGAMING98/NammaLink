@@ -4,15 +4,15 @@ Updated: 29 October 2026
 
 ## Current phase
 
-Phase 3 — Map and journey experience.
+Phase 4 — Journey recovery.
 
 ## Last completed task
 
-Connected the central-demo router to a validated Next.js API and responsive Journey Contract/results interface. Verified the real browser flow on desktop and mobile widths.
+Implemented evidence-aware incident states and an end-to-end simulated missed-connection recovery that preserves completed travel, checks the original contract, and explains when the deadline is no longer feasible.
 
 ## Last verified working commit
 
-Data and routing core: `91e0995` on `main`. The interactive journey milestone is ready for its verified commit.
+Interactive journey planner: `2e8296e` on `main`. The recovery milestone is ready for its verified commit.
 
 ## Completed features
 
@@ -31,10 +31,13 @@ Data and routing core: `91e0995` on `main`. The interactive journey milestone is
 - Zod-validated journey-planning API with provenance in every response.
 - Interactive arrive-by, walking, transfer, and ranking controls.
 - Mobile itinerary timeline with route, stop, wait, walk, transfer, and source evidence.
+- Disruption scoring with six explicit evidence states; unverified reports cannot invalidate journeys.
+- Tested simulated incident overlay that excludes the affected trip without mutating GTFS.
+- Recovery preserves the completed leg and produces a next-trip action with an explicit deadline-at-risk warning.
 
 ## Incomplete features
 
-Arbitrary place search/maps, full-feed preprocessing/spatial indexing, recovery, authentication, notification, ML, low-connectivity, operator-insight, and deployment remain incomplete.
+Arbitrary place search/maps, full-feed preprocessing/spatial indexing, persistent disruption reporting/moderation, authentication, notifications, ML, low-connectivity, operator insights, and deployment remain incomplete.
 
 ## Tests run
 
@@ -52,6 +55,8 @@ Arbitrary place search/maps, full-feed preprocessing/spatial indexing, recovery,
 - `npm run test:run`: passed, 13 tests across 5 files after API/UI integration.
 - `npm run build`: passed with static `/` and dynamic `/api/journeys` routes.
 - Browser flow: passed on desktop and 390×844 mobile viewport; central result rendered with no console warning/error.
+- `npm run test:run`: passed, 18 tests across 7 files after recovery implementation.
+- Recovery browser flow: passed; simulated incident, preserved leg, deadline risk, and next continuation rendered.
 
 ## Dataset limitations
 
@@ -69,7 +74,7 @@ Variables are populated locally. Two minimal Google Places API probes returned H
 
 ## Exact next implementation step
 
-Commit and push the interactive journey milestone, then implement typed disruption states and a clearly labelled simulated incident that invalidates the selected trip and produces a recovery result.
+Commit and push the recovery milestone, then implement low-connectivity persistence and queued-report primitives before adding operator schedule insights and final documentation.
 
 ## Restore commands
 
@@ -85,7 +90,7 @@ Read `docs/PROJECT_AUDIT.md`, `docs/IMPLEMENTATION_STATUS.md`, and this checkpoi
 
 ## Known bugs
 
-No verified runtime bugs in the tested bounded router or central UI flow. The form currently uses the fixed central demonstration campuses; arbitrary geocoded places and map rendering are not implemented.
+No verified runtime bugs in the tested bounded router, central UI, or simulated recovery flow. The recovery API is a deterministic demonstration, not a real incident feed or persistent reporting service.
 
 ## Deployment state
 
@@ -93,7 +98,7 @@ Not deployed. The local production build passes; no verified public URL exists.
 
 ## Uncommitted work
 
-Journey API, responsive interactive planner, API tests, initial evaluation report, generated Next.js agent rules, and checkpoint updates created in this milestone.
+Disruption/recovery domain engine, simulation API, recovery UI, tests, algorithm/evaluation documentation, and checkpoint updates created in this milestone.
 
 ## Evidence supporting claims
 

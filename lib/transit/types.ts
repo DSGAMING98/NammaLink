@@ -69,11 +69,13 @@ export interface PlanRequest {
   serviceDate: string;
   departAfter?: string;
   arriveBy?: string;
+  arrivalDeadline?: string;
   safetyBufferMinutes?: number;
   maxWalkingMeters: number;
   maxTransfers: number;
   preference: JourneyPreference;
   searchHorizonMinutes?: number;
+  excludedTripIds?: string[];
 }
 
 export interface TransitLeg {

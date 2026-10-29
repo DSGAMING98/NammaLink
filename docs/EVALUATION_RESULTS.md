@@ -29,7 +29,7 @@ Direct-only mode returns no journey for this bounded network. A 09:00 deadline i
 
 ## Automated verification
 
-- 13 tests across 5 files pass.
+- 18 tests across 7 files pass.
 - Strict TypeScript checking passes.
 - Next.js production build passes, including dynamic `/api/journeys`.
 - Invalid negative walking constraints receive HTTP 400.
@@ -41,6 +41,12 @@ Direct-only mode returns no journey for this bounded network. A 09:00 deadline i
 ## Performance
 
 The full automated suite completes in under one second on the current development machine. The central request explores 107 boardings in the bounded fixture. This is not a full-feed performance benchmark, so no production latency or feasible-route discovery rate is claimed.
+
+## Simulated recovery result
+
+A clearly labelled simulated incident invalidates the originally selected `600-CA` trip after the passenger has completed the Jain Gate–Banashankari leg. The engine preserves that completed leg and excludes the affected trip. No continuation can satisfy the original 10:05 deadline, so the result explicitly marks the deadline at risk and returns the next scheduled `600-CA`: replan at 08:00, board at 08:45, and reach the destination at approximately 10:38 with 311 m estimated walking.
+
+The simulation is verified by unit/API tests and the browser flow. An unverified version of the same report does not invalidate the journey.
 
 ## Failure cases and limitations
 

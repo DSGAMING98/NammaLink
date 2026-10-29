@@ -39,6 +39,12 @@ The bounded enumerator is appropriate for the 53-trip demonstration fixture and 
 
 The next scale step is a preprocessed Connection Scan Algorithm or RAPTOR implementation with spatial indexing and date-specific service materialization. The current pure functions and domain types provide a correctness oracle for that migration.
 
+## Evidence-aware disruption and recovery
+
+Reports are classified as unverified, suspected, corroborated, verified, expired, or rejected. Freshness, independent corroboration, GPS confidence, moderator confirmation, and conflicting evidence contribute to a transparent score. Only a `verified` incident can invalidate a scheduled leg; one fresh report remains suspected and does not become a closure.
+
+Recovery preserves completed legs, checks verified incidents against the remaining trip, route, and stops, excludes affected trips, and first searches under the original Journey Contract. If the deadline is impossible, a second search may relax only the deadline and returns that violation explicitly. The demonstration incident is synthetic and is marked simulated in the API and interface.
+
 ## Tests
 
 The automated suite covers:

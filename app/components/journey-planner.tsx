@@ -2,10 +2,18 @@
 
 import { FormEvent, useState } from "react";
 import type { Journey, JourneyPreference, PlanResult } from "@/lib/transit/types";
+import type { DisruptionIncident, RecoveryResult } from "@/lib/disruptions/types";
 import { formatServiceTime } from "@/lib/transit/time";
 
 interface JourneyResponse extends PlanResult {
   network: { name: string; version: string; validUntil: string; source: string };
+}
+
+interface RecoveryResponse {
+  simulation: true;
+  label: string;
+  incident: DisruptionIncident;
+  recovery: RecoveryResult;
 }
 
 const preferences: Array<{ value: JourneyPreference; label: string }> = [
@@ -16,7 +24,7 @@ const preferences: Array<{ value: JourneyPreference; label: string }> = [
   { value: "direct_only", label: "Direct only" },
 ];
 
-function JourneyCard({ journey, index }: { journey: Journey; index: number }) {
+function JourneyCard({ journey, index, onSimulate, simulating }: { journey: Journey; index: number; onSimulate?: () => void; simulating?: boolean }) {
   return (
     <article className="resultCard">
       <div className="resultTopline">
@@ -48,6 +56,11 @@ function JourneyCard({ journey, index }: { journey: Journey; index: number }) {
         <span><strong>{journey.transfers}</strong> transfer{journey.transfers === 1 ? "" : "s"}</span>
       </div>
       <p className="explanation">{journey.explanation}</p>
+      {onSimulate && (
+        <button className="simulateButton" type="button" onClick={onSimulate} disabled={simulating}>
+          {simulating ? "Replanning…" : "Simulate a missed connection"}
+        </button>
+      )}
     </article>
   );
 }
@@ -60,11 +73,14 @@ export function JourneyPlanner() {
   const [result, setResult] = useState<JourneyResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [recovery, setRecovery] = useState<RecoveryResponse | null>(null);
+  const [simulating, setSimulating] = useState(false);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setLoading(true);
     setError(null);
+    setRecovery(null);
 
     try {
       const response = await fetch("/api/journeys", {
@@ -89,6 +105,21 @@ export function JourneyPlanner() {
       setError(reason instanceof Error ? reason.message : "Journey search failed.");
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function simulateRecovery() {
+    setSimulating(true);
+    setError(null);
+    try {
+      const response = await fetch("/api/recovery", { method: "POST" });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error ?? "Recovery simulation failed.");
+      setRecovery(payload);
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "Recovery simulation failed.");
+    } finally {
+      setSimulating(false);
     }
   }
 
@@ -122,7 +153,34 @@ export function JourneyPlanner() {
       <div className="resultsRegion" aria-live="polite" aria-busy={loading}>
         {error && <div className="messageCard errorCard"><strong>Search unavailable</strong><p>{error}</p></div>}
         {result?.journeys.length === 0 && <div className="messageCard"><strong>No feasible option</strong><p>{result.message}</p><small>Try a later deadline, more walking, or allow a transfer.</small></div>}
-        {result?.journeys.map((journey, index) => <JourneyCard journey={journey} index={index} key={`${journey.id}-${index}`} />)}
+        {result?.journeys.map((journey, index) => (
+          <JourneyCard
+            journey={journey}
+            index={index}
+            key={`${journey.id}-${index}`}
+            onSimulate={index === 0 ? simulateRecovery : undefined}
+            simulating={simulating}
+          />
+        ))}
+        {recovery && (
+          <article className="recoveryCard">
+            <div className="simulationLabel">Simulation · not a real disruption</div>
+            <h3>Connection lost. Journey recovered.</h3>
+            <p>{recovery.recovery.message}</p>
+            <div className="recoveryEvidence">
+              <span>Incident</span><strong>{recovery.incident.title}</strong>
+              <span>Preserved</span><strong>{recovery.recovery.preservedLegs.length} completed leg</strong>
+              <span>Original deadline</span><strong>{recovery.recovery.deadlineStillPossible ? "Still feasible" : "At risk"}</strong>
+            </div>
+            {recovery.recovery.continuation && (
+              <div className="continuation">
+                <small>Next feasible scheduled continuation</small>
+                <strong>Replan {formatServiceTime(recovery.recovery.continuation.departureSeconds)} · arrive {formatServiceTime(recovery.recovery.continuation.arrivalSeconds)}</strong>
+                <span>Board {recovery.recovery.continuation.legs[0].routeShortName} at {formatServiceTime(recovery.recovery.continuation.legs[0].departureSeconds)} · {Math.round(recovery.recovery.continuation.walkingMeters)} m walking</span>
+              </div>
+            )}
+          </article>
+        )}
         {result && <p className="resultProvenance">{result.network.source} · feed {result.network.version} · {result.diagnostics.exploredBoardings} boardings evaluated</p>}
       </div>
     </div>
