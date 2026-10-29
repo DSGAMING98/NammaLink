@@ -4,15 +4,15 @@ Updated: 29 October 2026
 
 ## Current phase
 
-Phase 0 — Audit and recovery.
+Phase 1 — Application foundation.
 
 ## Last completed task
 
-Inspected the repository, runtime, Git state, local credential presence, and accessible transport datasets. Created the initial project audit, dataset inventory, and implementation-status record.
+Created a mobile-first Next.js application shell, explicit capability-status model, and unit-test baseline. Verified the production build without exposing local credentials.
 
 ## Last verified working commit
 
-Starting baseline: `14974140db9285fb9740a7486883d6de7819a28e` on `main`. The Phase 0 documentation changes have not yet been committed at the time of this checkpoint update.
+Phase 0 audit: `7d24eb1` on `main`. The Phase 1 application-foundation changes are ready for their milestone commit.
 
 ## Completed features
 
@@ -20,10 +20,13 @@ Starting baseline: `14974140db9285fb9740a7486883d6de7819a28e` on `main`. The Pha
 - Repository and dataset audit.
 - Dataset provenance, licence, record-count, and readiness inventory.
 - Architecture decision for a TypeScript schedule-based routing prototype.
+- Next.js 16 App Router and strict TypeScript foundation.
+- Responsive landing page and Journey Contract concept UI.
+- Honest capability-status labels with unit coverage.
 
 ## Incomplete features
 
-All application, routing, UI, recovery, authentication, notification, ML, low-connectivity, operator-insight, and deployment work remains incomplete.
+GTFS normalization, interactive journey planning, routing, recovery, authentication, notification, ML, low-connectivity, operator-insight, and deployment remain incomplete.
 
 ## Tests run
 
@@ -32,6 +35,9 @@ All application, routing, UI, recovery, authentication, notification, ML, low-co
 - `.env.local` variable-presence check with values hidden: passed; all listed variables populated.
 - Local dataset readability and file-size inventory: passed.
 - Prior dataset row/reference audit: passed for core BMTC/BMRCL GTFS relationships.
+- `npm run test:run`: passed, 2 tests.
+- `npm run typecheck`: passed.
+- `npm run build`: passed; static `/` route generated.
 
 ## Dataset limitations
 
@@ -45,11 +51,11 @@ All application, routing, UI, recovery, authentication, notification, ML, low-co
 
 ## Missing credentials or external blockers
 
-Variables are populated locally, but Google API enablement/billing/restrictions and Supabase schema/access have not been verified. No email, SMS, or web-push provider is configured or required for the core prototype.
+Variables are populated locally. Two minimal Google Places API probes returned HTTP 403, so API enablement, billing, or key restrictions remain a blocker. Supabase schema/access has not been verified. No email, SMS, or web-push provider is configured or required for the core prototype.
 
 ## Exact next implementation step
 
-Commit and push the Phase 0 documentation, then scaffold a Next.js TypeScript application with a pure transit-domain library and test runner. Establish a clean build/test baseline before GTFS ingestion.
+Commit and push the application foundation, then create a reproducible bounded demo-network fixture from the audited BMTC feed and implement the pure TypeScript schedule router against it.
 
 ## Restore commands
 
@@ -65,15 +71,15 @@ Read `docs/PROJECT_AUDIT.md`, `docs/IMPLEMENTATION_STATUS.md`, and this checkpoi
 
 ## Known bugs
 
-No application exists, so no runtime bugs are recorded yet.
+No verified runtime bugs in the application shell. Interactive journey planning is intentionally not yet connected.
 
 ## Deployment state
 
-Not deployed. No verified deployment URL exists.
+Not deployed. The local production build passes; no verified public URL exists.
 
 ## Uncommitted work
 
-Phase 0 documentation files created in this milestone.
+Application foundation, lockfile, tests, and checkpoint updates created in this milestone.
 
 ## Evidence supporting claims
 

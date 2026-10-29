@@ -7,13 +7,13 @@ Last updated: 29 October 2026
 | Repository and dataset audit | Implemented and tested | `docs/PROJECT_AUDIT.md`; verified against local files and Git state |
 | Dataset inventory and provenance | Implemented and tested | `docs/DATASET_INVENTORY.md`; local counts and upstream sources recorded |
 | Secret-safe environment template | Implemented and tested | `.env.example`, `.gitignore`; `.env.local` confirmed ignored |
-| Next.js application | Planned | No package manifest or application code yet |
+| Next.js application | Implemented and tested | Next.js 16 App Router shell; unit tests, strict type-check, and production build pass |
 | GTFS normalization | Planned | Existing feeds inspected but not yet transformed |
 | Nearby-stop search | Planned | Requires spatial index |
 | Transit routing | Planned | Connection-scan-style engine selected for first implementation |
 | Arrive-by and Journey Contract constraints | Planned | Domain model not yet implemented |
-| Mobile-first journey UI | Planned | No UI code yet |
-| Google Maps / Places / Routes integration | Planned | Variables present; access and restrictions unverified |
+| Mobile-first journey UI | In progress | Responsive landing and Journey Contract concept are implemented; form and results are not connected yet |
+| Google Maps / Places / Routes integration | Blocked | Variables are present, but two minimal Places API probes returned HTTP 403; no keys were exposed |
 | Journey disruption reporting | Planned | No persistence or workflow yet |
 | Recovery simulation | Planned | Required end-to-end demonstration not yet implemented |
 | Authentication / moderation | Planned | Supabase variables present; backend state unverified |
@@ -22,5 +22,5 @@ Last updated: 29 October 2026
 | Schedule-based ETA baseline | Planned | Does not require ML labels |
 | Low-connectivity mode | Planned | Browser storage/service worker not yet implemented |
 | Operator insights | Planned | Historical ridership and schedules are available |
-| Deployment | Planned | No application exists to deploy |
+| Deployment | Planned | Application builds locally; no deployment has been created or verified |
 
