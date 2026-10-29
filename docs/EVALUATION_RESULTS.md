@@ -29,7 +29,7 @@ Direct-only mode returns no journey for this bounded network. A 09:00 deadline i
 
 ## Automated verification
 
-- 18 tests across 7 files pass.
+- 20 tests across 8 files pass.
 - Strict TypeScript checking passes.
 - Next.js production build passes, including dynamic `/api/journeys`.
 - Invalid negative walking constraints receive HTTP 400.
@@ -47,6 +47,10 @@ The full automated suite completes in under one second on the current developmen
 A clearly labelled simulated incident invalidates the originally selected `600-CA` trip after the passenger has completed the Jain Gate–Banashankari leg. The engine preserves that completed leg and excludes the affected trip. No continuation can satisfy the original 10:05 deadline, so the result explicitly marks the deadline at risk and returns the next scheduled `600-CA`: replan at 08:00, board at 08:45, and reach the destination at approximately 10:38 with 311 m estimated walking.
 
 The simulation is verified by unit/API tests and the browser flow. An unverified version of the same report does not invalidate the journey.
+
+## Low-connectivity verification
+
+The production server exposes a manifest and service worker with explicit no-cache and content-security headers. Browser QA verified the online status indicator, last-journey persistence across reload, and a deduplicated local report queue. The queue is limited to 20 drafts and states that nothing is uploaded. A full offline reload was not automated in the in-app browser, so app-shell fallback remains implemented but not end-to-end device-verified.
 
 ## Failure cases and limitations
 

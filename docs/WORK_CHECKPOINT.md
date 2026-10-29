@@ -4,15 +4,15 @@ Updated: 29 October 2026
 
 ## Current phase
 
-Phase 4 — Journey recovery.
+Phase 7 — Low-connectivity features.
 
 ## Last completed task
 
-Implemented evidence-aware incident states and an end-to-end simulated missed-connection recovery that preserves completed travel, checks the original contract, and explains when the deadline is no longer feasible.
+Implemented production-only service-worker registration, connection status, last-journey persistence/restoration, and a bounded local disruption-report queue with no upload claim.
 
 ## Last verified working commit
 
-Interactive journey planner: `2e8296e` on `main`. The recovery milestone is ready for its verified commit.
+Journey recovery: `c45e51b` on `main`. The low-connectivity milestone is ready for its verified commit.
 
 ## Completed features
 
@@ -34,10 +34,14 @@ Interactive journey planner: `2e8296e` on `main`. The recovery milestone is read
 - Disruption scoring with six explicit evidence states; unverified reports cannot invalidate journeys.
 - Tested simulated incident overlay that excludes the affected trip without mutating GTFS.
 - Recovery preserves the completed leg and produces a next-trip action with an explicit deadline-at-risk warning.
+- Connection-state indicator and installable web-app manifest.
+- Production service-worker shell/static cache that excludes APIs.
+- Last calculated journey persisted locally and restorable after reload.
+- Deduplicated, 20-item local report queue with explicit no-upload semantics.
 
 ## Incomplete features
 
-Arbitrary place search/maps, full-feed preprocessing/spatial indexing, persistent disruption reporting/moderation, authentication, notifications, ML, low-connectivity, operator insights, and deployment remain incomplete.
+Arbitrary place search/maps, full-feed preprocessing/spatial indexing, persistent server-side disruption reporting/moderation, authentication, notifications, ML, full offline device validation, operator insights, and deployment remain incomplete.
 
 ## Tests run
 
@@ -57,6 +61,10 @@ Arbitrary place search/maps, full-feed preprocessing/spatial indexing, persisten
 - Browser flow: passed on desktop and 390×844 mobile viewport; central result rendered with no console warning/error.
 - `npm run test:run`: passed, 18 tests across 7 files after recovery implementation.
 - Recovery browser flow: passed; simulated incident, preserved leg, deadline risk, and next continuation rendered.
+- `npm run test:run`: passed, 20 tests across 8 files after offline-storage work.
+- `node --check public/sw.js`: passed.
+- Production server: `/sw.js` returned HTTP 200 with JavaScript, no-cache, and CSP headers; manifest route built.
+- Browser low-connectivity primitives: online indicator, saved-journey restore, and local report queue passed.
 
 ## Dataset limitations
 
@@ -74,7 +82,7 @@ Variables are populated locally. Two minimal Google Places API probes returned H
 
 ## Exact next implementation step
 
-Commit and push the recovery milestone, then implement low-connectivity persistence and queued-report primitives before adding operator schedule insights and final documentation.
+Commit and push the low-connectivity milestone, then implement schedule-frequency operator insights and complete architecture, ML, competitor, demo, and README documentation.
 
 ## Restore commands
 
@@ -90,7 +98,7 @@ Read `docs/PROJECT_AUDIT.md`, `docs/IMPLEMENTATION_STATUS.md`, and this checkpoi
 
 ## Known bugs
 
-No verified runtime bugs in the tested bounded router, central UI, or simulated recovery flow. The recovery API is a deterministic demonstration, not a real incident feed or persistent reporting service.
+No verified runtime bugs in the tested bounded router, central UI, recovery, or local persistence flow. A full browser reload with the machine disconnected has not been device-verified.
 
 ## Deployment state
 
@@ -98,7 +106,7 @@ Not deployed. The local production build passes; no verified public URL exists.
 
 ## Uncommitted work
 
-Disruption/recovery domain engine, simulation API, recovery UI, tests, algorithm/evaluation documentation, and checkpoint updates created in this milestone.
+Manifest, service worker, security headers, connectivity UI, saved journey, report queue, tests, and checkpoint updates created in this milestone.
 
 ## Evidence supporting claims
 

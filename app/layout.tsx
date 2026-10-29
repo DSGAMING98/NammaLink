@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import { ConnectivityStatus } from "@/app/components/connectivity-status";
 
 export const metadata: Metadata = {
   title: "NammaLink — Reach on Time, Wait Less",
@@ -15,7 +16,7 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body><ConnectivityStatus />{children}</body>
     </html>
   );
 }

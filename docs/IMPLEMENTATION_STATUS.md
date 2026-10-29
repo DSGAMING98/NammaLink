@@ -21,7 +21,7 @@ Last updated: 29 October 2026
 | Notifications | Planned | In-app first; no external delivery provider verified |
 | ML delay prediction | Blocked | No labelled observed arrival/delay data found |
 | Schedule-based ETA baseline | Planned | Does not require ML labels |
-| Low-connectivity mode | Planned | Browser storage/service worker not yet implemented |
+| Low-connectivity mode | Partially implemented | Connection status, saved journey, local report queue, manifest, and service-worker shell cache implemented; full offline device test remains |
 | Operator insights | Planned | Historical ridership and schedules are available |
 | Deployment | Planned | Application builds locally; no deployment has been created or verified |
 

@@ -1,9 +1,10 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import type { Journey, JourneyPreference, PlanResult } from "@/lib/transit/types";
 import type { DisruptionIncident, RecoveryResult } from "@/lib/disruptions/types";
 import { formatServiceTime } from "@/lib/transit/time";
+import { LAST_JOURNEY_KEY, queueReport } from "@/lib/offline/storage";
 
 interface JourneyResponse extends PlanResult {
   network: { name: string; version: string; validUntil: string; source: string };
@@ -75,6 +76,17 @@ export function JourneyPlanner() {
   const [loading, setLoading] = useState(false);
   const [recovery, setRecovery] = useState<RecoveryResponse | null>(null);
   const [simulating, setSimulating] = useState(false);
+  const [savedJourney, setSavedJourney] = useState<JourneyResponse | null>(null);
+  const [reportQueued, setReportQueued] = useState(false);
+
+  useEffect(() => {
+    try {
+      const stored = window.localStorage.getItem(LAST_JOURNEY_KEY);
+      if (stored) setSavedJourney(JSON.parse(stored));
+    } catch {
+      setSavedJourney(null);
+    }
+  }, []);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -100,12 +112,25 @@ export function JourneyPlanner() {
       const payload = await response.json();
       if (!response.ok) throw new Error(payload.error ?? "Journey search failed.");
       setResult(payload);
+      setSavedJourney(payload);
+      window.localStorage.setItem(LAST_JOURNEY_KEY, JSON.stringify(payload));
     } catch (reason) {
       setResult(null);
       setError(reason instanceof Error ? reason.message : "Journey search failed.");
     } finally {
       setLoading(false);
     }
+  }
+
+  function queueCurrentReport() {
+    if (!recovery) return;
+    queueReport(window.localStorage, {
+      id: recovery.incident.id,
+      type: "missed_connection",
+      description: recovery.incident.title,
+      createdAt: new Date().toISOString(),
+    });
+    setReportQueued(true);
   }
 
   async function simulateRecovery() {
@@ -147,6 +172,7 @@ export function JourneyPlanner() {
         </div>
 
         <button className="searchButton" type="submit" disabled={loading}>{loading ? "Checking schedules…" : "Find verified options"}</button>
+        {!result && savedJourney && <button className="restoreButton" type="button" onClick={() => setResult(savedJourney)}>Restore last saved journey</button>}
         <p className="panelNote">Static BMTC schedule version 20260907 · not live tracking</p>
       </form>
 
@@ -179,6 +205,10 @@ export function JourneyPlanner() {
                 <span>Board {recovery.recovery.continuation.legs[0].routeShortName} at {formatServiceTime(recovery.recovery.continuation.legs[0].departureSeconds)} · {Math.round(recovery.recovery.continuation.walkingMeters)} m walking</span>
               </div>
             )}
+            <button className="queueButton" type="button" onClick={queueCurrentReport} disabled={reportQueued}>
+              {reportQueued ? "Report queued on this device" : "Queue report for reconnection"}
+            </button>
+            <small className="queueNote">Local only. Nothing is uploaded by this prototype.</small>
           </article>
         )}
         {result && <p className="resultProvenance">{result.network.source} · feed {result.network.version} · {result.diagnostics.exploredBoardings} boardings evaluated</p>}
