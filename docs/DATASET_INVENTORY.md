@@ -19,6 +19,12 @@ Raw data lives outside the repository. Reproducible generated artifacts will be 
 | Historical observed arrivals/delays | Not found | Not applicable | Not applicable | None | Delay modelling | Blocks supervised ML validation; use schedule baseline |
 | Authorized realtime transit | Not found | Not applicable | Not applicable | None | Live ETA and disruptions | Do not label scheduled or simulated data as live |
 
+## Committed bounded fixture
+
+`data/demo-network.json` is an intentionally small ODbL derivative generated from BMTC feed version `20260907`. It contains routes `8931`, `2704`, and `8950`: 3 routes, 216 referenced stops, 53 trips, and 1,343 stop times (241,296 bytes). It was generated on 29 October 2026 with `npm run data:build`; SHA-256 is `F1156DC7B580712B275F0F75BF7B1A5927C597F1C603F52DEA0120E7454F7780`.
+
+Its intended use is deterministic routing tests and the Jain–Banashankari–Alliance-area demonstration. It is not a replacement for the full feed and is not evidence of live operation. Attribution and reproduction instructions are in `data/README.md`.
+
 ## Download and refresh policy
 
 Before accepting a new dataset:

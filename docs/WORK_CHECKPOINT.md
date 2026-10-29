@@ -4,15 +4,15 @@ Updated: 29 October 2026
 
 ## Current phase
 
-Phase 1 — Application foundation.
+Phase 2 — Core route optimization.
 
 ## Last completed task
 
-Created a mobile-first Next.js application shell, explicit capability-status model, and unit-test baseline. Verified the production build without exposing local credentials.
+Generated a reproducible bounded BMTC fixture and implemented the tested schedule router, arrive-by search, hard Journey Contract constraints, Pareto filtering, and central Jain–Banashankari–Alliance-area integration proof.
 
 ## Last verified working commit
 
-Phase 0 audit: `7d24eb1` on `main`. The Phase 1 application-foundation changes are ready for their milestone commit.
+Application foundation: `05e00df` on `main`. The data-and-routing milestone is ready for its verified commit.
 
 ## Completed features
 
@@ -23,10 +23,15 @@ Phase 0 audit: `7d24eb1` on `main`. The Phase 1 application-foundation changes a
 - Next.js 16 App Router and strict TypeScript foundation.
 - Responsive landing page and Journey Contract concept UI.
 - Honest capability-status labels with unit coverage.
+- ODbL-attributed 3-route/53-trip BMTC demonstration fixture and reproducible extraction script.
+- Calendar-aware scheduled routing with GTFS times beyond 24:00.
+- Arrive-by deadline and safety buffer, walking and transfer limits, and direct-only enforcement.
+- Fastest, least-waiting, least-walking, direct-preferred, and direct-only ranking.
+- Real scheduled central-demo connection test and explicit no-direct-service result.
 
 ## Incomplete features
 
-GTFS normalization, interactive journey planning, routing, recovery, authentication, notification, ML, low-connectivity, operator-insight, and deployment remain incomplete.
+Full-feed preprocessing/spatial indexing, interactive journey planning, recovery, authentication, notification, ML, low-connectivity, operator-insight, and deployment remain incomplete.
 
 ## Tests run
 
@@ -38,6 +43,9 @@ GTFS normalization, interactive journey planning, routing, recovery, authenticat
 - `npm run test:run`: passed, 2 tests.
 - `npm run typecheck`: passed.
 - `npm run build`: passed; static `/` route generated.
+- `npm run data:build`: passed; 3 routes, 216 stops, 53 trips, and 1,343 stop times generated.
+- `npm run test:run`: passed, 11 tests across 4 files after the routing milestone.
+- `npm run typecheck`: passed after the routing milestone.
 
 ## Dataset limitations
 
@@ -55,7 +63,7 @@ Variables are populated locally. Two minimal Google Places API probes returned H
 
 ## Exact next implementation step
 
-Commit and push the application foundation, then create a reproducible bounded demo-network fixture from the audited BMTC feed and implement the pure TypeScript schedule router against it.
+Commit and push the data-and-routing milestone, then expose the router through a validated API and connect the landing page to an interactive Journey Contract/results flow.
 
 ## Restore commands
 
@@ -71,7 +79,7 @@ Read `docs/PROJECT_AUDIT.md`, `docs/IMPLEMENTATION_STATUS.md`, and this checkpoi
 
 ## Known bugs
 
-No verified runtime bugs in the application shell. Interactive journey planning is intentionally not yet connected.
+No verified runtime bugs in the tested bounded router. Full-feed request-time enumeration is intentionally unsupported; the diagnostic cap protects the prototype from runaway searches.
 
 ## Deployment state
 
@@ -79,7 +87,7 @@ Not deployed. The local production build passes; no verified public URL exists.
 
 ## Uncommitted work
 
-Application foundation, lockfile, tests, and checkpoint updates created in this milestone.
+Fixture generator, bounded dataset, transit domain/router/tests, algorithm documentation, and checkpoint updates created in this milestone.
 
 ## Evidence supporting claims
 
