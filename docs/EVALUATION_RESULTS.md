@@ -52,6 +52,12 @@ The simulation is verified by unit/API tests and the browser flow. An unverified
 
 The production server exposes a manifest and service worker with explicit no-cache and content-security headers. Browser QA verified the online status indicator, last-journey persistence across reload, and a deduplicated local report queue. The queue is limited to 20 drafts and states that nothing is uploaded. A full offline reload was not automated in the in-app browser, so app-shell fallback remains implemented but not end-to-end device-verified.
 
+## Operator schedule analysis
+
+The bounded fixture contains 53 scheduled trips across 216 referenced stops and 3 selected routes. Direction-aware median scheduled headways are 48 minutes for `O EXP V-213VJ` (32 trips), 50 minutes for `600-CA` (17 trips), and 32 minutes for `365-BB BSK-BNP-ANK` (4 trips). The displayed service spans are 05:30–21:35, 07:20–16:30, and 17:13–20:00 respectively.
+
+These values describe the committed static fixture only. They do not measure occupancy, ridership, vehicles dispatched, on-time performance, or actual fleet utilization.
+
 ## Failure cases and limitations
 
 - No direct campus-to-campus service is present in the bounded fixture.

@@ -4,15 +4,15 @@ Updated: 29 October 2026
 
 ## Current phase
 
-Phase 7 — Low-connectivity features.
+Phase 8 — Operator insights.
 
 ## Last completed task
 
-Implemented production-only service-worker registration, connection status, last-journey persistence/restoration, and a bounded local disruption-report queue with no upload claim.
+Implemented and browser-verified a schedule-supply insights section with trip counts, service spans, direction-aware median headways, and explicit limits on fleet-utilization claims.
 
 ## Last verified working commit
 
-Journey recovery: `c45e51b` on `main`. The low-connectivity milestone is ready for its verified commit.
+Low-connectivity support: `6085479` on `main`. The operator-insights milestone is ready for its verified commit.
 
 ## Completed features
 
@@ -38,10 +38,12 @@ Journey recovery: `c45e51b` on `main`. The low-connectivity milestone is ready f
 - Production service-worker shell/static cache that excludes APIs.
 - Last calculated journey persisted locally and restorable after reload.
 - Deduplicated, 20-item local report queue with explicit no-upload semantics.
+- Tested bounded schedule analysis for route supply, headways, service spans, stop coverage, and route overlap.
+- Responsive operator insight section that explicitly distinguishes scheduled supply from actual fleet utilization.
 
 ## Incomplete features
 
-Arbitrary place search/maps, full-feed preprocessing/spatial indexing, persistent server-side disruption reporting/moderation, authentication, notifications, ML, full offline device validation, operator insights, and deployment remain incomplete.
+Arbitrary place search/maps, full-feed preprocessing/spatial indexing, persistent server-side disruption reporting/moderation, authentication, notifications, ML, full offline device validation, and deployment remain incomplete.
 
 ## Tests run
 
@@ -65,6 +67,8 @@ Arbitrary place search/maps, full-feed preprocessing/spatial indexing, persisten
 - `node --check public/sw.js`: passed.
 - Production server: `/sw.js` returned HTTP 200 with JavaScript, no-cache, and CSP headers; manifest route built.
 - Browser low-connectivity primitives: online indicator, saved-journey restore, and local report queue passed.
+- `npm run test:run`: passed, 22 tests across 9 files after operator insights.
+- Operator browser section: passed; 53 trips, 216 stops, route spans, and median headways rendered with limitation text.
 
 ## Dataset limitations
 
@@ -82,7 +86,7 @@ Variables are populated locally. Two minimal Google Places API probes returned H
 
 ## Exact next implementation step
 
-Commit and push the low-connectivity milestone, then implement schedule-frequency operator insights and complete architecture, ML, competitor, demo, and README documentation.
+Commit and push operator insights, then complete architecture, ML, competitor, demo, security/privacy, and README documentation before final clean-build verification.
 
 ## Restore commands
 
@@ -106,7 +110,7 @@ Not deployed. The local production build passes; no verified public URL exists.
 
 ## Uncommitted work
 
-Manifest, service worker, security headers, connectivity UI, saved journey, report queue, tests, and checkpoint updates created in this milestone.
+Schedule-insight engine, responsive operator section, tests, evaluation/status documentation, and checkpoint updates created in this milestone.
 
 ## Evidence supporting claims
 

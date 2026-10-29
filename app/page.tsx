@@ -1,5 +1,6 @@
 import { capabilityStatus, statusLabel } from "@/lib/status";
 import { JourneyPlanner } from "@/app/components/journey-planner";
+import { OperatorInsights } from "@/app/components/operator-insights";
 
 export default function HomePage() {
   return (
@@ -34,6 +35,8 @@ export default function HomePage() {
         <div><span>02</span><strong>Constraint safe</strong><p>Walking, budget and transfers are hard limits.</p></div>
         <div><span>03</span><strong>Recovery ready</strong><p>Replan the unfinished journey when conditions change.</p></div>
       </section>
+
+      <OperatorInsights />
 
       <section className="evidenceSection" id="evidence">
         <div className="sectionHeading">

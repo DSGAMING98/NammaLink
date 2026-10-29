@@ -22,6 +22,6 @@ Last updated: 29 October 2026
 | ML delay prediction | Blocked | No labelled observed arrival/delay data found |
 | Schedule-based ETA baseline | Planned | Does not require ML labels |
 | Low-connectivity mode | Partially implemented | Connection status, saved journey, local report queue, manifest, and service-worker shell cache implemented; full offline device test remains |
-| Operator insights | Planned | Historical ridership and schedules are available |
+| Operator insights | Implemented and tested | Bounded route trip counts, service spans, direction-aware median headways, and shared-stop analysis; explicitly not actual fleet utilization |
 | Deployment | Planned | Application builds locally; no deployment has been created or verified |
 

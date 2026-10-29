@@ -134,6 +134,20 @@ h1 span { color: var(--green-dark); }
 .principleStrip strong { display: block; font-size: 18px; }
 .principleStrip p { margin: 8px 0 0; color: rgba(255,255,255,.64); font-size: 13px; line-height: 1.5; }
 
+.insightsSection { padding: 110px clamp(24px, 7vw, 106px); background: var(--paper); border-bottom: 1px solid var(--line); }
+.insightTotals { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 58px 0 18px; }
+.insightTotals div { display: flex; flex-direction: column; padding: 24px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); }
+.insightTotals strong { font-size: clamp(32px, 4vw, 52px); letter-spacing: -.06em; }
+.insightTotals span { margin-top: 4px; color: var(--muted); font-size: 11px; font-weight: 750; text-transform: uppercase; letter-spacing: .08em; }
+.routeTable { border: 1px solid var(--line); border-radius: 16px; overflow: hidden; }
+.routeTable > div { display: grid; grid-template-columns: 2fr .65fr 1.2fr 1fr; gap: 14px; align-items: center; min-height: 58px; padding: 10px 18px; border-bottom: 1px solid var(--line); }
+.routeTable > div:last-child { border-bottom: 0; }
+.routeTableHeader { min-height: 42px !important; background: var(--ink); color: white; font-size: 9px; font-weight: 850; text-transform: uppercase; letter-spacing: .1em; }
+.routeTable strong { font-size: 12px; }
+.routeTable span { color: var(--muted); font-size: 11px; }
+.routeTableHeader span { color: rgba(255,255,255,.72); }
+.insightNote { margin: 13px 0 0; color: var(--muted); font-size: 10px; text-align: right; }
+
 .evidenceSection { padding: 110px clamp(24px, 7vw, 106px) 130px; }
 .sectionHeading { display: grid; grid-template-columns: 1fr 1.1fr; column-gap: 80px; align-items: end; }
 .sectionHeading .eyebrow { grid-column: 1 / -1; }
@@ -159,6 +173,7 @@ footer p { margin: 0; }
   .journeyPanel { max-width: 620px; }
   .plannerWrap { max-width: 620px; }
   .principleStrip, .statusGrid { grid-template-columns: 1fr; }
+  .insightTotals { grid-template-columns: 1fr 1fr 1fr; }
   .principleStrip div { border-right: 0; border-bottom: 1px solid rgba(255,255,255,.16); }
   .principleStrip div:last-child { border-bottom: 0; }
   .sectionHeading { grid-template-columns: 1fr; row-gap: 24px; }
@@ -170,6 +185,9 @@ footer p { margin: 0; }
   .hero { gap: 52px; padding-bottom: 72px; }
   h1 { font-size: clamp(54px, 17vw, 76px); }
   .contractGrid { grid-template-columns: 1fr; }
+  .insightTotals { grid-template-columns: 1fr; }
+  .routeTable > div { grid-template-columns: 1.4fr .5fr; }
+  .routeTable > div span:nth-child(3), .routeTable > div span:nth-child(4) { display: none; }
   .evidenceSection { padding-top: 80px; padding-bottom: 90px; }
   footer { align-items: flex-start; flex-direction: column; }
 }
