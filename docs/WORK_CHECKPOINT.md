@@ -12,7 +12,7 @@ Made returned contract comparisons selectable as complete itineraries, added sch
 
 ## Last verified working commit
 
-Contract-comparison milestone: `d9e27c2` on `main`, verified by GitHub Actions run `41053824571`.
+Round 3 Phase 26 milestone: `f13c756` on `main`. Local release-parity checks and the web/routing/data job in GitHub Actions run `41054502414` passed; GitHub's hosted Android job remained in `actions/setup-java` at handoff time, while the identical local APK build/install and physical-device flow passed.
 
 ## Current branch
 
@@ -127,6 +127,7 @@ Arbitrary place search/maps, coordinate-based access/egress, pedestrian-network 
 - CI Android artifact `NammaLink-android-debug-a5998fce5f11d6be4c8b15c9c892a331bd2cbf62` (`12974219715`): 9,987,995-byte ZIP retained until 13 November 2026; GitHub artifact digest `sha256:1c728c7a10e9022563e8bbaf60d69812413f85b289f083520073ef69afb0a129`.
 - GitHub Actions run [`41053824571`](https://github.com/DSGAMING98/NammaLink/actions/runs/41053824571): all 47 tests, strict type-check, production web build, native APK build, checksum recording, and artifact upload passed for `d9e27c2`.
 - CI Android artifact `NammaLink-android-debug-d9e27c25d5388938b8e3b8350a6c888caef56402` (`12975707017`): 9,994,223-byte ZIP retained until 13 November 2026; GitHub artifact digest `sha256:73ecfb9f5d9ce9ba48eb56989b6ada2bd147d17e740199099d2ec21a6cf20acd`.
+- GitHub Actions run [`41054502414`](https://github.com/DSGAMING98/NammaLink/actions/runs/41054502414): web/routing/data tests, strict type-check, and production build passed for `f13c756`; the hosted Android job was still waiting inside `actions/setup-java` at the time-sensitive Round 3 handoff. Local Android build, streamed install, online/offline switching, and fatal/ANR scan all passed.
 - Access-contract API smoke: 116 m access under an 800 m maximum left 684 m, separated door/stop/boarding times, and a 2,447 m access under a 100 m maximum returned no journey with explicit evidence.
 - Physical manual-stop regression: unchanged `0/800 m walk`, no injected current-location leg, updated APK install successful, and fatal/ANR scan clean.
 - Recommendation API smoke: default safest journey returned 3,000 seconds total duration and 360 seconds scheduled waiting; a fastest Metro journey returned 4,800 seconds total duration and zero scheduled waiting.
@@ -162,7 +163,7 @@ No public deployment is claimed. The production Next.js build and local producti
 
 ## Uncommitted work
 
-Phase 26 source, APK, documentation, and device evidence are ready for the final commit and CI verification.
+None. Phase 26 source, APK, documentation, and device evidence are committed and pushed. The only open verification state is the externally hosted Android CI job described above; the equivalent local/device checks passed.
 
 ## Exact next implementation step
 
