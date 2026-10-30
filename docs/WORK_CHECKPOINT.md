@@ -12,7 +12,7 @@ Verified the complete GitHub Actions pipeline on `main`: all web/data tests, str
 
 ## Last verified working commit
 
-CI milestone: `5b6226f` on `main`, verified by GitHub Actions run `41006581144`. The Android network-client integration is build-verified; connected UI validation still awaits an unlocked handset.
+Release-hardening milestone: `bdac2cc` on `main`, verified by GitHub Actions run `41007074104`. The Android network-client integration is build-verified; connected UI validation still awaits an unlocked handset.
 
 ## Completed features
 
@@ -73,6 +73,8 @@ Arbitrary place search/maps, spatial nearest-stop indexing, persistent server-si
 - GitHub Actions run [`41006581144`](https://github.com/DSGAMING98/NammaLink/actions/runs/41006581144): both `Web, routing, and data tests` and `Native Android APK` completed successfully for commit `5b6226fbaf16ae5d2c0f1fbb83365503fd856c93`.
 - CI Android artifact `NammaLink-android-debug-5b6226fbaf16ae5d2c0f1fbb83365503fd856c93`: 9,947,921-byte ZIP retained until 2026-11-13; GitHub artifact digest `sha256:2a5a2c02c6f4793e1209bc3cfdccdd8c9ce7dcf907cee5967bd620aa0df6ce1e`.
 - Release-safety verification: `:app:assembleRelease` without credentials failed at `verifyReleaseSigning` with the expected four-variable message, including on a reused Gradle configuration cache; `:app:assembleDebug` still passed.
+- Release-hardening GitHub Actions run [`41007074104`](https://github.com/DSGAMING98/NammaLink/actions/runs/41007074104): web/data and native Android jobs both passed for commit `bdac2ccec2ea19fb5e16e1e4436ad7dbfb931989`.
+- Release-hardening CI artifact `NammaLink-android-debug-bdac2ccec2ea19fb5e16e1e4436ad7dbfb931989`: 9,947,922-byte ZIP retained until 2026-11-13; GitHub artifact digest `sha256:a561a0e3efa84800a0d2ecf8c21ae2e43f2655b41071d523e8155a176f8cea48`.
 
 ## Dataset and ML limitations
 
