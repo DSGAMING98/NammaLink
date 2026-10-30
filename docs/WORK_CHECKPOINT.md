@@ -12,7 +12,7 @@ Added validated geospatial stop lookup and a native on-demand location permissio
 
 ## Last verified working commit
 
-Native full-feed operator evidence milestone: `ee56602` on `main`, verified by GitHub Actions run `41048063190`. The Phase 20 location milestone is under verification and will replace this line after CI passes.
+Permission-aware nearby-stop discovery milestone: `a02fdc3` on `main`, verified by GitHub Actions run `41049023651`.
 
 ## Current branch
 
@@ -107,6 +107,8 @@ Arbitrary place search/maps, coordinate-based access/egress, pedestrian-network 
 - CI Android artifact `NammaLink-android-debug-ee5660240adaa3a34f8391f6b7e85aad4aea0ebb` (`12972584369`): 9,958,927-byte ZIP retained until 13 November 2026; GitHub artifact digest `sha256:793ee327fd22dd239808b10a07a4be03fa0a23a44fd6927e2db7891d7051c0e6`.
 - Nearby-stop API verification: real-index positive query returned distance-ordered stops; incomplete/out-of-range coordinates returned HTTP 400; great-circle, radius, limit, and hidden-platform behavior passed unit coverage.
 - Physical Android location flow: system permission dialog rendered, denial retained manual search, permission grant produced a 70 m reported-accuracy fix, and the outside-five-kilometre state rendered without inventing stop coverage; fatal/ANR scan clean.
+- GitHub Actions run [`41049023651`](https://github.com/DSGAMING98/NammaLink/actions/runs/41049023651): all 45 tests, strict type-check, production web build, native APK build, checksum recording, and artifact upload passed for `a02fdc3`.
+- CI Android artifact `NammaLink-android-debug-a02fdc3fb1801a767bb4368512a0f7292074c87c` (`12973302879`): 9,970,818-byte ZIP retained until 13 November 2026; GitHub artifact digest `sha256:110e0e34672b730282807126075a5d170dbbe6905e96aa0607a7bba8368b7617`.
 
 ## Dataset and ML limitations
 
@@ -136,7 +138,7 @@ No public deployment is claimed. The production Next.js build and local producti
 
 ## Uncommitted work
 
-Phase 20 source, tests, APK, documentation, and device evidence are being committed as one verified milestone. After the milestone commit and checkpoint closure, the working tree must be clean.
+None. Phase 20 source, tests, APK, documentation, and device evidence are committed and pushed; the checkpoint closure is documentation-only.
 
 ## Exact next implementation step
 
