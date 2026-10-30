@@ -12,7 +12,7 @@ Made returned contract comparisons selectable as complete itineraries, added sch
 
 ## Last verified working commit
 
-Round 3 Phase 26 milestone: `f13c756` on `main`. Local release-parity checks and the web/routing/data job in GitHub Actions run `41054502414` passed; GitHub's hosted Android job remained in `actions/setup-java` at handoff time, while the identical local APK build/install and physical-device flow passed.
+Round 3 Phase 26 milestone: `f13c756` on `main`, fully verified by GitHub Actions run `41054502414` after the hosted Android runner delay cleared.
 
 ## Current branch
 
@@ -127,7 +127,8 @@ Arbitrary place search/maps, coordinate-based access/egress, pedestrian-network 
 - CI Android artifact `NammaLink-android-debug-a5998fce5f11d6be4c8b15c9c892a331bd2cbf62` (`12974219715`): 9,987,995-byte ZIP retained until 13 November 2026; GitHub artifact digest `sha256:1c728c7a10e9022563e8bbaf60d69812413f85b289f083520073ef69afb0a129`.
 - GitHub Actions run [`41053824571`](https://github.com/DSGAMING98/NammaLink/actions/runs/41053824571): all 47 tests, strict type-check, production web build, native APK build, checksum recording, and artifact upload passed for `d9e27c2`.
 - CI Android artifact `NammaLink-android-debug-d9e27c25d5388938b8e3b8350a6c888caef56402` (`12975707017`): 9,994,223-byte ZIP retained until 13 November 2026; GitHub artifact digest `sha256:73ecfb9f5d9ce9ba48eb56989b6ada2bd147d17e740199099d2ec21a6cf20acd`.
-- GitHub Actions run [`41054502414`](https://github.com/DSGAMING98/NammaLink/actions/runs/41054502414): web/routing/data tests, strict type-check, and production build passed for `f13c756`; the hosted Android job was still waiting inside `actions/setup-java` at the time-sensitive Round 3 handoff. Local Android build, streamed install, online/offline switching, and fatal/ANR scan all passed.
+- GitHub Actions run [`41054502414`](https://github.com/DSGAMING98/NammaLink/actions/runs/41054502414): all 47 tests, strict type-check, production web build, Android build, checksum recording, and artifact upload passed for `f13c756`.
+- CI Android artifact `NammaLink-android-debug-f13c756c9683b24c507f14383b857a3c9d467e6a` (`12975933689`): 9,997,047-byte ZIP retained until 13 November 2026; GitHub artifact digest `sha256:c00a7cb80f95b52ef20461e2e9468a78dbeee745b711fd0000fb6e243af4d8f8`.
 - Access-contract API smoke: 116 m access under an 800 m maximum left 684 m, separated door/stop/boarding times, and a 2,447 m access under a 100 m maximum returned no journey with explicit evidence.
 - Physical manual-stop regression: unchanged `0/800 m walk`, no injected current-location leg, updated APK install successful, and fatal/ANR scan clean.
 - Recommendation API smoke: default safest journey returned 3,000 seconds total duration and 360 seconds scheduled waiting; a fastest Metro journey returned 4,800 seconds total duration and zero scheduled waiting.
@@ -163,11 +164,11 @@ No public deployment is claimed. The production Next.js build and local producti
 
 ## Uncommitted work
 
-None. Phase 26 source, APK, documentation, and device evidence are committed and pushed. The only open verification state is the externally hosted Android CI job described above; the equivalent local/device checks passed.
+Planning-only work: `docs/MVP_ENGINEERING_ROADMAP.md` defines the engineering-first 11-phase route from the verified Phase 26 baseline. No Phase 27 implementation has started.
 
 ## Exact next implementation step
 
-Round 3 handoff: do not begin another feature phase before the 18:00 review. Demonstrate the installed APK, contract comparison, explicit waits, selectable offline alternatives, operator evidence, and documented limitations. Public deployment and release signing remain owner-dependent.
+Begin Phase 27 only after plan approval: deploy a public HTTPS backend, add health/configuration gates, fail presentation/release builds on loopback URLs, and prove physical-phone search with USB forwarding removed. Follow `docs/MVP_ENGINEERING_ROADMAP.md`.
 
 ## Restore commands
 

@@ -214,20 +214,13 @@ Demo instructions and judge Q&A: [Hackathon Demo](docs/HACKATHON_DEMO.md).
 - [Evaluation Results](docs/EVALUATION_RESULTS.md)
 - [Competitor Analysis](docs/COMPETITOR_ANALYSIS.md)
 - [Implementation Status](docs/IMPLEMENTATION_STATUS.md)
+- [Production MVP Engineering Roadmap](docs/MVP_ENGINEERING_ROADMAP.md)
 - [Work Checkpoint](docs/WORK_CHECKPOINT.md)
 - [Hackathon Demo](docs/HACKATHON_DEMO.md)
 
 ## Roadmap
 
-1. Add a production spatial index and arbitrary-coordinate access/egress to the preprocessed Connection Scan.
-2. Replace straight-line transfer estimates with licensed pedestrian-network walking geometry.
-3. Add arbitrary place selection and a map after Google API access is repaired.
-4. Secure a legitimate realtime feed and preserve source semantics.
-5. Add Supabase authentication, passenger/moderator roles, RLS, and retention only after backend verification.
-6. Add in-app alert deduplication, then optional push/email/SMS providers when configured.
-7. Train delay models only after labelled observed arrivals exist.
-8. Run device-level offline, accessibility, and field-journey validation.
-9. Deploy only after secrets, licences, monitoring, and full regression checks pass.
+The engineering-first implementation is defined in the [Production MVP Engineering Roadmap](docs/MVP_ENGINEERING_ROADMAP.md): five production/reliability phases followed by six passenger-feature phases. The first non-negotiable gate removes the installed app's dependency on `127.0.0.1`, USB forwarding, and a developer laptop.
 
 ## Licence
 
