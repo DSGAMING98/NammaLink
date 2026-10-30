@@ -4,11 +4,11 @@ Updated: 30 October 2026
 
 ## Current phase
 
-Phase 17 — City-scale arrive-by deadline planning.
+Phase 18 — Native full-itinerary offline restoration.
 
 ## Last completed task
 
-Added minute-precision latest-departure search for city-scale arrive-by contracts, wired the mode into Android, and physically validated a deadline-met journey.
+Replaced the Android saved-state placeholder with versioned full-journey serialization and physically verified restoration after force-stop with the backend tunnel removed.
 
 ## Last verified working commit
 
@@ -24,7 +24,7 @@ City-scale arrive-by milestone: `be13ffd` on `main`, verified by GitHub Actions 
 - Installable responsive web app with offline shell, saved journey, local report queue, and schedule-supply operator insights.
 - 40 passing web/router/API/operator/calendar/contract tests plus strict type-check and production build.
 - Native Kotlin/Jetpack Compose project using AGP 9.2.1, Gradle 9.4.1, compile/target SDK 36, and minimum SDK 26.
-- Native constraint planner, GTFS-derived demonstration itinerary, schematic route view, locally persisted saved journey, explicit simulated disruption/recovery, and operator screen.
+- Native constraint planner, GTFS-derived demonstration itinerary, schematic route view, versioned full-itinerary local save/restore, explicit simulated disruption/recovery, and operator screen.
 - Physical Android 16 installation and UI-hierarchy validation on Vivo V2513.
 - Device screenshots under `research_outputs/device_evidence/`.
 - Machine-readable zero-model registry and professional ML artifact/evidence policy in `docs/ML_TRAINING_REPORT.md`.
@@ -70,7 +70,7 @@ Arbitrary place search/maps, coordinate-based access/egress, pedestrian-network 
 - Updated Android `:app:assembleDebug`: passed with the stop-search and network-journey client.
 - `adb reverse tcp:3000 tcp:3000`: configured successfully; updated APK streamed install passed.
 - Production website APK check: HTTP 200, `application/vnd.android.package-archive`, 17,150,016-byte content length, visible debug-signing label.
-- Current arrive-by development APK SHA-256: `3159FA306A2C7AD04A336617FAF39DC30EBFE1F8A1B2CAD59B071139DF1943A6` (17,150,016 bytes).
+- Current offline-restore development APK SHA-256: `E858B95B3A6B0A76895462D7E3722F8FEAD1577D82E48B15BCC0BE549A11E9E6` (17,150,016 bytes).
 - Operator graph production HTML: passed for all full-feed totals, rejection count, and zero-model label.
 - Operator graph visual QA: passed in the in-app browser at desktop and 390×844 mobile viewport; cards, bars, disclaimers, and following download section rendered without observed overflow.
 - CI command parity check: frozen pnpm install, 36 tests, strict type-check, production web build, and native Android debug build passed locally before workflow push.
@@ -95,6 +95,7 @@ Arbitrary place search/maps, coordinate-based access/egress, pedestrian-network 
 - Real-index Metro arrive-by query: Whitefield 08:00 → Challaghatta 09:20 for a 09:30 deadline; latest start 08:00, 11 scans, 598 ms measured locally.
 - Physical arrive-by journey: latest start 10:10 for an 11:00 Kempegowda Bus Station → Central Silk Board deadline, arrival 10:42, 0/400 m walking, 859 ms; screenshot/UI hierarchy captured and fatal/ANR scan clean.
 - GitHub Actions run `41046438069`: all 40 tests, strict type-check, production web build, native APK build, checksum recording, and artifact upload passed for `be13ffd`; artifact `12972746779` is retained until 13 November 2026.
+- Physical offline restoration: versioned full-network journey payload stored, USB backend reverse removed, app force-stopped/relaunched, and the exact two-leg 08:00–08:50 itinerary restored with `Saved ✓`; fatal/ANR scan clean.
 
 ## Dataset and ML limitations
 

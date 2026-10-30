@@ -44,3 +44,11 @@ The post-flow device log scan matched no `FATAL EXCEPTION`, NammaLink ANR, or An
 - The native result displayed `Deadline 11:00 met · latest start 10:10`; the measured search was 859 ms and used 10 minute-precision scans.
 - Evidence: `arrive-by-planner.xml`, `arrive-by-result.png`, and `arrive-by-result.xml`.
 - Streamed installation passed and the post-flow log scan found no NammaLink fatal exception or ANR.
+
+## Full-itinerary offline restoration
+
+- Planned and saved the 08:00 Kempegowda Bus Station → Central Silk Board full-network journey, including both route legs and its applied Safest/800 m contract.
+- Confirmed the private app preferences contained a versioned `saved_network_journey` payload rather than only a boolean flag.
+- Removed the USB backend tunnel, force-stopped the app, relaunched it without a reachable server, and opened the Journey tab.
+- The native UI restored the same 08:00–08:50 itinerary, routes `316-B` and `G-3 SJSCBSE-CSB`, transfer count, contract, timeline, and `Saved ✓` state without a network request.
+- Evidence: `offline-save-saved.xml`, `offline-restore-result.png`, and `offline-restore-result.xml`; post-restore fatal/ANR scan was clean.

@@ -80,11 +80,12 @@ class MainActivity : ComponentActivity() {
 @Composable
 private fun NammaLinkApp() {
     val context = LocalContext.current
+    val journeyPreferences = remember(context) { context.getSharedPreferences("journeys", Context.MODE_PRIVATE) }
+    val restoredJourney = remember { decodeStoredJourney(journeyPreferences.getString("saved_network_journey", null)) }
     var tab by rememberSaveable { mutableIntStateOf(0) }
-    var saved by rememberSaveable {
-        mutableStateOf(context.getSharedPreferences("journeys", Context.MODE_PRIVATE).getBoolean("saved", false))
-    }
-    var networkJourney by remember { mutableStateOf<NetworkJourney?>(null) }
+    var saved by rememberSaveable { mutableStateOf(restoredJourney != null) }
+    var networkJourney by remember { mutableStateOf(restoredJourney) }
+    var restoredOffline by remember { mutableStateOf(restoredJourney != null) }
 
     MaterialTheme {
         Scaffold(
@@ -105,16 +106,21 @@ private fun NammaLinkApp() {
             Box(Modifier.padding(padding).fillMaxSize()) {
                 when (tab) {
                     0 -> PlannerScreen(
-                        onPlan = { journey -> networkJourney = journey; tab = 1 },
-                        onOfflineDemo = { networkJourney = null; tab = 1 },
+                        onPlan = { journey -> networkJourney = journey; saved = false; restoredOffline = false; tab = 1 },
+                        onOfflineDemo = { networkJourney = null; saved = journeyPreferences.getBoolean("demo_saved", false); restoredOffline = false; tab = 1 },
                     )
                     1 -> JourneyScreen(
                         networkJourney = networkJourney,
                         saved = saved,
+                        restoredOffline = restoredOffline,
                         onSave = {
+                            if (networkJourney != null) {
+                                if (saved) journeyPreferences.edit().remove("saved_network_journey").apply()
+                                else journeyPreferences.edit().putString("saved_network_journey", networkJourney!!.encodeForStorage()).apply()
+                            } else {
+                                journeyPreferences.edit().putBoolean("demo_saved", !saved).apply()
+                            }
                             saved = !saved
-                            context.getSharedPreferences("journeys", Context.MODE_PRIVATE)
-                                .edit().putBoolean("saved", saved).apply()
                         }
                     )
                     else -> OperatorScreen()
@@ -222,13 +228,13 @@ private fun StopSuggestions(stops: List<StopOption>, onSelect: (StopOption) -> U
 }
 
 @Composable
-private fun JourneyScreen(networkJourney: NetworkJourney?, saved: Boolean, onSave: () -> Unit) {
+private fun JourneyScreen(networkJourney: NetworkJourney?, saved: Boolean, restoredOffline: Boolean, onSave: () -> Unit) {
     var disrupted by rememberSaveable { mutableStateOf(false) }
     if (networkJourney != null) {
         Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
             ScreenHeader("Full-network schedule", "Arrive at ${networkJourney.arrival}.", "Depart ${networkJourney.departure} · ${networkJourney.transfers} transfer${if (networkJourney.transfers == 1) "" else "s"} · static BMTC + BMRCL feeds")
             Column(Modifier.padding(horizontal = 20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                StatusPill("${networkJourney.priority.replaceFirstChar { it.uppercase() }} contract · ${networkJourney.walkingMeters}/${networkJourney.maximumWalkingMeters} m walk · ${networkJourney.queryMilliseconds.toInt()} ms", Green)
+                StatusPill("${networkJourney.priority.replaceFirstChar { it.uppercase() }} contract · ${networkJourney.walkingMeters}/${networkJourney.maximumWalkingMeters} m walk · ${if (restoredOffline) "restored offline" else "${networkJourney.queryMilliseconds.toInt()} ms"}", Green)
                 if (networkJourney.timeMode == "arriveBy") {
                     StatusPill("Deadline ${networkJourney.requestedTime} met · latest start ${networkJourney.latestStart}", Green)
                 }
@@ -243,7 +249,7 @@ private fun JourneyScreen(networkJourney: NetworkJourney?, saved: Boolean, onSav
                     )
                 }
                 OutlinedButton(onClick = onSave, modifier = Modifier.fillMaxWidth()) { Text(if (saved) "Saved ✓" else "Save offline") }
-                Text("Schedule-only result. It does not use live vehicle positions, observed delay, or a trained prediction model.", color = Muted, fontSize = 12.sp)
+                Text(if (restoredOffline) "Saved schedule snapshot restored locally. Replan online before travel to check for a newer schedule." else "Schedule-only result. It does not use live vehicle positions, observed delay, or a trained prediction model.", color = Muted, fontSize = 12.sp)
                 Spacer(Modifier.height(16.dp))
             }
         }

@@ -4,11 +4,54 @@ import java.net.HttpURLConnection
 import java.net.URI
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
+import org.json.JSONArray
 import org.json.JSONObject
 
 data class StopOption(val id: String, val name: String, val lat: Double, val lon: Double, val agency: String = "BMTC", val mode: String = "bus")
 data class NetworkRide(val route: String, val agency: String, val mode: String, val headsign: String, val from: String, val to: String, val departure: String, val arrival: String, val stopCount: Int, val distanceMeters: Int)
 data class NetworkJourney(val origin: String, val destination: String, val departure: String, val arrival: String, val transfers: Int, val walkingMeters: Int, val timeMode: String, val requestedTime: String, val latestStart: String, val deadlineMet: Boolean, val priority: String, val maximumWalkingMeters: Int, val rides: List<NetworkRide>, val queryMilliseconds: Double)
+
+fun NetworkJourney.encodeForStorage(): String = JSONObject().apply {
+    put("version", 1)
+    put("origin", origin)
+    put("destination", destination)
+    put("departure", departure)
+    put("arrival", arrival)
+    put("transfers", transfers)
+    put("walkingMeters", walkingMeters)
+    put("timeMode", timeMode)
+    put("requestedTime", requestedTime)
+    put("latestStart", latestStart)
+    put("deadlineMet", deadlineMet)
+    put("priority", priority)
+    put("maximumWalkingMeters", maximumWalkingMeters)
+    put("queryMilliseconds", queryMilliseconds)
+    put("rides", JSONArray().apply {
+        rides.forEach { ride ->
+            put(JSONObject().apply {
+                put("route", ride.route); put("agency", ride.agency); put("mode", ride.mode); put("headsign", ride.headsign)
+                put("from", ride.from); put("to", ride.to); put("departure", ride.departure); put("arrival", ride.arrival)
+                put("stopCount", ride.stopCount); put("distanceMeters", ride.distanceMeters)
+            })
+        }
+    })
+}.toString()
+
+fun decodeStoredJourney(value: String?): NetworkJourney? = runCatching {
+    val json = JSONObject(value ?: error("Missing journey"))
+    if (json.getInt("version") != 1) error("Unsupported saved journey")
+    val ridesJson = json.getJSONArray("rides")
+    NetworkJourney(
+        origin = json.getString("origin"), destination = json.getString("destination"), departure = json.getString("departure"), arrival = json.getString("arrival"),
+        transfers = json.getInt("transfers"), walkingMeters = json.getInt("walkingMeters"), timeMode = json.getString("timeMode"), requestedTime = json.getString("requestedTime"),
+        latestStart = json.getString("latestStart"), deadlineMet = json.getBoolean("deadlineMet"), priority = json.getString("priority"), maximumWalkingMeters = json.getInt("maximumWalkingMeters"),
+        rides = List(ridesJson.length()) { index ->
+            val ride = ridesJson.getJSONObject(index)
+            NetworkRide(ride.getString("route"), ride.getString("agency"), ride.getString("mode"), ride.getString("headsign"), ride.getString("from"), ride.getString("to"), ride.getString("departure"), ride.getString("arrival"), ride.getInt("stopCount"), ride.getInt("distanceMeters"))
+        },
+        queryMilliseconds = json.getDouble("queryMilliseconds"),
+    )
+}.getOrNull()
 
 private fun request(path: String): JSONObject {
     val connection = URI.create("${BuildConfig.API_BASE_URL}$path").toURL().openConnection() as HttpURLConnection

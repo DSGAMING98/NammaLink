@@ -38,7 +38,7 @@
 
 ## Native Android app
 
-The `android/` project is a real Compose application—not a WebView. It includes debounced search across 10,043 bus and Metro stops, calendar-filtered full-network requests through an injectable API base URL, explicit bus/Metro/walking timeline cards, constraint controls, a native route schematic, persisted offline save state, a clearly simulated recovery flow, and honest operator insights. The bounded demonstration remains an explicit offline option rather than a silent substitute for a failed network request.
+The `android/` project is a real Compose application—not a WebView. It includes debounced search across 10,043 bus and Metro stops, calendar-filtered full-network requests through an injectable API base URL, explicit bus/Metro/walking timeline cards, constraint controls, a native route schematic, full-itinerary local save/restore, a clearly simulated recovery flow, and honest operator insights. The bounded demonstration remains an explicit offline option rather than a silent substitute for a failed network request.
 
 Requirements: Android SDK 36, JDK 17+ (Android Studio's bundled JDK is recommended), and an authorized USB device or emulator.
 
