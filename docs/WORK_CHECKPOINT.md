@@ -12,7 +12,7 @@ Implemented the production health/version contract, server-only Google gateway, 
 
 ## Last verified working commit
 
-Pending the engineering milestone commit and hosted CI result. Local verification passes: 51 tests, strict type-check, production build, debug APK, presentation APK, endpoint guards, production health smoke, and physical-device readiness/degraded-mode QA.
+Engineering milestone `49b66b2` on `main`, fully verified by GitHub Actions run `41086371223`. Local and hosted verification pass: 53 tests, secret hygiene, strict type-check, production build/standalone smoke, debug APK, presentation APK, endpoint guards, and physical-device readiness/degraded-mode QA.
 
 ## Current branch
 
@@ -136,6 +136,9 @@ Arbitrary place search/maps, coordinate-based access/egress, pedestrian-network 
 - Physical contract comparison: safest and fastest were identical 08:00–08:50 results; direct was honestly shown as 08:00–10:42 with 162 minutes total and 115 minutes waiting; the selected itinerary exposed its 08:09–08:15 connection wait; schema-version-4 offline restoration retained the comparison; fatal/ANR scan clean.
 - Physical selectable alternatives: Direct switched to the full `348-C` result and explicit 115-minute initial wait; schema-version-5 restored Direct with the backend disconnected, then switched offline to the complete Safest itinerary; fatal/ANR scan clean.
 
+- Engineering foundation GitHub Actions run [`41086371223`](https://github.com/DSGAMING98/NammaLink/actions/runs/41086371223): secret hygiene, all 53 tests, strict type-check, production build, standalone health/stop smoke tests, debug APK, public-endpoint fail-closed test, presentation APK, checksum, and artifact upload all passed for `49b66b2`.
+- CI Android artifact `NammaLink-android-debug-49b66b27109d88a7a0f8de0b812f81587ac6de42` (`12992151752`): 10,002,974-byte ZIP retained until 13 November 2026; digest `sha256:073cd8da8ed911629c3d58d579348682b31f7047a7bb859f84a9bb057efd6cd8`.
+
 ## Dataset and ML limitations
 
 - BMTC and BMRCL feeds are unofficial static community feeds.
@@ -164,7 +167,7 @@ No public deployment is claimed. The standalone production build, non-root conta
 
 ## Uncommitted work
 
-Engineering phases 27–31 are implemented locally and await commit, push, and hosted CI verification. Device evidence is saved under `research_outputs/device_evidence/nammalink-engineering-*`.
+None. Engineering phases 27–31 are committed and pushed. Device evidence is saved under `research_outputs/device_evidence/nammalink-engineering-*`.
 
 ## Exact next implementation step
 
