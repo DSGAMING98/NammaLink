@@ -4,11 +4,11 @@ Updated: 30 October 2026
 
 ## Current phase
 
-Phase 15 — Calendar-aware bus + Metro routing and device validation.
+Phase 16 — City-scale Journey Contract enforcement.
 
 ## Last completed task
 
-Integrated BMRCL into the production stop/index pipeline, added GTFS calendar filtering and explicit bus–Metro walking transfers, rendered Metro/mixed journeys in Android, and validated both flows on the physical Android 16 handset.
+Enforced safest/fastest/direct behavior and hard transfer-walking budgets in the city-scale API, wired the controls into Android, and physically validated a direct zero-transfer result.
 
 ## Last verified working commit
 
@@ -22,7 +22,7 @@ Calendar-aware bus + Metro milestone: `0cfa474` on `main`, verified by GitHub Ac
 - Calendar-aware schedule routing with hard arrive-by, walking, transfer, and directness constraints.
 - Multiple ranking strategies, source-labelled timeline, evidence-aware simulated incident, and recovery preserving the completed leg.
 - Installable responsive web app with offline shell, saved journey, local report queue, and schedule-supply operator insights.
-- 36 passing web/router/API/operator/calendar tests plus strict type-check and production build.
+- 38 passing web/router/API/operator/calendar/contract tests plus strict type-check and production build.
 - Native Kotlin/Jetpack Compose project using AGP 9.2.1, Gradle 9.4.1, compile/target SDK 36, and minimum SDK 26.
 - Native constraint planner, GTFS-derived demonstration itinerary, schematic route view, locally persisted saved journey, explicit simulated disruption/recovery, and operator screen.
 - Physical Android 16 installation and UI-hierarchy validation on Vivo V2513.
@@ -31,17 +31,17 @@ Calendar-aware bus + Metro milestone: `0cfa474` on `main`, verified by GitHub Ac
 - Operator UI explicitly reports zero trained ML models instead of fabricating evaluation metrics.
 - Reproducible 10,043-stop BMTC + BMRCL search index with station/platform normalization, mode labels, result limits, and embedded provenance.
 - Calendar-filtered 61,115-trip multimodal Connection Scan index with 1,563,324 admitted connections, 670 explicit transfer footpaths, 5,153 recorded plausibility rejections, three-minute inter-trip buffer, and exact ride/walk reconstruction.
-- `/api/network-journeys` date/stop/time validation, feed-window enforcement, provenance, schedule-only flag, and measured query latency.
-- Android debounced stop autocomplete, injectable backend URL, city-scale journey parsing/rendering, explicit request errors, and separately selected offline fallback.
+- `/api/network-journeys` date/stop/time/contract validation, hard walking budgets, safest/fastest/direct behavior, feed-window enforcement, provenance, schedule-only flag, and measured query latency.
+- Android debounced stop autocomplete, injectable backend URL, enforced priority/walking controls, city-scale journey parsing/rendering, explicit request errors, and separately selected offline fallback.
 - Website Android download section and repository-hosted 17.15 MB development APK, explicitly labelled debug-signed with SHA-256.
 - Full-feed operator supply graph with 10,043 searchable stops, 61,115 trips, 4,419 route records, 1,563,324 admitted connections, and top-eight route trip bars.
 - GitHub Actions verification for tests, type-check, production web build, native Android build, APK checksum, and 14-day APK artifact retention.
 - Fail-closed Android release signing configuration: production packaging requires four external environment values and a readable keystore; signing files are ignored by Git.
-- Physical-device validation of live bus/Metro autocomplete, bus-only routing, Metro-only routing, and a mixed BMTC–walk–BMRCL journey over the USB-forwarded backend.
+- Physical-device validation of live bus/Metro autocomplete, bus-only routing, Metro-only routing, mixed BMTC–walk–BMRCL routing, and a direct hard-contract journey over the USB-forwarded backend.
 
 ## Incomplete features
 
-Arbitrary place search/maps, coordinate-based access/egress, pedestrian-network geometry, city-scale enforcement of all Journey Contract preferences, persistent server-side disruption reporting/moderation, authentication, notifications, legitimately trained ML, secure release signing, and public backend deployment remain incomplete.
+Arbitrary place search/maps, coordinate-based access/egress, pedestrian-network geometry, city-scale arrive-by/deadline routing and multi-label Pareto alternatives, persistent server-side disruption reporting/moderation, authentication, notifications, legitimately trained ML, secure release signing, and public backend deployment remain incomplete.
 
 ## Verification evidence
 
@@ -50,6 +50,7 @@ Arbitrary place search/maps, coordinate-based access/egress, pedestrian-network 
 - Full-network routing milestone: passed, 27 tests across 11 files.
 - Full-feed operator graph milestone: passed, 28 tests across 12 files.
 - Multimodal/calendar milestone: passed, 36 tests across 14 files, including real indexed Metro and mixed-mode API queries.
+- City-scale contract milestone: passed, 38 tests across 14 files, including walking-budget adaptation, direct-only routing, invalid-contract rejection, and physical-device UI evidence.
 - `npm run typecheck`: passed.
 - `pnpm build`: passed with the static web app and all journey, recovery, stop-search, and full-network API routes.
 - Browser desktop/mobile journey, recovery, low-connectivity, and operator flows: passed in prior milestones.
@@ -68,7 +69,7 @@ Arbitrary place search/maps, coordinate-based access/egress, pedestrian-network 
 - Updated Android `:app:assembleDebug`: passed with the stop-search and network-journey client.
 - `adb reverse tcp:3000 tcp:3000`: configured successfully; updated APK streamed install passed.
 - Production website APK check: HTTP 200, `application/vnd.android.package-archive`, 17,150,016-byte content length, visible debug-signing label.
-- Current multimodal development APK SHA-256: `57447884BBE9F277D19019B24080107A6309CD4DEC8AC1D4022673012F49C44E` (17,150,016 bytes).
+- Current contract-aware development APK SHA-256: `229CDC4FB10F28FEBF151461820D0B44D3A943D94F87DBC5ABE8908788B7BC81` (17,150,016 bytes).
 - Operator graph production HTML: passed for all full-feed totals, rejection count, and zero-model label.
 - Operator graph visual QA: passed in the in-app browser at desktop and 390×844 mobile viewport; cards, bars, disclaimers, and following download section rendered without observed overflow.
 - CI command parity check: frozen pnpm install, 36 tests, strict type-check, production web build, and native Android debug build passed locally before workflow push.
@@ -87,6 +88,8 @@ Arbitrary place search/maps, coordinate-based access/egress, pedestrian-network 
 - Updated APK streamed installation and mixed-mode UI hierarchy passed; post-flow fatal/ANR scan remained clean.
 - Reproducibility rerun produced byte-identical artifacts: stop index SHA-256 `4A76778C271D7084BBA69910E861F3AFABD9E9992D6521D6A94C77F9FA260FE8`, metadata `6A1C0214E3E1317A55EE69FE1BD7879D4196758C993A7C86D270935E00306CB1`, and binary gzip `8261A316CA1C358343658908A1C5A957477A82A9548571F9B1020A318049EB42`.
 - GitHub Actions run `41036767610`: web/routing/data tests, strict type-check, production build, native APK build, checksum recording, and artifact upload all passed; artifact `12968352261` is retained for 14 days.
+- Real-index walking-budget adaptation: the 400 m HSR Layout → Whitefield result used a 128 m SAP Labs transfer; a 100 m contract selected an alternate 83 m Kundalahalli Metro Station transfer and still arrived at 09:15.
+- Physical direct-contract journey: Kempegowda Bus Station 09:55 → Central Silk Board 10:42 on `348-C`, 0 transfers, 0/400 m walking, 53 ms; screenshot/UI hierarchy captured and fatal/ANR scan clean.
 
 ## Dataset and ML limitations
 

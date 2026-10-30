@@ -28,3 +28,11 @@ The post-flow device log scan matched no `FATAL EXCEPTION`, NammaLink ANR, or An
 - Verified 14th Main HSR Layout 08:02 → Whitefield Metro 09:15: two BMTC legs, a clearly labelled 128 m estimated transfer walk, and a six-stop Purple Line leg; 48 ms measured scan.
 - The updated APK installed successfully on the Vivo V2513, rendered bus, walk, and Metro cards, and produced no fatal/ANR log match.
 - Evidence: `metro-journey.png`, `metro-journey.xml`, `mixed-journey.png`, and `mixed-journey-lower.xml`.
+
+## City-scale Journey Contract extension
+
+- Selected `Direct` and a 400 m walking budget in the native planner; both values were sent to the production API instead of remaining decorative controls.
+- Verified Kempegowda Bus Station 09:55 → Central Silk Board 10:42 on direct route `348-C`: zero transfers, zero walking, 20 stops, and a 53 ms measured scan.
+- The native result displayed `Direct contract · 0/400 m walk`; screenshot and UI hierarchy are saved as `contract-direct-result.png` and `contract-direct-result.xml`.
+- A separate real-index API regression showed that tightening the HSR Layout → Whitefield Metro walking budget from 400 m to 100 m selected an alternate 83 m Kundalahalli transfer while preserving the 09:15 arrival.
+- The updated APK streamed installation passed, and the post-flow device log scan found no NammaLink fatal exception or ANR.

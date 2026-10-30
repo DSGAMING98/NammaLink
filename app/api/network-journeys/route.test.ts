@@ -15,11 +15,26 @@ describe("multimodal network journey API", () => {
   });
 
   it("returns explicit walking in a bus-to-Metro journey", async () => {
-    const response = await GET(request({ origin: "20568", destination: "metro:WHTM", date: "2026-10-30", departAfter: "08:00" }));
+    const response = await GET(request({ origin: "20568", destination: "metro:WHTM", date: "2026-10-30", departAfter: "08:00", priority: "safest", maxWalkingMeters: "400" }));
     const body = await response.json();
     expect(body.journey.modes).toEqual(["bus", "metro"]);
     expect(body.journey.walkingMeters).toBe(128);
     expect(body.journey.rides.some((ride: { mode: string; distanceMeters?: number }) => ride.mode === "walk" && ride.distanceMeters === 128)).toBe(true);
+    expect(body.journey.contract).toMatchObject({ priority: "safest", maximumWalkingMeters: 400, minimumTransferSeconds: 180 });
+
+    const tighterResponse = await GET(request({ origin: "20568", destination: "metro:WHTM", date: "2026-10-30", departAfter: "08:00", priority: "safest", maxWalkingMeters: "100" }));
+    const tighterBody = await tighterResponse.json();
+    expect(tighterBody.journey.walkingMeters).toBe(83);
+    expect(tighterBody.journey.walkingMeters).toBeLessThanOrEqual(100);
+  });
+
+  it("enforces direct-only and validates city-scale contract controls", async () => {
+    const direct = await GET(request({ origin: "metro:WHTM", destination: "metro:CLGA", date: "2026-10-30", departAfter: "08:00", priority: "direct", maxWalkingMeters: "0" }));
+    const directBody = await direct.json();
+    expect(directBody.journey).toMatchObject({ transfers: 0, walkingMeters: 0, contract: { priority: "direct", directOnly: true } });
+
+    const invalid = await GET(request({ origin: "metro:WHTM", destination: "metro:CLGA", date: "2026-10-30", departAfter: "08:00", priority: "unknown", maxWalkingMeters: "-1" }));
+    expect(invalid.status).toBe(400);
   });
 
   it("rejects dates outside the shared feed window", async () => {

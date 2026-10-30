@@ -7,7 +7,7 @@
 **A constraint-aware scheduled public-transport planner and journey-recovery prototype for Bengaluru**
 
 [![Build](https://img.shields.io/badge/build-passing-16c784)](#verification)
-[![Tests](https://img.shields.io/badge/tests-36%20passing-16c784)](#verification)
+[![Tests](https://img.shields.io/badge/tests-38%20passing-16c784)](#verification)
 [![Android](https://img.shields.io/badge/Android-native%20APK-156b52)](#native-android-app)
 [![CI](https://github.com/DSGAMING98/NammaLink/actions/workflows/ci.yml/badge.svg)](https://github.com/DSGAMING98/NammaLink/actions/workflows/ci.yml)
 [![Data](https://img.shields.io/badge/data-static%20GTFS-f0b429)](#data-and-honesty)
@@ -212,8 +212,8 @@ Demo instructions and judge Q&A: [Hackathon Demo](docs/HACKATHON_DEMO.md).
 
 ## Roadmap
 
-1. Replace request-time bounded enumeration with preprocessed CSA/RAPTOR and a spatial index.
-2. Integrate full BMTC/BMRCL service calendars and pedestrian-network walking.
+1. Add a production spatial index and arbitrary-coordinate access/egress to the preprocessed Connection Scan.
+2. Replace straight-line transfer estimates with licensed pedestrian-network walking geometry.
 3. Add arbitrary place selection and a map after Google API access is repaired.
 4. Secure a legitimate realtime feed and preserve source semantics.
 5. Add Supabase authentication, passenger/moderator roles, RLS, and retention only after backend verification.

@@ -51,6 +51,8 @@ The committed index contains 61,115 scheduled trips, 1,563,324 admitted connecti
 | Kempegowda Bus Station → Central Silk Board, after 08:00 | 08:00–08:50; routes `316-B` and `G-3 SJSCBSE-CSB`; 1 transfer | 175 ms in the earlier bus-only device run |
 | Whitefield (Kadugodi) Metro → Challaghatta Metro, after 08:00 | 08:00–09:20; Purple Line; 36 stops; 0 transfers | 52 ms |
 | 14th Main HSR Layout → Whitefield Metro, after 08:00 | 08:02–09:15; two BMTC legs, 128 m estimated transfer walk, Purple Line; 2 transit transfers | 48 ms |
+| Same mixed query, 100 m walking budget | 08:02–09:15; alternate 83 m transfer from Kundalahalli Metro Station; contract satisfied | Production API regression check |
+| Kempegowda Bus Station → Central Silk Board, Direct, 400 m budget | 09:55–10:42; route `348-C`; 0 transfers; 0 m walking | 53 ms on physical device |
 
 The mixed result demonstrates exact reconstruction of ride and walking segments. Transfer walking is great-circle distance at 1.25 m/s between stops no more than 250 m apart; it is not claimed as accessible or pedestrian-network-valid geometry.
 

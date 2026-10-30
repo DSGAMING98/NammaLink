@@ -182,7 +182,9 @@ private fun PlannerScreen(onPlan: (NetworkJourney) -> Unit, onOfflineDemo: () ->
                     if (origin.id.isBlank() || destination.id.isBlank()) { error = "Select both stops from the verified suggestions."; return@Button }
                     planning = true; error = null
                     scope.launch {
-                        runCatching { withContext(Dispatchers.IO) { planNetworkJourney(origin, destination, LocalDate.now().toString(), departAfter) } }
+                        val maximumWalkingMeters = when (maxWalk) { "400 m" -> 400; "800 m" -> 800; else -> 1_500 }
+                        val priorityValue = ranking.lowercase()
+                        runCatching { withContext(Dispatchers.IO) { planNetworkJourney(origin, destination, LocalDate.now().toString(), departAfter, priorityValue, maximumWalkingMeters) } }
                             .onSuccess(onPlan)
                             .onFailure { error = it.message ?: "Network journey unavailable." }
                         planning = false
@@ -195,7 +197,7 @@ private fun PlannerScreen(onPlan: (NetworkJourney) -> Unit, onOfflineDemo: () ->
             ) { Text(if (planning) "Scanning the schedule…" else "Plan across bus + Metro", fontWeight = FontWeight.Bold) }
             error?.let { Text(it, color = Coral, fontWeight = FontWeight.Bold, fontSize = 13.sp) }
             OutlinedButton(onClick = onOfflineDemo, modifier = Modifier.fillMaxWidth()) { Text("Open bounded offline demonstration") }
-            Text("Full-network results optimize scheduled arrival with a three-minute transfer buffer. Walking limits and priority chips remain Journey Contract preferences but are not yet enforced by the city-scale scan. The offline demonstration remains available explicitly.", color = Muted, fontSize = 12.sp)
+            Text("Safest applies a three-minute interchange buffer, Fastest removes that extra buffer, and Direct permits one transit ride. The selected transfer-walking budget is enforced by the city-scale scan. The offline demonstration remains available explicitly.", color = Muted, fontSize = 12.sp)
             Spacer(Modifier.height(16.dp))
         }
     }
@@ -219,7 +221,7 @@ private fun JourneyScreen(networkJourney: NetworkJourney?, saved: Boolean, onSav
         Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
             ScreenHeader("Full-network schedule", "Arrive at ${networkJourney.arrival}.", "Depart ${networkJourney.departure} · ${networkJourney.transfers} transfer${if (networkJourney.transfers == 1) "" else "s"} · static BMTC + BMRCL feeds")
             Column(Modifier.padding(horizontal = 20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                StatusPill("Verified indexed schedule · ${networkJourney.queryMilliseconds.toInt()} ms", Green)
+                StatusPill("${networkJourney.priority.replaceFirstChar { it.uppercase() }} contract · ${networkJourney.walkingMeters}/${networkJourney.maximumWalkingMeters} m walk · ${networkJourney.queryMilliseconds.toInt()} ms", Green)
                 RouteMap(false, networkJourney.origin, networkJourney.destination)
                 networkJourney.rides.forEach { ride ->
                     ItineraryCard(

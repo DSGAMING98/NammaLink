@@ -8,7 +8,7 @@ Last updated: 30 October 2026
 | Dataset inventory and provenance | Implemented and tested | `docs/DATASET_INVENTORY.md`; local counts and upstream sources recorded |
 | Secret-safe environment template | Implemented and tested | `.env.example`, `.gitignore`; `.env.local` confirmed ignored |
 | Next.js application | Implemented and tested | Next.js 16 App Router shell; unit tests, strict type-check, and production build pass |
-| GTFS normalization | Partially implemented | Reproducible extraction creates a licensed 3-route, 53-trip bounded fixture; full BMTC/BMRCL materialization remains |
+| GTFS normalization | Implemented and tested | Reproducible bounded fixture plus combined BMTC/BMRCL stop, calendar, connection, and footpath indexes |
 | Nearby-stop search | Implemented and tested | Great-circle radius search is covered by routing tests; production spatial index remains planned |
 | Transit routing | Implemented and tested | Bounded schedule enumerator, Pareto pruning, and real central-demo integration tests pass |
 | Arrive-by and Journey Contract constraints | Implemented and tested | Deadline, safety buffer, walking, transfers, and five ranking preferences are enforced in pure TypeScript |
@@ -22,8 +22,8 @@ Last updated: 30 October 2026
 | ML delay prediction | Blocked | No labelled observed arrival/delay data found |
 | Schedule-based ETA baseline | Implemented and tested | GTFS times plus explicit walking/waiting; every output labelled scheduled |
 | Full-network stop search | Implemented and tested | 10,043 searchable BMTC stops/BMRCL stations with mode and feed provenance |
-| Full-network schedule routing | Implemented and benchmarked | 1,563,324-connection calendar-filtered CSA; bus, Metro, interchange, and 670 transfer footpaths |
-| Native Android client | Implemented and physical-device validated | Compose APK, live network autocomplete, full-network journey rendering, explicit offline fallback; evidence under `research_outputs/device_evidence/` |
+| Full-network schedule routing | Implemented and benchmarked | 1,563,324-connection calendar-filtered CSA; bus, Metro, interchange, 670 transfer footpaths, hard walking budgets, and safest/fastest/direct behavior |
+| Native Android client | Implemented and physical-device validated | Compose APK, live autocomplete, contract-aware full-network planning/rendering, explicit offline fallback; evidence under `research_outputs/device_evidence/` |
 | APK distribution | Development preview available | Website serves a checksum-labelled debug-signed APK; production signing remains incomplete |
 | Low-connectivity mode | Partially implemented | Connection status, saved journey, local report queue, manifest, and service-worker shell cache implemented; full offline device test remains |
 | Operator insights | Implemented and tested | Bounded route trip counts, service spans, direction-aware median headways, and shared-stop analysis; explicitly not actual fleet utilization |

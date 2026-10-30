@@ -20,11 +20,16 @@ export async function GET(request: Request) {
   const destinationId = url.searchParams.get("destination") ?? "";
   const date = url.searchParams.get("date") ?? "";
   const departAfter = parseServiceTime(url.searchParams.get("departAfter") ?? "");
+  const priority = url.searchParams.get("priority") ?? "safest";
+  const maximumWalkingMeters = Number(url.searchParams.get("maxWalkingMeters") ?? "5000");
   const selectedOrigin = stopIndex.stops.find((stop) => stop.id === originId);
   const selectedDestination = stopIndex.stops.find((stop) => stop.id === destinationId);
 
   if (!selectedOrigin || !selectedDestination || departAfter === null || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
     return Response.json({ error: "Provide valid origin, destination, date, and departAfter=HH:MM." }, { status: 400 });
+  }
+  if (!["safest", "fastest", "direct"].includes(priority) || !Number.isInteger(maximumWalkingMeters) || maximumWalkingMeters < 0 || maximumWalkingMeters > 5_000) {
+    return Response.json({ error: "Provide priority=safest|fastest|direct and maxWalkingMeters from 0 to 5000." }, { status: 400 });
   }
   if (date < metadata.validFrom || date > metadata.validUntil) {
     return Response.json({ error: "Date is outside the static feed validity window.", validFrom: metadata.validFrom, validUntil: metadata.validUntil }, { status: 422 });
@@ -33,10 +38,11 @@ export async function GET(request: Request) {
   const started = performance.now();
   const index = await loadFullConnectionIndex();
   const activeTrips = activeTripsForDate(metadata.trips, metadata.services, date);
-  const legs = earliestArrival(index, routableStops(selectedOrigin), routableStops(selectedDestination), departAfter, 180, activeTrips);
+  const minimumTransferSeconds = priority === "safest" ? 180 : 0;
+  const legs = earliestArrival(index, routableStops(selectedOrigin), routableStops(selectedDestination), departAfter, minimumTransferSeconds, activeTrips, { maximumWalkingMeters, directOnly: priority === "direct" });
   const queryMilliseconds = Math.round((performance.now() - started) * 10) / 10;
   if (!legs) {
-    return Response.json({ journey: null, queryMilliseconds, evidence: "No scheduled path found in the indexed static feed." });
+    return Response.json({ journey: null, queryMilliseconds, contract: { priority, maximumWalkingMeters, minimumTransferSeconds, directOnly: priority === "direct" }, evidence: "No scheduled path found that satisfies this journey contract in the indexed static feed." });
   }
 
   const rides: Array<{ tripId: string; route: string; routeColor: string | null; agency: string; mode: string; headsign: string; from: typeof stopIndex.stops[number]; to: typeof stopIndex.stops[number]; departure: string; arrival: string; stopCount: number; distanceMeters?: number }> = [];
@@ -58,7 +64,7 @@ export async function GET(request: Request) {
   }
 
   return Response.json({
-    journey: { origin: selectedOrigin, destination: selectedDestination, departure: rides[0]?.departure, arrival: rides.at(-1)?.arrival, transfers: Math.max(0, rides.filter((ride) => ride.mode !== "walk").length - 1), walkingMeters: rides.reduce((sum, ride) => sum + (ride.distanceMeters ?? 0), 0), modes: [...new Set(rides.filter((ride) => ride.mode !== "walk").map((ride) => ride.mode))], rides },
+    journey: { origin: selectedOrigin, destination: selectedDestination, departure: rides[0]?.departure, arrival: rides.at(-1)?.arrival, transfers: Math.max(0, rides.filter((ride) => ride.mode !== "walk").length - 1), walkingMeters: rides.reduce((sum, ride) => sum + (ride.distanceMeters ?? 0), 0), modes: [...new Set(rides.filter((ride) => ride.mode !== "walk").map((ride) => ride.mode))], contract: { priority, maximumWalkingMeters, minimumTransferSeconds, directOnly: priority === "direct" }, rides },
     queryMilliseconds,
     network: { feedVersions: metadata.feedVersions, validFrom: metadata.validFrom, validUntil: metadata.validUntil, stops: metadata.searchableStopCount, routingNodes: metadata.stopCount, trips: metadata.tripCount, activeTrips: activeTrips.reduce((sum, value) => sum + value, 0), connections: metadata.connectionCount, transferFootpaths: metadata.footpaths.length, footpathPolicy: metadata.footpathPolicy, plausibilityGate: metadata.plausibilityGate, sources: metadata.sources, license: metadata.license, realtime: false },
   });

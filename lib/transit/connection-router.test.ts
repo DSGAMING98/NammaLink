@@ -42,4 +42,15 @@ describe("connection scan", () => {
     expect(result?.map((leg) => leg.trip)).toEqual([0, -1, 1]);
     expect(result?.[1]).toMatchObject({ from: 1, to: 2, distanceMeters: 125, departure: 120, arrival: 220 });
   });
+
+  it("enforces the walking budget and direct-only contract", () => {
+    const index = {
+      ...fixture([[100, 120, 0, 1, 0], [230, 250, 2, 3, 1], [300, 360, 0, 3, 2]]),
+      tripCount: 3,
+      footpaths: [{ from: 1, to: 2, distanceMeters: 125, durationSeconds: 100 }],
+    };
+    expect(earliestArrival(index, 0, 3, 90, 0, undefined, { maximumWalkingMeters: 100 })?.map((leg) => leg.trip)).toEqual([2]);
+    expect(earliestArrival(index, 0, 3, 90, 0, undefined, { maximumWalkingMeters: 125 })?.map((leg) => leg.trip)).toEqual([0, -1, 1]);
+    expect(earliestArrival(index, 0, 3, 90, 0, undefined, { directOnly: true })?.map((leg) => leg.trip)).toEqual([2]);
+  });
 });

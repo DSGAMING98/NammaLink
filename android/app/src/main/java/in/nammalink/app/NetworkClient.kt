@@ -8,7 +8,7 @@ import org.json.JSONObject
 
 data class StopOption(val id: String, val name: String, val lat: Double, val lon: Double, val agency: String = "BMTC", val mode: String = "bus")
 data class NetworkRide(val route: String, val agency: String, val mode: String, val headsign: String, val from: String, val to: String, val departure: String, val arrival: String, val stopCount: Int, val distanceMeters: Int)
-data class NetworkJourney(val origin: String, val destination: String, val departure: String, val arrival: String, val transfers: Int, val rides: List<NetworkRide>, val queryMilliseconds: Double)
+data class NetworkJourney(val origin: String, val destination: String, val departure: String, val arrival: String, val transfers: Int, val walkingMeters: Int, val priority: String, val maximumWalkingMeters: Int, val rides: List<NetworkRide>, val queryMilliseconds: Double)
 
 private fun request(path: String): JSONObject {
     val connection = URI.create("${BuildConfig.API_BASE_URL}$path").toURL().openConnection() as HttpURLConnection
@@ -38,8 +38,11 @@ fun searchNetworkStops(query: String): List<StopOption> {
     }
 }
 
-fun planNetworkJourney(origin: StopOption, destination: StopOption, serviceDate: String, departAfter: String): NetworkJourney {
-    val path = "/api/network-journeys?origin=${origin.id}&destination=${destination.id}&date=$serviceDate&departAfter=${URLEncoder.encode(departAfter, StandardCharsets.UTF_8)}"
+fun planNetworkJourney(origin: StopOption, destination: StopOption, serviceDate: String, departAfter: String, priority: String, maximumWalkingMeters: Int): NetworkJourney {
+    val encodedOrigin = URLEncoder.encode(origin.id, StandardCharsets.UTF_8)
+    val encodedDestination = URLEncoder.encode(destination.id, StandardCharsets.UTF_8)
+    val encodedTime = URLEncoder.encode(departAfter, StandardCharsets.UTF_8)
+    val path = "/api/network-journeys?origin=$encodedOrigin&destination=$encodedDestination&date=$serviceDate&departAfter=$encodedTime&priority=$priority&maxWalkingMeters=$maximumWalkingMeters"
     val response = request(path)
     val journey = response.optJSONObject("journey") ?: error("No scheduled path found for these stops and time.")
     val ridesJson = journey.getJSONArray("rides")
@@ -64,6 +67,9 @@ fun planNetworkJourney(origin: StopOption, destination: StopOption, serviceDate:
         departure = journey.getString("departure"),
         arrival = journey.getString("arrival"),
         transfers = journey.getInt("transfers"),
+        walkingMeters = journey.optInt("walkingMeters", 0),
+        priority = journey.getJSONObject("contract").getString("priority"),
+        maximumWalkingMeters = journey.getJSONObject("contract").getInt("maximumWalkingMeters"),
         rides = rides,
         queryMilliseconds = response.getDouble("queryMilliseconds"),
     )
