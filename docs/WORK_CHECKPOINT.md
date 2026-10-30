@@ -12,7 +12,7 @@ Replaced the bounded native operator demonstration with combined BMTC/BMRCL tota
 
 ## Last verified working commit
 
-Native full-itinerary offline restoration milestone: `e0bb4fe` on `main`, verified by GitHub Actions run `41047408362`. The Phase 19 operator milestone is under verification and will replace this line after CI passes.
+Native full-feed operator evidence milestone: `ee56602` on `main`, verified by GitHub Actions run `41048063190`.
 
 ## Completed features
 
@@ -98,6 +98,8 @@ Arbitrary place search/maps, coordinate-based access/egress, pedestrian-network 
 - Physical offline restoration: versioned full-network journey payload stored, USB backend reverse removed, app force-stopped/relaunched, and the exact two-leg 08:00–08:50 itinerary restored with `Saved ✓`; fatal/ANR scan clean.
 - GitHub Actions run `41047408362`: all 40 tests, strict type-check, production web build, native APK build, checksum recording, and artifact upload passed for `e0bb4fe`; artifact `12972304582` is retained until 13 November 2026.
 - Physical native operator graph: full-feed totals, zero-model evidence gate, all eight count-labelled route bars, and the supply-only disclaimer rendered on the Vivo V2513; screenshot/UI hierarchy evidence captured and fatal/ANR scan clean.
+- GitHub Actions run [`41048063190`](https://github.com/DSGAMING98/NammaLink/actions/runs/41048063190): all 40 tests, strict type-check, production web build, native APK build, checksum recording, and artifact upload passed for `ee56602`.
+- CI Android artifact `NammaLink-android-debug-ee5660240adaa3a34f8391f6b7e85aad4aea0ebb` (`12972584369`): 9,958,927-byte ZIP retained until 13 November 2026; GitHub artifact digest `sha256:793ee327fd22dd239808b10a07a4be03fa0a23a44fd6927e2db7891d7051c0e6`.
 
 ## Dataset and ML limitations
 
