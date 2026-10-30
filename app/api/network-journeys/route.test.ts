@@ -9,6 +9,7 @@ describe("multimodal network journey API", () => {
     const body = await response.json();
     expect(response.status).toBe(200);
     expect(body.journey).toMatchObject({ departure: "08:00", arrival: "09:20", modes: ["metro"] });
+    expect(body.journey).toMatchObject({ durationSeconds: 4_800, scheduledWaitingSeconds: 0 });
     expect(body.journey.rides[0]).toMatchObject({ agency: "BMRCL", mode: "metro", route: "Purple" });
     expect(body.network.activeTrips).toBeLessThan(body.network.trips);
     expect(body.network.feedVersions).toMatchObject({ BMTC: "20260907", BMRCL: "20260817" });
@@ -47,6 +48,10 @@ describe("multimodal network journey API", () => {
 
     const bothModes = await GET(request({ origin: "metro:WHTM", destination: "metro:CLGA", date: "2026-10-30", departAfter: "08:00", arriveBy: "09:30" }));
     expect(bothModes.status).toBe(400);
+
+    const fastest = await GET(request({ origin: "metro:WHTM", destination: "metro:CLGA", date: "2026-10-30", arriveBy: "09:30", priority: "fastest" }));
+    const fastestBody = await fastest.json();
+    expect(fastestBody.journey.recommendation.reasons[0]).toContain("latest feasible start");
   });
 
   it("rejects dates outside the shared feed window", async () => {
@@ -66,6 +71,10 @@ describe("multimodal network journey API", () => {
     expect(body.journey.walkingMeters).toBe(body.journey.access.distanceMeters);
     expect(body.journey.contract).toMatchObject({ maximumWalkingMeters: 800, accessWalkingMeters: body.journey.access.distanceMeters });
     expect(body.journey.contract.remainingWalkingMeters).toBe(800 - body.journey.access.distanceMeters);
+    expect(body.journey.durationSeconds).toBeGreaterThan(0);
+    expect(body.journey.scheduledWaitingSeconds).toBeGreaterThanOrEqual(0);
+    expect(body.journey.recommendation).toMatchObject({ title: "Protected-transfer recommendation" });
+    expect(body.journey.recommendation.reasons).toHaveLength(2);
 
     const rejected = await GET(request({
       origin: "20921", destination: "20707", date: "2026-10-30", departAfter: "08:00",

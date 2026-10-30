@@ -4,11 +4,11 @@ Updated: 30 October 2026
 
 ## Current phase
 
-Phase 23 — Door-to-stop access walking contract.
+Phase 24 — Timetable waiting and recommendation evidence.
 
 ## Last completed task
 
-Integrated current-location access walking into the door departure and hard walking budget, added explicit over-budget evidence, and verified that manual stop-to-stop planning remains unchanged on the physical device.
+Added timetable-derived journey duration and scheduled waiting, contract-specific recommendation reasons, schema-version-3 offline persistence, and physical-device evidence.
 
 ## Last verified working commit
 
@@ -34,6 +34,7 @@ Door-to-stop access-contract milestone: `ff54502` on `main`, verified by GitHub 
 - Native geographic projection from real boarding/transfer/alighting coordinates with bus/Metro/walk colours and explicit straight-line limitations.
 - Map legend, mode-coloured timeline markers, and privacy-preserving current-fix context that remains in memory only and does not alter saved journeys.
 - Optional current-location access leg with budget reservation, door-time calculation, and evidence-backed over-budget rejection.
+- Timetable-derived duration/waiting and safest/fastest/direct recommendation reasoning, with an explicit static-schedule evidence boundary and offline persistence.
 - Device screenshots under `research_outputs/device_evidence/`.
 - Machine-readable zero-model registry and professional ML artifact/evidence policy in `docs/ML_TRAINING_REPORT.md`.
 - Operator UI explicitly reports zero trained ML models instead of fabricating evaluation metrics.
@@ -78,7 +79,7 @@ Arbitrary place search/maps, coordinate-based access/egress, pedestrian-network 
 - Updated Android `:app:assembleDebug`: passed with the stop-search and network-journey client.
 - `adb reverse tcp:3000 tcp:3000`: configured successfully; updated APK streamed install passed.
 - Production website APK check: HTTP 200, `application/vnd.android.package-archive`, 17,150,016-byte content length, visible debug-signing label.
-- Current access-contract development APK SHA-256: `195C68443034C019F7FE3FF7FC28E17AF784A9AC81B5E24B1A8E14FBEFD6317D` (17,150,016 bytes).
+- Current recommendation-evidence development APK SHA-256: `3296FAD1409FC489A2C0F2EF9C00D76E0E3DD72A352B1A209E6FAA74E3F9D37F` (17,150,016 bytes).
 - Operator graph production HTML: passed for all full-feed totals, rejection count, and zero-model label.
 - Operator graph visual QA: passed in the in-app browser at desktop and 390×844 mobile viewport; cards, bars, disclaimers, and following download section rendered without observed overflow.
 - CI command parity check: frozen pnpm install, 36 tests, strict type-check, production web build, and native Android debug build passed locally before workflow push.
@@ -122,6 +123,8 @@ Arbitrary place search/maps, coordinate-based access/egress, pedestrian-network 
 - CI Android artifact `NammaLink-android-debug-ff54502bce82a3b8c50d3f8dc488280b30393cac` (`12974733008`): 9,985,170-byte ZIP retained until 13 November 2026; GitHub artifact digest `sha256:9cf172d1c3d5f34ed1b6dc8addf1dea8b070c74fd27a0dae02bdff10c4a47419`.
 - Access-contract API smoke: 116 m access under an 800 m maximum left 684 m, separated door/stop/boarding times, and a 2,447 m access under a 100 m maximum returned no journey with explicit evidence.
 - Physical manual-stop regression: unchanged `0/800 m walk`, no injected current-location leg, updated APK install successful, and fatal/ANR scan clean.
+- Recommendation API smoke: default safest journey returned 3,000 seconds total duration and 360 seconds scheduled waiting; a fastest Metro journey returned 4,800 seconds total duration and zero scheduled waiting.
+- Physical recommendation result: `50 min journey · 6 min scheduled waiting`, protected-transfer title, three-minute transfer rule, walking-cap evidence, and non-live disclaimer rendered; schema-version-3 offline restoration retained every field after backend removal; fatal/ANR scan clean.
 
 ## Dataset and ML limitations
 
@@ -151,11 +154,11 @@ No public deployment is claimed. The production Next.js build and local producti
 
 ## Uncommitted work
 
-None. Phase 23 source, tests, APK, documentation, and device evidence are committed and its GitHub Actions verification is closed successfully.
+Phase 24 source, APK, documentation, and device evidence are ready for commit and CI verification.
 
 ## Exact next implementation step
 
-Add explicit waiting time and recommendation reasoning to full-network Android results so passengers can compare why a journey was selected. Public deployment and release signing remain owner-dependent production steps once account and keystore access are available.
+Expose leg-by-leg waiting intervals and a compact safest/fastest/direct comparison so passengers can see the trade-off before choosing a contract. Public deployment and release signing remain owner-dependent production steps once account and keystore access are available.
 
 ## Restore commands
 

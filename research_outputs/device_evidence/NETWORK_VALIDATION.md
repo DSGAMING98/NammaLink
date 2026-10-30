@@ -90,3 +90,10 @@ The post-flow device log scan matched no `FATAL EXCEPTION`, NammaLink ANR, or An
 - A 2,447 m boarding walk under a 100 m maximum returned no journey with explicit evidence instead of ignoring the access constraint.
 - Installed the access-aware APK and planned the default manually selected stop-to-stop journey. It retained `0/800 m walk`, added no `Current location` leg, and produced no fatal/ANR log match.
 - Evidence: `access-manual-regression.png`/`.xml`; the positive access leg is covered by API tests because the physical device was outside the indexed nearby-stop radius.
+
+## Scheduled waiting and recommendation reasoning
+
+- Planned the real 08:00 Kempegowda Bus Station → Central Silk Board safest-contract journey and verified `50 min journey · 6 min scheduled waiting` from the indexed itinerary times.
+- Verified the `Protected-transfer recommendation`, its three-minute vehicle-change rule, walking-limit evidence, and explicit statement that the reasoning is not a live-delay prediction.
+- Saved the schema-version-3 journey, removed the USB backend reverse, force-stopped/relaunched the app, and verified that duration, waiting, reasons, and `restored offline` all survived.
+- Evidence: `phase24-journey.png`/`.xml`, `phase24-journey-lower.xml`, and `phase24-journey-offline.png`/`.xml`; the post-flow fatal/ANR scan was clean.

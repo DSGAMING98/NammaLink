@@ -302,6 +302,14 @@ private fun JourneyScreen(networkJourney: NetworkJourney?, deviceLocation: Devic
                 if (networkJourney.timeMode == "arriveBy") {
                     StatusPill("Deadline ${networkJourney.requestedTime} met · latest start ${networkJourney.latestStart}", Green)
                 }
+                StatusPill("${networkJourney.durationMinutes} min journey · ${networkJourney.scheduledWaitingMinutes} min scheduled waiting", Amber)
+                Card(colors = CardDefaults.cardColors(containerColor = Color.White), shape = RoundedCornerShape(18.dp)) {
+                    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Text(networkJourney.recommendationTitle, fontWeight = FontWeight.Bold, color = Ink)
+                        networkJourney.recommendationReasons.forEach { reason -> Text("• $reason", color = Muted, fontSize = 12.sp) }
+                        Text("Reasoning uses the indexed static timetable and selected journey contract; it is not a live-delay prediction.", color = Muted, fontSize = 11.sp)
+                    }
+                }
                 RouteMap(false, networkJourney.origin, networkJourney.destination, networkJourney.rides, deviceLocation)
                 networkJourney.rides.forEach { ride ->
                     ItineraryCard(

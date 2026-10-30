@@ -37,6 +37,7 @@
 - Physical-device verification of bus-only, Metro-only, and mixed BMTC–walk–BMRCL journeys.
 - On-demand Android location permission flow with distance-ranked nearby-stop lookup and a tested manual-search fallback when permission or feed coverage is unavailable.
 - Door-to-stop access walking integrated into departure time and the same hard walking budget when a nearby origin is selected.
+- Full-network Android results show timetable-derived total duration and scheduled waiting, plus contract-specific recommendation reasons that survive offline save/restore.
 - Native geographic route fallback projected from real stop coordinates, with a bus/Metro/walk legend, session-only current-fix handling, explicit straight-line limits, and offline persistence.
 
 ## Native Android app

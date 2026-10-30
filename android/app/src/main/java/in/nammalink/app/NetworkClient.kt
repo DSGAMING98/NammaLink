@@ -15,10 +15,31 @@ data class NetworkRide(
     val fromLat: Double = Double.NaN, val fromLon: Double = Double.NaN,
     val toLat: Double = Double.NaN, val toLon: Double = Double.NaN,
 )
-data class NetworkJourney(val origin: String, val destination: String, val departure: String, val arrival: String, val transfers: Int, val walkingMeters: Int, val timeMode: String, val requestedTime: String, val latestStart: String, val deadlineMet: Boolean, val priority: String, val maximumWalkingMeters: Int, val rides: List<NetworkRide>, val queryMilliseconds: Double)
+data class NetworkJourney(val origin: String, val destination: String, val departure: String, val arrival: String, val transfers: Int, val walkingMeters: Int, val timeMode: String, val requestedTime: String, val latestStart: String, val deadlineMet: Boolean, val priority: String, val maximumWalkingMeters: Int, val rides: List<NetworkRide>, val queryMilliseconds: Double, val durationMinutes: Int = 0, val scheduledWaitingMinutes: Int = 0, val recommendationTitle: String = "Schedule recommendation", val recommendationReasons: List<String> = emptyList())
+
+private fun serviceMinute(value: String): Int? {
+    val parts = value.split(":")
+    return if (parts.size == 2) parts[0].toIntOrNull()?.let { hour -> parts[1].toIntOrNull()?.let { minute -> hour * 60 + minute } } else null
+}
+
+private fun deriveWaitingMinutes(rides: List<NetworkRide>, timeMode: String, requestedTime: String, latestStart: String): Int {
+    var cursor = serviceMinute(if (timeMode == "departAfter") requestedTime else latestStart) ?: return 0
+    return rides.sumOf { ride ->
+        val departure = serviceMinute(ride.departure) ?: cursor
+        val waiting = (departure - cursor).coerceAtLeast(0)
+        cursor = serviceMinute(ride.arrival) ?: departure
+        waiting
+    }
+}
+
+private fun fallbackRecommendation(priority: String, walkingMeters: Int, maximumWalkingMeters: Int): Pair<String, List<String>> = when (priority) {
+    "safest" -> "Protected-transfer recommendation" to listOf("Every vehicle change reserves at least 3 minutes.", "$walkingMeters m total walking stays within the $maximumWalkingMeters m limit.")
+    "direct" -> "Direct-only recommendation" to listOf("The search excludes journeys that require changing vehicles.", "$walkingMeters m total walking stays within the $maximumWalkingMeters m limit.")
+    else -> "Earliest-arrival recommendation" to listOf("Selected from the indexed static timetable under the fastest contract.", "$walkingMeters m total walking stays within the $maximumWalkingMeters m limit.")
+}
 
 fun NetworkJourney.encodeForStorage(): String = JSONObject().apply {
-    put("version", 2)
+    put("version", 3)
     put("origin", origin)
     put("destination", destination)
     put("departure", departure)
@@ -32,6 +53,10 @@ fun NetworkJourney.encodeForStorage(): String = JSONObject().apply {
     put("priority", priority)
     put("maximumWalkingMeters", maximumWalkingMeters)
     put("queryMilliseconds", queryMilliseconds)
+    put("durationMinutes", durationMinutes)
+    put("scheduledWaitingMinutes", scheduledWaitingMinutes)
+    put("recommendationTitle", recommendationTitle)
+    put("recommendationReasons", JSONArray(recommendationReasons))
     put("rides", JSONArray().apply {
         rides.forEach { ride ->
             put(JSONObject().apply {
@@ -49,23 +74,37 @@ fun NetworkJourney.encodeForStorage(): String = JSONObject().apply {
 
 fun decodeStoredJourney(value: String?): NetworkJourney? = runCatching {
     val json = JSONObject(value ?: error("Missing journey"))
-    if (json.getInt("version") !in 1..2) error("Unsupported saved journey")
+    if (json.getInt("version") !in 1..3) error("Unsupported saved journey")
     val ridesJson = json.getJSONArray("rides")
+    val rides = List(ridesJson.length()) { index ->
+        val ride = ridesJson.getJSONObject(index)
+        NetworkRide(
+            route = ride.getString("route"), agency = ride.getString("agency"), mode = ride.getString("mode"), headsign = ride.getString("headsign"),
+            from = ride.getString("from"), to = ride.getString("to"), departure = ride.getString("departure"), arrival = ride.getString("arrival"),
+            stopCount = ride.getInt("stopCount"), distanceMeters = ride.getInt("distanceMeters"),
+            fromLat = ride.optDouble("fromLat", Double.NaN), fromLon = ride.optDouble("fromLon", Double.NaN),
+            toLat = ride.optDouble("toLat", Double.NaN), toLon = ride.optDouble("toLon", Double.NaN),
+        )
+    }
+    val priority = json.getString("priority")
+    val walkingMeters = json.getInt("walkingMeters")
+    val maximumWalkingMeters = json.getInt("maximumWalkingMeters")
+    val fallbackRecommendation = fallbackRecommendation(priority, walkingMeters, maximumWalkingMeters)
+    val departure = json.getString("departure")
+    val arrival = json.getString("arrival")
+    val timeMode = json.getString("timeMode")
+    val requestedTime = json.getString("requestedTime")
+    val latestStart = json.getString("latestStart")
     NetworkJourney(
-        origin = json.getString("origin"), destination = json.getString("destination"), departure = json.getString("departure"), arrival = json.getString("arrival"),
-        transfers = json.getInt("transfers"), walkingMeters = json.getInt("walkingMeters"), timeMode = json.getString("timeMode"), requestedTime = json.getString("requestedTime"),
-        latestStart = json.getString("latestStart"), deadlineMet = json.getBoolean("deadlineMet"), priority = json.getString("priority"), maximumWalkingMeters = json.getInt("maximumWalkingMeters"),
-        rides = List(ridesJson.length()) { index ->
-            val ride = ridesJson.getJSONObject(index)
-            NetworkRide(
-                route = ride.getString("route"), agency = ride.getString("agency"), mode = ride.getString("mode"), headsign = ride.getString("headsign"),
-                from = ride.getString("from"), to = ride.getString("to"), departure = ride.getString("departure"), arrival = ride.getString("arrival"),
-                stopCount = ride.getInt("stopCount"), distanceMeters = ride.getInt("distanceMeters"),
-                fromLat = ride.optDouble("fromLat", Double.NaN), fromLon = ride.optDouble("fromLon", Double.NaN),
-                toLat = ride.optDouble("toLat", Double.NaN), toLon = ride.optDouble("toLon", Double.NaN),
-            )
-        },
+        origin = json.getString("origin"), destination = json.getString("destination"), departure = departure, arrival = arrival,
+        transfers = json.getInt("transfers"), walkingMeters = walkingMeters, timeMode = timeMode, requestedTime = requestedTime,
+        latestStart = latestStart, deadlineMet = json.getBoolean("deadlineMet"), priority = priority, maximumWalkingMeters = maximumWalkingMeters,
+        rides = rides,
         queryMilliseconds = json.getDouble("queryMilliseconds"),
+        durationMinutes = json.optInt("durationMinutes", ((serviceMinute(arrival) ?: 0) - (serviceMinute(departure) ?: 0)).coerceAtLeast(0)),
+        scheduledWaitingMinutes = json.optInt("scheduledWaitingMinutes", deriveWaitingMinutes(rides, timeMode, requestedTime, latestStart)),
+        recommendationTitle = json.optString("recommendationTitle", fallbackRecommendation.first),
+        recommendationReasons = json.optJSONArray("recommendationReasons")?.let { reasons -> List(reasons.length()) { reasons.getString(it) } } ?: fallbackRecommendation.second,
     )
 }.getOrNull()
 
@@ -118,6 +157,7 @@ fun planNetworkJourney(origin: StopOption, destination: StopOption, serviceDate:
     val response = request(path)
     val journey = response.optJSONObject("journey") ?: error(response.optString("evidence", "No scheduled path found for these stops and time."))
     val contract = journey.getJSONObject("contract")
+    val recommendation = journey.getJSONObject("recommendation")
     val ridesJson = journey.getJSONArray("rides")
     val transitRides = List(ridesJson.length()) { index ->
         val ride = ridesJson.getJSONObject(index)
@@ -168,5 +208,9 @@ fun planNetworkJourney(origin: StopOption, destination: StopOption, serviceDate:
         maximumWalkingMeters = contract.getInt("maximumWalkingMeters"),
         rides = rides,
         queryMilliseconds = response.getDouble("queryMilliseconds"),
+        durationMinutes = (journey.getInt("durationSeconds") + 59) / 60,
+        scheduledWaitingMinutes = (journey.getInt("scheduledWaitingSeconds") + 59) / 60,
+        recommendationTitle = recommendation.getString("title"),
+        recommendationReasons = recommendation.getJSONArray("reasons").let { reasons -> List(reasons.length()) { reasons.getString(it) } },
     )
 }

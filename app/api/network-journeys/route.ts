@@ -112,9 +112,29 @@ export async function GET(request: Request) {
     distanceMeters: accessWalkingMeters,
     durationSeconds: accessDurationSeconds,
   } : null;
+  const timedLegs = [
+    ...(access ? [{ departure: access.departure, arrival: access.arrival }] : []),
+    ...rides.map((ride) => ({ departure: ride.departure, arrival: ride.arrival })),
+  ];
+  let waitingCursor = timeMode === "departAfter" ? requestedTime : (latestStart ?? firstDeparture ?? requestedTime);
+  const scheduledWaitingSeconds = timedLegs.reduce((total, leg) => {
+    const departure = parseServiceTime(leg.departure);
+    const arrival = parseServiceTime(leg.arrival);
+    const waiting = departure === null ? 0 : Math.max(0, departure - waitingCursor);
+    if (arrival !== null) waitingCursor = arrival;
+    return total + waiting;
+  }, 0);
+  const arrivalTime = parseServiceTime(rides.at(-1)?.arrival ?? "");
+  const doorDepartureTime = parseServiceTime(access?.departure ?? rides[0]?.departure ?? "");
+  const durationSeconds = arrivalTime !== null && doorDepartureTime !== null ? Math.max(0, arrivalTime - doorDepartureTime) : 0;
+  const recommendation = priority === "safest"
+    ? { title: "Protected-transfer recommendation", reasons: [`Every vehicle change reserves at least ${minimumTransferSeconds / 60} minutes.`, `${accessWalkingMeters + rides.reduce((sum, ride) => sum + (ride.distanceMeters ?? 0), 0)} m total walking stays within the ${maximumWalkingMeters} m limit.`] }
+    : priority === "direct"
+      ? { title: "Direct-only recommendation", reasons: ["The search excludes journeys that require changing vehicles.", `${accessWalkingMeters + rides.reduce((sum, ride) => sum + (ride.distanceMeters ?? 0), 0)} m total walking stays within the ${maximumWalkingMeters} m limit.`] }
+      : { title: "Earliest-arrival recommendation", reasons: [timeMode === "departAfter" ? `This is the earliest scheduled arrival found after ${requestedTimeInput}.` : `This is the latest feasible start found for the ${requestedTimeInput} arrival deadline.`, `${accessWalkingMeters + rides.reduce((sum, ride) => sum + (ride.distanceMeters ?? 0), 0)} m total walking stays within the ${maximumWalkingMeters} m limit.`] };
 
   return Response.json({
-    journey: { origin: selectedOrigin, destination: selectedDestination, departure: access?.departure ?? rides[0]?.departure, arrival: rides.at(-1)?.arrival, transfers: Math.max(0, rides.filter((ride) => ride.mode !== "walk").length - 1), walkingMeters: accessWalkingMeters + rides.reduce((sum, ride) => sum + (ride.distanceMeters ?? 0), 0), access, modes: [...new Set(rides.filter((ride) => ride.mode !== "walk").map((ride) => ride.mode))], contract, rides },
+    journey: { origin: selectedOrigin, destination: selectedDestination, departure: access?.departure ?? rides[0]?.departure, arrival: rides.at(-1)?.arrival, durationSeconds, scheduledWaitingSeconds, transfers: Math.max(0, rides.filter((ride) => ride.mode !== "walk").length - 1), walkingMeters: accessWalkingMeters + rides.reduce((sum, ride) => sum + (ride.distanceMeters ?? 0), 0), access, recommendation, modes: [...new Set(rides.filter((ride) => ride.mode !== "walk").map((ride) => ride.mode))], contract, rides },
     queryMilliseconds,
     network: { feedVersions: metadata.feedVersions, validFrom: metadata.validFrom, validUntil: metadata.validUntil, stops: metadata.searchableStopCount, routingNodes: metadata.stopCount, trips: metadata.tripCount, activeTrips: activeTrips.reduce((sum, value) => sum + value, 0), connections: metadata.connectionCount, transferFootpaths: metadata.footpaths.length, scanCount, scanStrategy: timeMode === "arriveBy" ? "minute-precision monotone deadline search" : "single forward scan", footpathPolicy: metadata.footpathPolicy, plausibilityGate: metadata.plausibilityGate, sources: metadata.sources, license: metadata.license, realtime: false },
   });

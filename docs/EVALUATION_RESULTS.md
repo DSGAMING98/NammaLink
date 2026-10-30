@@ -91,6 +91,12 @@ A production API query from a coordinate near Kempegowda Bus Station measured a 
 
 The physical Android regression used manually selected stops and retained the existing 0/800 m walking contract with no injected current-location leg. This proves the optional access parameters do not alter ordinary stop-to-stop planning. The connected device was outside nearby-stop coverage, so a positive access-leg Android rendering remains API/integration-tested rather than physically exercised at an in-coverage location.
 
+## Timetable waiting and recommendation evidence
+
+The full-network API now calculates door-to-destination duration and scheduled waiting directly from the selected itinerary's departure/arrival times. A production query for the default 08:00 Kempegowda Bus Station → Central Silk Board safest contract returned a 50-minute journey with 360 seconds (6 minutes) of scheduled waiting. A 07:50 fastest Metro query returned an 80-minute journey with zero scheduled waiting. The API also returns contract-specific reasons without claiming live-delay or ML evidence.
+
+On the physical Vivo V2513, Android rendered `50 min journey · 6 min scheduled waiting`, the `Protected-transfer recommendation`, the three-minute vehicle-change rule, and walking-limit evidence. Storage schema version 3 preserved the same duration, waiting, and reasons after saving, removing the backend reverse mapping, force-stopping, and relaunching. The post-flow log scan contained no fatal exception or ANR.
+
 ## Operator schedule analysis
 
 The bounded fixture contains 53 scheduled trips across 216 referenced stops and 3 selected routes. Direction-aware median scheduled headways are 48 minutes for `O EXP V-213VJ` (32 trips), 50 minutes for `600-CA` (17 trips), and 32 minutes for `365-BB BSK-BNP-ANK` (4 trips). The displayed service spans are 05:30–21:35, 07:20–16:30, and 17:13–20:00 respectively.
