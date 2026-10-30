@@ -310,8 +310,31 @@ private fun JourneyScreen(networkJourney: NetworkJourney?, deviceLocation: Devic
                         Text("Reasoning uses the indexed static timetable and selected journey contract; it is not a live-delay prediction.", color = Muted, fontSize = 11.sp)
                     }
                 }
+                if (networkJourney.alternatives.isNotEmpty()) {
+                    Card(colors = CardDefaults.cardColors(containerColor = Color.White), shape = RoundedCornerShape(18.dp)) {
+                        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Text("Contract comparison", fontWeight = FontWeight.Bold, color = Ink)
+                            networkJourney.alternatives.forEach { alternative ->
+                                val selectedLabel = if (alternative.priority == networkJourney.priority) " · selected" else ""
+                                Text("${alternative.priority.replaceFirstChar { it.uppercase() }}$selectedLabel", fontWeight = FontWeight.SemiBold, color = if (alternative.priority == networkJourney.priority) Green else Ink)
+                                Text("${alternative.departure}–${alternative.arrival} · ${alternative.durationMinutes} min · ${alternative.scheduledWaitingMinutes} min wait · ${alternative.transfers} change${if (alternative.transfers == 1) "" else "s"} · ${alternative.walkingMeters} m walk", color = Muted, fontSize = 12.sp)
+                            }
+                            Text("Only successfully returned results from the same indexed timetable and walking limit are shown.", color = Muted, fontSize = 11.sp)
+                        }
+                    }
+                }
                 RouteMap(false, networkJourney.origin, networkJourney.destination, networkJourney.rides, deviceLocation)
-                networkJourney.rides.forEach { ride ->
+                networkJourney.rides.forEachIndexed { index, ride ->
+                    val waitingMinutes = networkJourney.waitBeforeRideMinutes(index)
+                    if (waitingMinutes > 0) {
+                        ItineraryCard(
+                            if (index == 0) { if (networkJourney.timeMode == "departAfter") networkJourney.requestedTime else networkJourney.latestStart } else networkJourney.rides[index - 1].arrival,
+                            "Wait $waitingMinutes min",
+                            if (index == 0) "Scheduled wait before departure" else "Scheduled connection at ${ride.from}",
+                            "Board ${ride.departure}",
+                            Amber,
+                        )
+                    }
                     ItineraryCard(
                         ride.departure,
                         when (ride.mode) { "metro" -> "Take Metro ${ride.route}"; "walk" -> "Walk ${ride.distanceMeters} m"; else -> "Take bus ${ride.route}" },

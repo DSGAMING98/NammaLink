@@ -15,7 +15,8 @@ data class NetworkRide(
     val fromLat: Double = Double.NaN, val fromLon: Double = Double.NaN,
     val toLat: Double = Double.NaN, val toLon: Double = Double.NaN,
 )
-data class NetworkJourney(val origin: String, val destination: String, val departure: String, val arrival: String, val transfers: Int, val walkingMeters: Int, val timeMode: String, val requestedTime: String, val latestStart: String, val deadlineMet: Boolean, val priority: String, val maximumWalkingMeters: Int, val rides: List<NetworkRide>, val queryMilliseconds: Double, val durationMinutes: Int = 0, val scheduledWaitingMinutes: Int = 0, val recommendationTitle: String = "Schedule recommendation", val recommendationReasons: List<String> = emptyList())
+data class ContractAlternative(val priority: String, val departure: String, val arrival: String, val durationMinutes: Int, val scheduledWaitingMinutes: Int, val transfers: Int, val walkingMeters: Int)
+data class NetworkJourney(val origin: String, val destination: String, val departure: String, val arrival: String, val transfers: Int, val walkingMeters: Int, val timeMode: String, val requestedTime: String, val latestStart: String, val deadlineMet: Boolean, val priority: String, val maximumWalkingMeters: Int, val rides: List<NetworkRide>, val queryMilliseconds: Double, val durationMinutes: Int = 0, val scheduledWaitingMinutes: Int = 0, val recommendationTitle: String = "Schedule recommendation", val recommendationReasons: List<String> = emptyList(), val alternatives: List<ContractAlternative> = emptyList())
 
 private fun serviceMinute(value: String): Int? {
     val parts = value.split(":")
@@ -38,8 +39,16 @@ private fun fallbackRecommendation(priority: String, walkingMeters: Int, maximum
     else -> "Earliest-arrival recommendation" to listOf("Selected from the indexed static timetable under the fastest contract.", "$walkingMeters m total walking stays within the $maximumWalkingMeters m limit.")
 }
 
+fun NetworkJourney.waitBeforeRideMinutes(index: Int): Int {
+    if (index !in rides.indices) return 0
+    val previousTime = if (index == 0) {
+        if (timeMode == "departAfter") requestedTime else latestStart
+    } else rides[index - 1].arrival
+    return ((serviceMinute(rides[index].departure) ?: 0) - (serviceMinute(previousTime) ?: 0)).coerceAtLeast(0)
+}
+
 fun NetworkJourney.encodeForStorage(): String = JSONObject().apply {
-    put("version", 3)
+    put("version", 4)
     put("origin", origin)
     put("destination", destination)
     put("departure", departure)
@@ -57,6 +66,15 @@ fun NetworkJourney.encodeForStorage(): String = JSONObject().apply {
     put("scheduledWaitingMinutes", scheduledWaitingMinutes)
     put("recommendationTitle", recommendationTitle)
     put("recommendationReasons", JSONArray(recommendationReasons))
+    put("alternatives", JSONArray().apply {
+        alternatives.forEach { alternative ->
+            put(JSONObject().apply {
+                put("priority", alternative.priority); put("departure", alternative.departure); put("arrival", alternative.arrival)
+                put("durationMinutes", alternative.durationMinutes); put("scheduledWaitingMinutes", alternative.scheduledWaitingMinutes)
+                put("transfers", alternative.transfers); put("walkingMeters", alternative.walkingMeters)
+            })
+        }
+    })
     put("rides", JSONArray().apply {
         rides.forEach { ride ->
             put(JSONObject().apply {
@@ -74,7 +92,7 @@ fun NetworkJourney.encodeForStorage(): String = JSONObject().apply {
 
 fun decodeStoredJourney(value: String?): NetworkJourney? = runCatching {
     val json = JSONObject(value ?: error("Missing journey"))
-    if (json.getInt("version") !in 1..3) error("Unsupported saved journey")
+    if (json.getInt("version") !in 1..4) error("Unsupported saved journey")
     val ridesJson = json.getJSONArray("rides")
     val rides = List(ridesJson.length()) { index ->
         val ride = ridesJson.getJSONObject(index)
@@ -105,6 +123,13 @@ fun decodeStoredJourney(value: String?): NetworkJourney? = runCatching {
         scheduledWaitingMinutes = json.optInt("scheduledWaitingMinutes", deriveWaitingMinutes(rides, timeMode, requestedTime, latestStart)),
         recommendationTitle = json.optString("recommendationTitle", fallbackRecommendation.first),
         recommendationReasons = json.optJSONArray("recommendationReasons")?.let { reasons -> List(reasons.length()) { reasons.getString(it) } } ?: fallbackRecommendation.second,
+        alternatives = json.optJSONArray("alternatives")?.let { alternatives -> List(alternatives.length()) { index ->
+            alternatives.getJSONObject(index).let { alternative -> ContractAlternative(
+                priority = alternative.getString("priority"), departure = alternative.getString("departure"), arrival = alternative.getString("arrival"),
+                durationMinutes = alternative.getInt("durationMinutes"), scheduledWaitingMinutes = alternative.getInt("scheduledWaitingMinutes"),
+                transfers = alternative.getInt("transfers"), walkingMeters = alternative.getInt("walkingMeters"),
+            ) }
+        } } ?: emptyList(),
     )
 }.getOrNull()
 
@@ -147,7 +172,7 @@ fun findNearbyNetworkStops(latitude: Double, longitude: Double): List<StopOption
     }
 }
 
-fun planNetworkJourney(origin: StopOption, destination: StopOption, serviceDate: String, timeMode: String, requestedTime: String, priority: String, maximumWalkingMeters: Int, accessLocation: DeviceLocation? = null): NetworkJourney {
+private fun planSingleNetworkJourney(origin: StopOption, destination: StopOption, serviceDate: String, timeMode: String, requestedTime: String, priority: String, maximumWalkingMeters: Int, accessLocation: DeviceLocation? = null): NetworkJourney {
     val encodedOrigin = URLEncoder.encode(origin.id, StandardCharsets.UTF_8)
     val encodedDestination = URLEncoder.encode(destination.id, StandardCharsets.UTF_8)
     val encodedTime = URLEncoder.encode(requestedTime, StandardCharsets.UTF_8)
@@ -213,4 +238,19 @@ fun planNetworkJourney(origin: StopOption, destination: StopOption, serviceDate:
         recommendationTitle = recommendation.getString("title"),
         recommendationReasons = recommendation.getJSONArray("reasons").let { reasons -> List(reasons.length()) { reasons.getString(it) } },
     )
+}
+
+fun planNetworkJourney(origin: StopOption, destination: StopOption, serviceDate: String, timeMode: String, requestedTime: String, priority: String, maximumWalkingMeters: Int, accessLocation: DeviceLocation? = null): NetworkJourney {
+    val selected = planSingleNetworkJourney(origin, destination, serviceDate, timeMode, requestedTime, priority, maximumWalkingMeters, accessLocation)
+    val journeysByPriority = buildMap {
+        put(priority, selected)
+        listOf("safest", "fastest", "direct").filterNot { it == priority }.forEach { candidate ->
+            runCatching { planSingleNetworkJourney(origin, destination, serviceDate, timeMode, requestedTime, candidate, maximumWalkingMeters, accessLocation) }
+                .getOrNull()?.let { put(candidate, it) }
+        }
+    }
+    val alternatives = listOf("safest", "fastest", "direct").mapNotNull { candidate -> journeysByPriority[candidate]?.let { journey ->
+        ContractAlternative(candidate, if (journey.timeMode == "departAfter") journey.requestedTime else journey.latestStart, journey.arrival, journey.durationMinutes, journey.scheduledWaitingMinutes, journey.transfers, journey.walkingMeters)
+    } }
+    return selected.copy(alternatives = alternatives)
 }

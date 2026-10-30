@@ -97,6 +97,12 @@ The full-network API now calculates door-to-destination duration and scheduled w
 
 On the physical Vivo V2513, Android rendered `50 min journey · 6 min scheduled waiting`, the `Protected-transfer recommendation`, the three-minute vehicle-change rule, and walking-limit evidence. Storage schema version 3 preserved the same duration, waiting, and reasons after saving, removing the backend reverse mapping, force-stopping, and relaunching. The post-flow log scan contained no fatal exception or ANR.
 
+## Contract comparison and connection-wait evidence
+
+Android now runs the same origin, destination, time mode, and walking cap through each feasible safest, fastest, and direct contract. For the 08:00 Kempegowda Bus Station → Central Silk Board request, safest and fastest both produced 08:00–08:50, 50-minute results with 6 minutes of scheduled waiting and one change. Direct produced 08:00–10:42, 162 minutes door-to-arrival with 115 minutes of initial waiting and no changes. This exposes the real cost of avoiding a transfer instead of presenting only its 47-minute onboard span.
+
+The selected safest itinerary rendered its 08:09–08:15 connection as an explicit `Wait 6 min` step at St Josephs Indian School/Malya Hospital. Storage schema version 4 preserved all three comparison rows and the wait step after save, backend disconnection, force-stop, and relaunch. Infeasible contract searches are omitted rather than synthesized.
+
 ## Operator schedule analysis
 
 The bounded fixture contains 53 scheduled trips across 216 referenced stops and 3 selected routes. Direction-aware median scheduled headways are 48 minutes for `O EXP V-213VJ` (32 trips), 50 minutes for `600-CA` (17 trips), and 32 minutes for `365-BB BSK-BNP-ANK` (4 trips). The displayed service spans are 05:30–21:35, 07:20–16:30, and 17:13–20:00 respectively.

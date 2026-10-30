@@ -97,3 +97,10 @@ The post-flow device log scan matched no `FATAL EXCEPTION`, NammaLink ANR, or An
 - Verified the `Protected-transfer recommendation`, its three-minute vehicle-change rule, walking-limit evidence, and explicit statement that the reasoning is not a live-delay prediction.
 - Saved the schema-version-3 journey, removed the USB backend reverse, force-stopped/relaunched the app, and verified that duration, waiting, reasons, and `restored offline` all survived.
 - Evidence: `phase24-journey.png`/`.xml`, `phase24-journey-lower.xml`, and `phase24-journey-offline.png`/`.xml`; the post-flow fatal/ANR scan was clean.
+
+## Contract comparison and explicit connection wait
+
+- Verified three feasible searches for the same 08:00 request: safest and fastest each arrived 08:50 with 50 minutes total, 6 minutes waiting, one change, and zero walking; direct arrived 10:42 with 162 minutes door-to-arrival, 115 minutes waiting, no changes, and zero walking.
+- Verified the selected itinerary's explicit `08:09`, `Wait 6 min`, `Board 08:15` connection step at St Josephs Indian School/Malya Hospital.
+- Saved storage schema version 4, removed the backend reverse, force-stopped/relaunched, and verified every comparison row with `restored offline`.
+- Evidence: `phase25-comparison.png`/`.xml`, `phase25-wait-leg.png`/`.xml`, and `phase25-comparison-offline.png`/`.xml`; the post-flow fatal/ANR scan was clean.

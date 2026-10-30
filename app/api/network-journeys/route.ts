@@ -125,7 +125,7 @@ export async function GET(request: Request) {
     return total + waiting;
   }, 0);
   const arrivalTime = parseServiceTime(rides.at(-1)?.arrival ?? "");
-  const doorDepartureTime = parseServiceTime(access?.departure ?? rides[0]?.departure ?? "");
+  const doorDepartureTime = timeMode === "departAfter" ? requestedTime : latestStart;
   const durationSeconds = arrivalTime !== null && doorDepartureTime !== null ? Math.max(0, arrivalTime - doorDepartureTime) : 0;
   const recommendation = priority === "safest"
     ? { title: "Protected-transfer recommendation", reasons: [`Every vehicle change reserves at least ${minimumTransferSeconds / 60} minutes.`, `${accessWalkingMeters + rides.reduce((sum, ride) => sum + (ride.distanceMeters ?? 0), 0)} m total walking stays within the ${maximumWalkingMeters} m limit.`] }

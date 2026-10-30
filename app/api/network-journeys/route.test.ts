@@ -34,6 +34,10 @@ describe("multimodal network journey API", () => {
     const directBody = await direct.json();
     expect(directBody.journey).toMatchObject({ transfers: 0, walkingMeters: 0, contract: { priority: "direct", directOnly: true } });
 
+    const delayedDirect = await GET(request({ origin: "20921", destination: "20707", date: "2026-10-30", departAfter: "08:00", priority: "direct", maxWalkingMeters: "800" }));
+    const delayedDirectBody = await delayedDirect.json();
+    expect(delayedDirectBody.journey).toMatchObject({ departure: "09:55", arrival: "10:42", durationSeconds: 9_720, scheduledWaitingSeconds: 6_900 });
+
     const invalid = await GET(request({ origin: "metro:WHTM", destination: "metro:CLGA", date: "2026-10-30", departAfter: "08:00", priority: "unknown", maxWalkingMeters: "-1" }));
     expect(invalid.status).toBe(400);
   });
