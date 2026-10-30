@@ -291,7 +291,7 @@ private fun JourneyScreen(networkJourney: NetworkJourney?, saved: Boolean, resto
                 if (networkJourney.timeMode == "arriveBy") {
                     StatusPill("Deadline ${networkJourney.requestedTime} met · latest start ${networkJourney.latestStart}", Green)
                 }
-                RouteMap(false, networkJourney.origin, networkJourney.destination)
+                RouteMap(false, networkJourney.origin, networkJourney.destination, networkJourney.rides)
                 networkJourney.rides.forEach { ride ->
                     ItineraryCard(
                         ride.departure,
@@ -328,21 +328,55 @@ private fun JourneyScreen(networkJourney: NetworkJourney?, saved: Boolean, resto
 }
 
 @Composable
-private fun RouteMap(disrupted: Boolean, origin: String, destination: String) {
+private fun RouteMap(disrupted: Boolean, origin: String, destination: String, rides: List<NetworkRide> = emptyList()) {
+    val geographicRides = rides.filter { ride ->
+        ride.fromLat.isFinite() && ride.fromLon.isFinite() && ride.toLat.isFinite() && ride.toLon.isFinite()
+    }
     Card(colors = CardDefaults.cardColors(containerColor = Color(0xFFE8E5D8)), shape = RoundedCornerShape(18.dp)) {
-        Box(Modifier.fillMaxWidth().height(190.dp).padding(20.dp)) {
+        Box(Modifier.fillMaxWidth().height(if (geographicRides.isEmpty()) 190.dp else 220.dp).padding(20.dp)) {
             Canvas(Modifier.fillMaxSize()) {
-                val y = size.height * .52f
-                drawLine(Green, Offset(20f, y), Offset(size.width - 20f, y), strokeWidth = 14f, cap = StrokeCap.Round)
-                drawLine(if (disrupted) Coral else Amber, Offset(size.width * .48f, y), Offset(size.width * .72f, y), strokeWidth = 14f, cap = StrokeCap.Round)
-                listOf(.08f, .48f, .72f, .92f).forEach { x ->
-                    drawCircle(Paper, 13f, Offset(size.width * x, y))
-                    drawCircle(Ink, 13f, Offset(size.width * x, y), style = Stroke(5f))
+                if (geographicRides.isNotEmpty()) {
+                    val latitudes = geographicRides.flatMap { listOf(it.fromLat, it.toLat) }
+                    val longitudes = geographicRides.flatMap { listOf(it.fromLon, it.toLon) }
+                    val minLat = latitudes.min(); val maxLat = latitudes.max()
+                    val minLon = longitudes.min(); val maxLon = longitudes.max()
+                    val latRange = (maxLat - minLat).coerceAtLeast(.0001)
+                    val lonRange = (maxLon - minLon).coerceAtLeast(.0001)
+                    val left = 18f; val right = size.width - 18f; val top = 72f; val bottom = size.height - 82f
+                    fun point(lat: Double, lon: Double) = Offset(
+                        left + (((lon - minLon) / lonRange).toFloat() * (right - left)),
+                        bottom - (((lat - minLat) / latRange).toFloat() * (bottom - top)),
+                    )
+                    (1..3).forEach { step ->
+                        val fraction = step / 4f
+                        drawLine(Muted.copy(alpha = .14f), Offset(left, top + (bottom - top) * fraction), Offset(right, top + (bottom - top) * fraction), strokeWidth = 2f)
+                        drawLine(Muted.copy(alpha = .14f), Offset(left + (right - left) * fraction, top), Offset(left + (right - left) * fraction, bottom), strokeWidth = 2f)
+                    }
+                    geographicRides.forEach { ride ->
+                        val color = when (ride.mode) { "metro" -> PurpleLine; "walk" -> Amber; else -> Green }
+                        val start = point(ride.fromLat, ride.fromLon); val end = point(ride.toLat, ride.toLon)
+                        drawLine(color, start, end, strokeWidth = if (ride.mode == "walk") 8f else 12f, cap = StrokeCap.Round)
+                        drawCircle(Paper, 9f, start); drawCircle(color, 9f, start, style = Stroke(4f))
+                        drawCircle(Paper, 9f, end); drawCircle(color, 9f, end, style = Stroke(4f))
+                    }
+                } else {
+                    val y = size.height * .52f
+                    drawLine(Green, Offset(20f, y), Offset(size.width - 20f, y), strokeWidth = 14f, cap = StrokeCap.Round)
+                    drawLine(if (disrupted) Coral else Amber, Offset(size.width * .48f, y), Offset(size.width * .72f, y), strokeWidth = 14f, cap = StrokeCap.Round)
+                    listOf(.08f, .48f, .72f, .92f).forEach { x ->
+                        drawCircle(Paper, 13f, Offset(size.width * x, y))
+                        drawCircle(Ink, 13f, Offset(size.width * x, y), style = Stroke(5f))
+                    }
                 }
             }
             Text(origin.take(18), Modifier.align(Alignment.BottomStart), color = Ink, fontWeight = FontWeight.Bold, fontSize = 12.sp)
             Text(destination.take(18), Modifier.align(Alignment.BottomEnd), color = Ink, fontWeight = FontWeight.Bold, fontSize = 12.sp)
-            Text(if (disrupted) "Schematic · recovery path" else "Native schematic · map key not required", Modifier.align(Alignment.TopStart), color = Muted, fontSize = 12.sp)
+            Text(
+                when { geographicRides.isNotEmpty() -> "Geographic fallback · straight stop-to-stop estimates"; disrupted -> "Schematic · recovery path"; else -> "Native schematic · map key not required" },
+                Modifier.align(Alignment.TopStart).semantics { contentDescription = if (geographicRides.isNotEmpty()) "Geographic route fallback using real stop coordinates and straight estimated segments" else "Route schematic" },
+                color = Muted,
+                fontSize = 12.sp,
+            )
         }
     }
 }

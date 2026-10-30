@@ -77,6 +77,12 @@ The stop API now accepts validated latitude/longitude input and returns up to 25
 
 On the physical Vivo V2513, the app displayed the Android precise/approximate permission dialog only after the nearby-stop action. Denial returned to a usable manual-search state. After permission was granted, the platform supplied a current fix with 70 m reported accuracy; no indexed stop was within five kilometres of that physical position, so the app displayed the supported-area fallback rather than fabricating a nearby result. This validates permission, fix acquisition, backend lookup, and the out-of-coverage state; it does not claim continuous tracking or broad geographic coverage.
 
+## Native geographic fallback verification
+
+Android now retains the latitude/longitude of every ride and transfer endpoint returned by the indexed journey API. The native fallback projects those real coordinates into a bounded local view, colours bus, Metro, and walking segments separately, and labels the result `straight stop-to-stop estimates`. It does not use road geometry, pedestrian paths, map tiles, or a live vehicle layer.
+
+Physical-device QA planned the real 08:00 Kempegowda Bus Station → Central Silk Board journey and rendered its St Josephs Indian School/Malya Hospital transfer at the corresponding projected coordinate. The coordinate-bearing journey was saved as storage schema version 2, the USB backend reverse was removed, and the app was force-stopped and relaunched. The same geographic fallback and both route legs restored with no reverse mapping present. The post-flow device log contained no NammaLink fatal exception or ANR.
+
 ## Operator schedule analysis
 
 The bounded fixture contains 53 scheduled trips across 216 referenced stops and 3 selected routes. Direction-aware median scheduled headways are 48 minutes for `O EXP V-213VJ` (32 trips), 50 minutes for `600-CA` (17 trips), and 32 minutes for `365-BB BSK-BNP-ANK` (4 trips). The displayed service spans are 05:30–21:35, 07:20–16:30, and 17:13–20:00 respectively.

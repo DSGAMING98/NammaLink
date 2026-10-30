@@ -10,6 +10,7 @@ Last updated: 30 October 2026
 | Next.js application | Implemented and tested | Next.js 16 App Router shell; unit tests, strict type-check, and production build pass |
 | GTFS normalization | Implemented and tested | Reproducible bounded fixture plus combined BMTC/BMRCL stop, calendar, connection, and footpath indexes |
 | Nearby-stop search | Implemented and physical-device validated | Bounded great-circle API lookup plus Android on-demand permission/fix flow; real Bengaluru positive results are API-tested, while the connected device correctly exercised the outside-five-kilometre fallback |
+| Native journey map | Implemented and physical-device validated fallback | Projects actual ride/walk endpoint coordinates with mode colours and transfer nodes; explicitly labelled straight stop-to-stop estimates, not street or pedestrian geometry |
 | Transit routing | Implemented and tested | Bounded schedule enumerator, Pareto pruning, and real central-demo integration tests pass |
 | Arrive-by and Journey Contract constraints | Implemented and tested | Deadline, safety buffer, walking, transfers, and five ranking preferences are enforced in pure TypeScript |
 | Journey API | Implemented and tested | Zod-validated POST endpoint returns source-labelled schedule results; API tests cover valid and invalid requests |
@@ -23,7 +24,7 @@ Last updated: 30 October 2026
 | Schedule-based ETA baseline | Implemented and tested | GTFS times plus explicit walking/waiting; every output labelled scheduled |
 | Full-network stop search | Implemented and tested | 10,043 searchable BMTC stops/BMRCL stations with mode and feed provenance |
 | Full-network schedule routing | Implemented and benchmarked | 1,563,324-connection calendar-filtered CSA; depart-after/arrive-by, bus, Metro, interchange, 670 transfer footpaths, hard walking budgets, and safest/fastest/direct behavior |
-| Native Android client | Implemented and physical-device validated | Compose APK, live autocomplete, permission-aware nearby-stop discovery, contract planning, full-network rendering, versioned full-itinerary local save/restore, explicit offline fallback; evidence under `research_outputs/device_evidence/` |
+| Native Android client | Implemented and physical-device validated | Compose APK, live autocomplete, permission-aware nearby-stop discovery, contract planning, geographic fallback, full-network rendering, coordinate-preserving offline save/restore, explicit bounded fallback; evidence under `research_outputs/device_evidence/` |
 | APK distribution | Development preview available | Website serves a checksum-labelled debug-signed APK; production signing remains incomplete |
 | Low-connectivity mode | Partially implemented | Android full-itinerary restoration passed with the backend tunnel removed; web connection status, local report queue, manifest, and service-worker shell cache remain, but web app-shell offline reload is not device-verified |
 | Operator insights | Implemented and tested | Web and native views report full-feed totals plus top-eight scheduled route trip counts; bounded-fixture headways remain separately labelled; explicitly not ridership, punctuality, occupancy, revenue, or actual utilization |

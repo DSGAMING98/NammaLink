@@ -4,15 +4,15 @@ Updated: 30 October 2026
 
 ## Current phase
 
-Phase 20 — Permission-aware nearby-stop discovery.
+Phase 21 — Real-coordinate native geographic fallback.
 
 ## Last completed task
 
-Added validated geospatial stop lookup and a native on-demand location permission/fix flow, then physically verified the Android permission dialog, denial fallback, real device fix, outside-coverage response, and clean logs.
+Preserved real journey endpoint coordinates through Android parsing and versioned offline storage, rendered an honestly labelled geographic fallback, and physically verified online planning plus force-stop offline restoration.
 
 ## Last verified working commit
 
-Permission-aware nearby-stop discovery milestone: `a02fdc3` on `main`, verified by GitHub Actions run `41049023651`.
+Permission-aware nearby-stop discovery milestone: `a02fdc3` on `main`, verified by GitHub Actions run `41049023651`. The Phase 21 geographic fallback is under verification and will replace this line after CI passes.
 
 ## Current branch
 
@@ -31,6 +31,7 @@ Permission-aware nearby-stop discovery milestone: `a02fdc3` on `main`, verified 
 - Native constraint planner, GTFS-derived demonstration itinerary, schematic route view, versioned full-itinerary local save/restore, explicit simulated disruption/recovery, and full-feed operator screen.
 - Physical Android 16 installation and UI-hierarchy validation on Vivo V2513.
 - Android on-demand precise/approximate location permission, current-fix acquisition, distance-ranked nearby-stop lookup, denial-safe manual search, and outside-feed fallback.
+- Native geographic projection from real boarding/transfer/alighting coordinates with bus/Metro/walk colours and explicit straight-line limitations.
 - Device screenshots under `research_outputs/device_evidence/`.
 - Machine-readable zero-model registry and professional ML artifact/evidence policy in `docs/ML_TRAINING_REPORT.md`.
 - Operator UI explicitly reports zero trained ML models instead of fabricating evaluation metrics.
@@ -75,7 +76,7 @@ Arbitrary place search/maps, coordinate-based access/egress, pedestrian-network 
 - Updated Android `:app:assembleDebug`: passed with the stop-search and network-journey client.
 - `adb reverse tcp:3000 tcp:3000`: configured successfully; updated APK streamed install passed.
 - Production website APK check: HTTP 200, `application/vnd.android.package-archive`, 17,150,016-byte content length, visible debug-signing label.
-- Current location-enabled development APK SHA-256: `4C256ABB4B19E37138B3BCC95055C6ABC34490101D1E7C889C7FDAC2BBCE05F0` (17,150,016 bytes).
+- Current geographic-fallback development APK SHA-256: `CBB11CF8A83A8F48D46FE2E9D2595E6B7577DBE5E8C19F57686C4022C9DF1984` (17,150,016 bytes).
 - Operator graph production HTML: passed for all full-feed totals, rejection count, and zero-model label.
 - Operator graph visual QA: passed in the in-app browser at desktop and 390×844 mobile viewport; cards, bars, disclaimers, and following download section rendered without observed overflow.
 - CI command parity check: frozen pnpm install, 36 tests, strict type-check, production web build, and native Android debug build passed locally before workflow push.
@@ -109,6 +110,7 @@ Arbitrary place search/maps, coordinate-based access/egress, pedestrian-network 
 - Physical Android location flow: system permission dialog rendered, denial retained manual search, permission grant produced a 70 m reported-accuracy fix, and the outside-five-kilometre state rendered without inventing stop coverage; fatal/ANR scan clean.
 - GitHub Actions run [`41049023651`](https://github.com/DSGAMING98/NammaLink/actions/runs/41049023651): all 45 tests, strict type-check, production web build, native APK build, checksum recording, and artifact upload passed for `a02fdc3`.
 - CI Android artifact `NammaLink-android-debug-a02fdc3fb1801a767bb4368512a0f7292074c87c` (`12973302879`): 9,970,818-byte ZIP retained until 13 November 2026; GitHub artifact digest `sha256:110e0e34672b730282807126075a5d170dbbe6905e96aa0607a7bba8368b7617`.
+- Physical geographic fallback: real 08:00–08:50 route endpoints and transfer projected cleanly; coordinate-bearing storage version 2 restored the same map and both route legs after backend reverse removal plus force-stop/relaunch; fatal/ANR scan clean.
 
 ## Dataset and ML limitations
 
@@ -127,7 +129,7 @@ Arbitrary place search/maps, coordinate-based access/egress, pedestrian-network 
 
 ## Known bugs and coverage gaps
 
-- The native route graphic is a schematic, not yet a geographic map with real stop coordinates or pedestrian geometry.
+- The native fallback uses real stop coordinates but still lacks street-following transit shapes, pedestrian geometry, map tiles, pan/zoom, and current-location overlay.
 - Nearby discovery selects an indexed boarding stop but does not yet add the device-to-stop access distance to the journey contract's transfer-walking total.
 - The connected phone's physical location was outside the five-kilometre indexed-stop radius, so the positive nearby-result UI is API-tested but not physically exercised at an in-coverage location.
 - Full-network planning requires a reachable backend unless an already-saved journey or the explicit bounded offline demonstration is used.
@@ -138,11 +140,11 @@ No public deployment is claimed. The production Next.js build and local producti
 
 ## Uncommitted work
 
-None. Phase 20 source, tests, APK, documentation, and device evidence are committed and pushed; the checkpoint closure is documentation-only.
+Phase 21 source, APK, documentation, and device evidence are being committed as one verified milestone. After CI closure, the working tree must be clean.
 
 ## Exact next implementation step
 
-Implement a clearly labelled geographic route fallback from real stop coordinates—without claiming street-following geometry—then validate it on the physical device. Public deployment and release signing remain the next owner-dependent production steps once account and keystore access are available.
+Add a privacy-aware current-location marker and a clear bus/Metro/walk legend to the geographic fallback, then verify a multimodal route on the physical device. Public deployment and release signing remain owner-dependent production steps once account and keystore access are available.
 
 ## Restore commands
 

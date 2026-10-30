@@ -8,11 +8,17 @@ import org.json.JSONArray
 import org.json.JSONObject
 
 data class StopOption(val id: String, val name: String, val lat: Double, val lon: Double, val agency: String = "BMTC", val mode: String = "bus", val distanceMeters: Int? = null)
-data class NetworkRide(val route: String, val agency: String, val mode: String, val headsign: String, val from: String, val to: String, val departure: String, val arrival: String, val stopCount: Int, val distanceMeters: Int)
+data class NetworkRide(
+    val route: String, val agency: String, val mode: String, val headsign: String,
+    val from: String, val to: String, val departure: String, val arrival: String,
+    val stopCount: Int, val distanceMeters: Int,
+    val fromLat: Double = Double.NaN, val fromLon: Double = Double.NaN,
+    val toLat: Double = Double.NaN, val toLon: Double = Double.NaN,
+)
 data class NetworkJourney(val origin: String, val destination: String, val departure: String, val arrival: String, val transfers: Int, val walkingMeters: Int, val timeMode: String, val requestedTime: String, val latestStart: String, val deadlineMet: Boolean, val priority: String, val maximumWalkingMeters: Int, val rides: List<NetworkRide>, val queryMilliseconds: Double)
 
 fun NetworkJourney.encodeForStorage(): String = JSONObject().apply {
-    put("version", 1)
+    put("version", 2)
     put("origin", origin)
     put("destination", destination)
     put("departure", departure)
@@ -32,6 +38,10 @@ fun NetworkJourney.encodeForStorage(): String = JSONObject().apply {
                 put("route", ride.route); put("agency", ride.agency); put("mode", ride.mode); put("headsign", ride.headsign)
                 put("from", ride.from); put("to", ride.to); put("departure", ride.departure); put("arrival", ride.arrival)
                 put("stopCount", ride.stopCount); put("distanceMeters", ride.distanceMeters)
+                put("fromLat", ride.fromLat.takeIf { it.isFinite() } ?: JSONObject.NULL)
+                put("fromLon", ride.fromLon.takeIf { it.isFinite() } ?: JSONObject.NULL)
+                put("toLat", ride.toLat.takeIf { it.isFinite() } ?: JSONObject.NULL)
+                put("toLon", ride.toLon.takeIf { it.isFinite() } ?: JSONObject.NULL)
             })
         }
     })
@@ -39,7 +49,7 @@ fun NetworkJourney.encodeForStorage(): String = JSONObject().apply {
 
 fun decodeStoredJourney(value: String?): NetworkJourney? = runCatching {
     val json = JSONObject(value ?: error("Missing journey"))
-    if (json.getInt("version") != 1) error("Unsupported saved journey")
+    if (json.getInt("version") !in 1..2) error("Unsupported saved journey")
     val ridesJson = json.getJSONArray("rides")
     NetworkJourney(
         origin = json.getString("origin"), destination = json.getString("destination"), departure = json.getString("departure"), arrival = json.getString("arrival"),
@@ -47,7 +57,13 @@ fun decodeStoredJourney(value: String?): NetworkJourney? = runCatching {
         latestStart = json.getString("latestStart"), deadlineMet = json.getBoolean("deadlineMet"), priority = json.getString("priority"), maximumWalkingMeters = json.getInt("maximumWalkingMeters"),
         rides = List(ridesJson.length()) { index ->
             val ride = ridesJson.getJSONObject(index)
-            NetworkRide(ride.getString("route"), ride.getString("agency"), ride.getString("mode"), ride.getString("headsign"), ride.getString("from"), ride.getString("to"), ride.getString("departure"), ride.getString("arrival"), ride.getInt("stopCount"), ride.getInt("distanceMeters"))
+            NetworkRide(
+                route = ride.getString("route"), agency = ride.getString("agency"), mode = ride.getString("mode"), headsign = ride.getString("headsign"),
+                from = ride.getString("from"), to = ride.getString("to"), departure = ride.getString("departure"), arrival = ride.getString("arrival"),
+                stopCount = ride.getInt("stopCount"), distanceMeters = ride.getInt("distanceMeters"),
+                fromLat = ride.optDouble("fromLat", Double.NaN), fromLon = ride.optDouble("fromLon", Double.NaN),
+                toLat = ride.optDouble("toLat", Double.NaN), toLon = ride.optDouble("toLon", Double.NaN),
+            )
         },
         queryMilliseconds = json.getDouble("queryMilliseconds"),
     )
@@ -104,17 +120,23 @@ fun planNetworkJourney(origin: StopOption, destination: StopOption, serviceDate:
     val ridesJson = journey.getJSONArray("rides")
     val rides = List(ridesJson.length()) { index ->
         val ride = ridesJson.getJSONObject(index)
+        val fromStop = ride.getJSONObject("from")
+        val toStop = ride.getJSONObject("to")
         NetworkRide(
             route = ride.getString("route"),
             agency = ride.optString("agency", "BMTC"),
             mode = ride.optString("mode", "bus"),
             headsign = ride.optString("headsign"),
-            from = ride.getJSONObject("from").getString("name"),
-            to = ride.getJSONObject("to").getString("name"),
+            from = fromStop.getString("name"),
+            to = toStop.getString("name"),
             departure = ride.getString("departure"),
             arrival = ride.getString("arrival"),
             stopCount = ride.getInt("stopCount"),
             distanceMeters = ride.optInt("distanceMeters", 0),
+            fromLat = fromStop.getDouble("lat"),
+            fromLon = fromStop.getDouble("lon"),
+            toLat = toStop.getDouble("lat"),
+            toLon = toStop.getDouble("lon"),
         )
     }
     return NetworkJourney(

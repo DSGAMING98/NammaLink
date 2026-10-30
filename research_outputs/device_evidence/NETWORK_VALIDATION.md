@@ -68,3 +68,11 @@ The post-flow device log scan matched no `FATAL EXCEPTION`, NammaLink ANR, or An
 - Granted the permissions for the positive platform-fix path. The app acquired a device location with 70 m reported accuracy and queried the indexed stop API.
 - The physical position was outside the five-kilometre feed radius, so the app honestly displayed the no-covered-stop fallback. A real-index API test separately verifies ordered, distance-labelled nearby results around Kempegowda Bus Station.
 - Evidence: `location-permission.png`/`.xml`, `location-denied.xml`, and `location-nearby-5km.png`/`.xml`; the post-flow fatal/ANR scan was clean.
+
+## Real-coordinate geographic fallback
+
+- Planned the real 08:00 Kempegowda Bus Station → Central Silk Board two-leg journey after installing the coordinate-enabled APK.
+- Verified a geographic projection from the actual origin, St Josephs Indian School/Malya Hospital transfer, and destination coordinates, with the disclosure `straight stop-to-stop estimates` visible above the plot.
+- Saved the journey into coordinate-bearing storage schema version 2, removed the USB backend reverse, force-stopped and relaunched the app, then reopened Journey with no reverse mapping present.
+- Verified the same map, routes, transfer node, and `restored offline` state after relaunch. This is a functional geographic fallback, not road/pedestrian geometry or live vehicle tracking.
+- Evidence: `geographic-map.png`/`.xml` and `geographic-map-offline.png`/`.xml`; the post-flow fatal/ANR scan was clean.
