@@ -12,7 +12,7 @@ Integrated BMRCL into the production stop/index pipeline, added GTFS calendar fi
 
 ## Last verified working commit
 
-Connected bus-routing milestone: `e03879a` on `main`. The current multimodal extension is locally test/build/device verified and awaits its Git checkpoint.
+Calendar-aware bus + Metro milestone: `0cfa474` on `main`, verified by GitHub Actions run `41036767610`.
 
 ## Completed features
 
@@ -86,6 +86,7 @@ Arbitrary place search/maps, coordinate-based access/egress, pedestrian-network 
 - Physical mixed journey: 14th Main HSR Layout 08:02 → Whitefield Metro 09:15 using `V-500E ELCKIA-HBLB`, `500-F`, a 128 m estimated walk, and Purple Line; 48 ms measured scan.
 - Updated APK streamed installation and mixed-mode UI hierarchy passed; post-flow fatal/ANR scan remained clean.
 - Reproducibility rerun produced byte-identical artifacts: stop index SHA-256 `4A76778C271D7084BBA69910E861F3AFABD9E9992D6521D6A94C77F9FA260FE8`, metadata `6A1C0214E3E1317A55EE69FE1BD7879D4196758C993A7C86D270935E00306CB1`, and binary gzip `8261A316CA1C358343658908A1C5A957477A82A9548571F9B1020A318049EB42`.
+- GitHub Actions run `41036767610`: web/routing/data tests, strict type-check, production build, native APK build, checksum recording, and artifact upload all passed; artifact `12968352261` is retained for 14 days.
 
 ## Dataset and ML limitations
 
