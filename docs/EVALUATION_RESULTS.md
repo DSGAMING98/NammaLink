@@ -103,6 +103,12 @@ Android now runs the same origin, destination, time mode, and walking cap throug
 
 The selected safest itinerary rendered its 08:09–08:15 connection as an explicit `Wait 6 min` step at St Josephs Indian School/Malya Hospital. Storage schema version 4 preserved all three comparison rows and the wait step after save, backend disconnection, force-stop, and relaunch. Infeasible contract searches are omitted rather than synthesized.
 
+## Selectable alternative and offline switching evidence
+
+On the physical device, tapping the Direct comparison row replaced the complete result with the real `348-C` itinerary: 09:55 boarding, 10:42 arrival, zero transfers, 162 minutes door-to-arrival, and an explicit 115-minute scheduled wait before departure. The selected marker and recommendation changed to Direct without returning to the planner or issuing another request.
+
+The direct result and every returned alternative were saved with storage schema version 5. After removing the backend reverse mapping, force-stopping, and relaunching, the direct result restored offline. Tapping Safest then switched offline to the complete 08:00–08:50 two-leg itinerary with one transfer and six minutes of scheduled waiting. The device log remained free of fatal exceptions and ANRs.
+
 ## Operator schedule analysis
 
 The bounded fixture contains 53 scheduled trips across 216 referenced stops and 3 selected routes. Direction-aware median scheduled headways are 48 minutes for `O EXP V-213VJ` (32 trips), 50 minutes for `600-CA` (17 trips), and 32 minutes for `365-BB BSK-BNP-ANK` (4 trips). The displayed service spans are 05:30–21:35, 07:20–16:30, and 17:13–20:00 respectively.

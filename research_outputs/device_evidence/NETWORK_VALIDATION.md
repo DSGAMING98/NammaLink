@@ -104,3 +104,10 @@ The post-flow device log scan matched no `FATAL EXCEPTION`, NammaLink ANR, or An
 - Verified the selected itinerary's explicit `08:09`, `Wait 6 min`, `Board 08:15` connection step at St Josephs Indian School/Malya Hospital.
 - Saved storage schema version 4, removed the backend reverse, force-stopped/relaunched, and verified every comparison row with `restored offline`.
 - Evidence: `phase25-comparison.png`/`.xml`, `phase25-wait-leg.png`/`.xml`, and `phase25-comparison-offline.png`/`.xml`; the post-flow fatal/ANR scan was clean.
+
+## Selectable alternatives and offline switching
+
+- Tapped the Direct comparison row and verified the complete result changed to route `348-C`, 09:55–10:42, zero transfers, 162 minutes total, and an explicit 115-minute wait from the 08:00 request.
+- Saved schema version 5 with the direct journey selected, removed the backend reverse, force-stopped/relaunched, and verified Direct restored offline.
+- Tapped Safest while still offline and verified the complete result switched to the 08:00–08:50, one-transfer, six-minute-wait itinerary without a backend request.
+- Evidence: `phase26-direct-selected.png`/`.xml`, `phase26-direct-itinerary.xml`, `phase26-direct-offline.xml`, and `phase26-safest-offline-switch.png`/`.xml`; the post-flow fatal/ANR scan was clean.

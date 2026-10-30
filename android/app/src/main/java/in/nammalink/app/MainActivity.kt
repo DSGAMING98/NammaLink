@@ -126,6 +126,7 @@ private fun NammaLinkApp() {
                             deviceLocation = deviceLocation,
                             saved = saved,
                             restoredOffline = restoredOffline,
+                            onSelectAlternative = { journey -> networkJourney = journey; saved = false },
                             onSave = {
                                 if (networkJourney != null) {
                                     if (saved) journeyPreferences.edit().remove("saved_network_journey").apply()
@@ -292,7 +293,7 @@ private fun StopSuggestions(stops: List<StopOption>, onSelect: (StopOption) -> U
 }
 
 @Composable
-private fun JourneyScreen(networkJourney: NetworkJourney?, deviceLocation: DeviceLocation?, saved: Boolean, restoredOffline: Boolean, onSave: () -> Unit) {
+private fun JourneyScreen(networkJourney: NetworkJourney?, deviceLocation: DeviceLocation?, saved: Boolean, restoredOffline: Boolean, onSelectAlternative: (NetworkJourney) -> Unit, onSave: () -> Unit) {
     var disrupted by rememberSaveable { mutableStateOf(false) }
     if (networkJourney != null) {
         Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
@@ -316,10 +317,16 @@ private fun JourneyScreen(networkJourney: NetworkJourney?, deviceLocation: Devic
                             Text("Contract comparison", fontWeight = FontWeight.Bold, color = Ink)
                             networkJourney.alternatives.forEach { alternative ->
                                 val selectedLabel = if (alternative.priority == networkJourney.priority) " · selected" else ""
-                                Text("${alternative.priority.replaceFirstChar { it.uppercase() }}$selectedLabel", fontWeight = FontWeight.SemiBold, color = if (alternative.priority == networkJourney.priority) Green else Ink)
-                                Text("${alternative.departure}–${alternative.arrival} · ${alternative.durationMinutes} min · ${alternative.scheduledWaitingMinutes} min wait · ${alternative.transfers} change${if (alternative.transfers == 1) "" else "s"} · ${alternative.walkingMeters} m walk", color = Muted, fontSize = 12.sp)
+                                Column(
+                                    Modifier.fillMaxWidth().clickable(enabled = alternative.journey != null && alternative.priority != networkJourney.priority) {
+                                        alternative.journey?.let { onSelectAlternative(it.copy(alternatives = networkJourney.alternatives)) }
+                                    }.padding(vertical = 4.dp)
+                                ) {
+                                    Text("${alternative.priority.replaceFirstChar { it.uppercase() }}$selectedLabel", fontWeight = FontWeight.SemiBold, color = if (alternative.priority == networkJourney.priority) Green else Ink)
+                                    Text("${alternative.departure}–${alternative.arrival} · ${alternative.durationMinutes} min · ${alternative.scheduledWaitingMinutes} min wait · ${alternative.transfers} change${if (alternative.transfers == 1) "" else "s"} · ${alternative.walkingMeters} m walk", color = Muted, fontSize = 12.sp)
+                                }
                             }
-                            Text("Only successfully returned results from the same indexed timetable and walking limit are shown.", color = Muted, fontSize = 11.sp)
+                            Text("Tap a returned contract to show its complete itinerary. Every row uses the same indexed timetable and walking limit.", color = Muted, fontSize = 11.sp)
                         }
                     }
                 }

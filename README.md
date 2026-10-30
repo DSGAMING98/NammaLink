@@ -39,6 +39,7 @@
 - Door-to-stop access walking integrated into departure time and the same hard walking budget when a nearby origin is selected.
 - Full-network Android results show timetable-derived total duration and scheduled waiting, plus contract-specific recommendation reasons that survive offline save/restore.
 - Feasible safest/fastest/direct results are compared using real door-to-arrival duration, scheduled waiting, changes, and walking; connection waits appear as explicit itinerary steps.
+- Comparison rows switch the complete itinerary immediately, and storage schema version 5 keeps every returned alternative usable offline.
 - Native geographic route fallback projected from real stop coordinates, with a bus/Metro/walk legend, session-only current-fix handling, explicit straight-line limits, and offline persistence.
 
 ## Native Android app

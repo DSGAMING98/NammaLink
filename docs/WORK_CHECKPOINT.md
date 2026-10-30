@@ -4,11 +4,11 @@ Updated: 30 October 2026
 
 ## Current phase
 
-Phase 25 — Contract comparison and explicit connection waits.
+Phase 26 — Selectable alternatives and Round 3 handoff.
 
 ## Last completed task
 
-Added real safest/fastest/direct comparison searches, door-to-arrival duration that includes initial wait, explicit connection-wait itinerary steps, schema-version-4 persistence, and physical-device evidence.
+Made returned contract comparisons selectable as complete itineraries, added schema-version-5 offline alternative persistence, verified online Direct selection and offline switching back to Safest, and froze feature expansion for the Round 3 handoff.
 
 ## Last verified working commit
 
@@ -36,6 +36,7 @@ Contract-comparison milestone: `d9e27c2` on `main`, verified by GitHub Actions r
 - Optional current-location access leg with budget reservation, door-time calculation, and evidence-backed over-budget rejection.
 - Timetable-derived duration/waiting and safest/fastest/direct recommendation reasoning, with an explicit static-schedule evidence boundary and offline persistence.
 - Feasible same-request contract comparison with actual duration, waiting, changes, and walking plus leg-level scheduled-wait cards.
+- Selectable full-itinerary alternatives that remain switchable after save, backend disconnection, force-stop, and relaunch.
 - Device screenshots under `research_outputs/device_evidence/`.
 - Machine-readable zero-model registry and professional ML artifact/evidence policy in `docs/ML_TRAINING_REPORT.md`.
 - Operator UI explicitly reports zero trained ML models instead of fabricating evaluation metrics.
@@ -80,7 +81,7 @@ Arbitrary place search/maps, coordinate-based access/egress, pedestrian-network 
 - Updated Android `:app:assembleDebug`: passed with the stop-search and network-journey client.
 - `adb reverse tcp:3000 tcp:3000`: configured successfully; updated APK streamed install passed.
 - Production website APK check: HTTP 200, `application/vnd.android.package-archive`, 17,150,016-byte content length, visible debug-signing label.
-- Current contract-comparison development APK SHA-256: `CAF0B8C9967C8CF2107B38AAB7ACBCACB67D5CCEC3FD1C9733D1D694DC1625CA` (17,150,016 bytes).
+- Current Round 3 development APK SHA-256: `EBFA83535D5471B8BCB91EC484E7AFB8FC6574A14181C24307B09B735228EEB8` (17,150,016 bytes).
 - Operator graph production HTML: passed for all full-feed totals, rejection count, and zero-model label.
 - Operator graph visual QA: passed in the in-app browser at desktop and 390×844 mobile viewport; cards, bars, disclaimers, and following download section rendered without observed overflow.
 - CI command parity check: frozen pnpm install, 36 tests, strict type-check, production web build, and native Android debug build passed locally before workflow push.
@@ -131,6 +132,7 @@ Arbitrary place search/maps, coordinate-based access/egress, pedestrian-network 
 - Recommendation API smoke: default safest journey returned 3,000 seconds total duration and 360 seconds scheduled waiting; a fastest Metro journey returned 4,800 seconds total duration and zero scheduled waiting.
 - Physical recommendation result: `50 min journey · 6 min scheduled waiting`, protected-transfer title, three-minute transfer rule, walking-cap evidence, and non-live disclaimer rendered; schema-version-3 offline restoration retained every field after backend removal; fatal/ANR scan clean.
 - Physical contract comparison: safest and fastest were identical 08:00–08:50 results; direct was honestly shown as 08:00–10:42 with 162 minutes total and 115 minutes waiting; the selected itinerary exposed its 08:09–08:15 connection wait; schema-version-4 offline restoration retained the comparison; fatal/ANR scan clean.
+- Physical selectable alternatives: Direct switched to the full `348-C` result and explicit 115-minute initial wait; schema-version-5 restored Direct with the backend disconnected, then switched offline to the complete Safest itinerary; fatal/ANR scan clean.
 
 ## Dataset and ML limitations
 
@@ -160,11 +162,11 @@ No public deployment is claimed. The production Next.js build and local producti
 
 ## Uncommitted work
 
-None. Phase 25 source, APK, documentation, and device evidence are committed and its GitHub Actions verification is closed successfully.
+Phase 26 source, APK, documentation, and device evidence are ready for the final commit and CI verification.
 
 ## Exact next implementation step
 
-Make feasible comparison rows selectable so a passenger can switch to that contract's complete itinerary without returning to the planner. Public deployment and release signing remain owner-dependent production steps once account and keystore access are available.
+Round 3 handoff: do not begin another feature phase before the 18:00 review. Demonstrate the installed APK, contract comparison, explicit waits, selectable offline alternatives, operator evidence, and documented limitations. Public deployment and release signing remain owner-dependent.
 
 ## Restore commands
 

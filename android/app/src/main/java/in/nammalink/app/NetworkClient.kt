@@ -15,7 +15,7 @@ data class NetworkRide(
     val fromLat: Double = Double.NaN, val fromLon: Double = Double.NaN,
     val toLat: Double = Double.NaN, val toLon: Double = Double.NaN,
 )
-data class ContractAlternative(val priority: String, val departure: String, val arrival: String, val durationMinutes: Int, val scheduledWaitingMinutes: Int, val transfers: Int, val walkingMeters: Int)
+data class ContractAlternative(val priority: String, val departure: String, val arrival: String, val durationMinutes: Int, val scheduledWaitingMinutes: Int, val transfers: Int, val walkingMeters: Int, val journey: NetworkJourney? = null)
 data class NetworkJourney(val origin: String, val destination: String, val departure: String, val arrival: String, val transfers: Int, val walkingMeters: Int, val timeMode: String, val requestedTime: String, val latestStart: String, val deadlineMet: Boolean, val priority: String, val maximumWalkingMeters: Int, val rides: List<NetworkRide>, val queryMilliseconds: Double, val durationMinutes: Int = 0, val scheduledWaitingMinutes: Int = 0, val recommendationTitle: String = "Schedule recommendation", val recommendationReasons: List<String> = emptyList(), val alternatives: List<ContractAlternative> = emptyList())
 
 private fun serviceMinute(value: String): Int? {
@@ -48,7 +48,7 @@ fun NetworkJourney.waitBeforeRideMinutes(index: Int): Int {
 }
 
 fun NetworkJourney.encodeForStorage(): String = JSONObject().apply {
-    put("version", 4)
+    put("version", 5)
     put("origin", origin)
     put("destination", destination)
     put("departure", departure)
@@ -72,6 +72,7 @@ fun NetworkJourney.encodeForStorage(): String = JSONObject().apply {
                 put("priority", alternative.priority); put("departure", alternative.departure); put("arrival", alternative.arrival)
                 put("durationMinutes", alternative.durationMinutes); put("scheduledWaitingMinutes", alternative.scheduledWaitingMinutes)
                 put("transfers", alternative.transfers); put("walkingMeters", alternative.walkingMeters)
+                alternative.journey?.let { put("journey", JSONObject(it.copy(alternatives = emptyList()).encodeForStorage())) }
             })
         }
     })
@@ -92,7 +93,7 @@ fun NetworkJourney.encodeForStorage(): String = JSONObject().apply {
 
 fun decodeStoredJourney(value: String?): NetworkJourney? = runCatching {
     val json = JSONObject(value ?: error("Missing journey"))
-    if (json.getInt("version") !in 1..4) error("Unsupported saved journey")
+    if (json.getInt("version") !in 1..5) error("Unsupported saved journey")
     val ridesJson = json.getJSONArray("rides")
     val rides = List(ridesJson.length()) { index ->
         val ride = ridesJson.getJSONObject(index)
@@ -128,6 +129,7 @@ fun decodeStoredJourney(value: String?): NetworkJourney? = runCatching {
                 priority = alternative.getString("priority"), departure = alternative.getString("departure"), arrival = alternative.getString("arrival"),
                 durationMinutes = alternative.getInt("durationMinutes"), scheduledWaitingMinutes = alternative.getInt("scheduledWaitingMinutes"),
                 transfers = alternative.getInt("transfers"), walkingMeters = alternative.getInt("walkingMeters"),
+                journey = alternative.optJSONObject("journey")?.let { decodeStoredJourney(it.toString()) },
             ) }
         } } ?: emptyList(),
     )
@@ -250,7 +252,7 @@ fun planNetworkJourney(origin: StopOption, destination: StopOption, serviceDate:
         }
     }
     val alternatives = listOf("safest", "fastest", "direct").mapNotNull { candidate -> journeysByPriority[candidate]?.let { journey ->
-        ContractAlternative(candidate, if (journey.timeMode == "departAfter") journey.requestedTime else journey.latestStart, journey.arrival, journey.durationMinutes, journey.scheduledWaitingMinutes, journey.transfers, journey.walkingMeters)
+        ContractAlternative(candidate, if (journey.timeMode == "departAfter") journey.requestedTime else journey.latestStart, journey.arrival, journey.durationMinutes, journey.scheduledWaitingMinutes, journey.transfers, journey.walkingMeters, journey.copy(alternatives = emptyList()))
     } }
     return selected.copy(alternatives = alternatives)
 }
