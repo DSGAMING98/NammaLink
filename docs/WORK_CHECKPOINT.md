@@ -12,7 +12,7 @@ Integrated current-location access walking into the door departure and hard walk
 
 ## Last verified working commit
 
-Multimodal map-context milestone: `5469f7e` on `main`, verified by GitHub Actions run `41050897769`. The Phase 23 access-contract milestone is under verification and will replace this line after CI passes.
+Door-to-stop access-contract milestone: `ff54502` on `main`, verified by GitHub Actions run `41051675350`.
 
 ## Current branch
 
@@ -118,6 +118,8 @@ Arbitrary place search/maps, coordinate-based access/egress, pedestrian-network 
 - Physical multimodal map: two BMTC legs, a 128 m estimated walk, and Purple Line rendered with consistent green/amber/purple map and timeline colours; current fix outside the route was disclosed as session-only; scroll state opened at the journey header; fatal/ANR scan clean.
 - GitHub Actions run [`41050897769`](https://github.com/DSGAMING98/NammaLink/actions/runs/41050897769): all 45 tests, strict type-check, production web build, native APK build, checksum recording, and artifact upload passed for `5469f7e`.
 - CI Android artifact `NammaLink-android-debug-5469f7e0c4ffa6689cedbe86e6d59afa15e66090` (`12975130370`): 9,983,918-byte ZIP retained until 13 November 2026; GitHub artifact digest `sha256:6e20c4157a4c3764c248e40ac85c99a834cb274166d04c8e5b912b8808d486e2`.
+- GitHub Actions run [`41051675350`](https://github.com/DSGAMING98/NammaLink/actions/runs/41051675350): all 47 tests, strict type-check, production web build, native APK build, checksum recording, and artifact upload passed for `ff54502`.
+- CI Android artifact `NammaLink-android-debug-ff54502bce82a3b8c50d3f8dc488280b30393cac` (`12974733008`): 9,985,170-byte ZIP retained until 13 November 2026; GitHub artifact digest `sha256:9cf172d1c3d5f34ed1b6dc8addf1dea8b070c74fd27a0dae02bdff10c4a47419`.
 - Access-contract API smoke: 116 m access under an 800 m maximum left 684 m, separated door/stop/boarding times, and a 2,447 m access under a 100 m maximum returned no journey with explicit evidence.
 - Physical manual-stop regression: unchanged `0/800 m walk`, no injected current-location leg, updated APK install successful, and fatal/ANR scan clean.
 
@@ -149,7 +151,7 @@ No public deployment is claimed. The production Next.js build and local producti
 
 ## Uncommitted work
 
-Phase 23 source, tests, APK, documentation, and device evidence are being committed as one verified milestone. After CI closure, the working tree must be clean.
+None. Phase 23 source, tests, APK, documentation, and device evidence are committed and its GitHub Actions verification is closed successfully.
 
 ## Exact next implementation step
 
