@@ -1,6 +1,18 @@
 # Routing and optimization algorithms
 
-Last updated: 29 October 2026
+Last updated: 30 October 2026
+
+## Full-network Connection Scan
+
+The city-scale schedule endpoint now uses a preprocessed Connection Scan Algorithm index containing 1,477,697 time-sorted adjacent-stop connections from 57,836 BMTC trips and 9,960 stops. The 29.55 MB binary table is stored as a 13.60 MB gzip artifact and loaded once per server process.
+
+Preprocessing rejects non-positive travel durations and inter-stop movements above 25 m/s (90 km/h). Exactly 5,153 of the source feed's 1,482,850 candidate connections are excluded by this deterministic plausibility gate. This protects routing from known coordinate/time defects without presenting the filter as observed operations data.
+
+At query time the scan maintains earliest stop arrivals, trip reachability, and connection-level predecessors. A passenger can remain aboard without a transfer penalty; boarding a different trip requires 180 seconds. Connection-level reconstruction is essential: it returns the exact feasible boarding chain rather than combining unrelated earliest-arrival labels.
+
+The production API is `GET /api/network-journeys` with stop IDs, service date, and `departAfter=HH:MM`. Dates outside the static feed's published 2026-09-07–2027-09-07 window return HTTP 422. Results include feed provenance, index counts, filter statistics, query time, and `realtime: false`.
+
+On the verified development machine, repeated warm Kempegowda Bus Station → Central Silk Board scans completed in 205–256 ms. The verified 08:00 result arrives at 08:50 with one six-minute transfer. Cold decompression is slower and is reported separately by the API timer.
 
 ## Implemented schedule router
 
@@ -37,7 +49,7 @@ This verifies dataset-supported timetable connectivity, not real-world operation
 
 The bounded enumerator is appropriate for the 53-trip demonstration fixture and completes the current test suite in well under one second. It caps explored boardings and reports when truncation occurs. It is not intended to enumerate the entire 57,836-trip feed in a request path.
 
-The next scale step is a preprocessed Connection Scan Algorithm or RAPTOR implementation with spatial indexing and date-specific service materialization. The current pure functions and domain types provide a correctness oracle for that migration.
+The remaining scale steps are spatial access/egress footpaths, explicit station transfers, multi-criteria rounds, service-exception materialization when feeds include it, and request-level scan budgets. The bounded router remains a correctness oracle for hard walking/deadline constraints that the full-network endpoint does not yet implement.
 
 ## Evidence-aware disruption and recovery
 

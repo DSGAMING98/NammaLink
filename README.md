@@ -31,6 +31,7 @@
 - Responsive browser-verified interface.
 - Native Kotlin/Jetpack Compose Android app built, installed, and flow-tested on a physical Android 16 phone.
 - Reproducible 9,960-stop BMTC index and provenance-labelled `/api/stops` search for arbitrary feed-supported stop selection.
+- Full-feed Connection Scan endpoint covering 57,836 trips and 1,477,697 plausibility-filtered scheduled connections.
 
 ## Native Android app
 

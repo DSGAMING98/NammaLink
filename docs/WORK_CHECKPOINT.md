@@ -4,15 +4,15 @@ Updated: 30 October 2026
 
 ## Current phase
 
-Phase 11 — Native Android MVP and physical-device validation.
+Phase 12 — Full-network schedule routing and native integration.
 
 ## Last completed task
 
-Built the first genuine Kotlin/Jetpack Compose Android APK, installed it on an authorized Vivo Android 16 phone, and verified planner, journey, persistence, simulated recovery, and operator evidence flows without a crash or ANR.
+Built and benchmarked a full-feed binary Connection Scan index and a date-gated network journey API, including physical-plausibility filtering, transfer feasibility, and exact connection-chain reconstruction.
 
 ## Last verified working commit
 
-Verified native Android milestone: `ecc34ed` on `main`. The compact stop-search milestone follows this commit.
+Verified compact stop-search milestone: `587c70d` on `main`. The full-network routing milestone follows this commit.
 
 ## Completed features
 
@@ -30,6 +30,8 @@ Verified native Android milestone: `ecc34ed` on `main`. The compact stop-search 
 - Machine-readable zero-model registry and professional ML artifact/evidence policy in `docs/ML_TRAINING_REPORT.md`.
 - Operator UI explicitly reports zero trained ML models instead of fabricating evaluation metrics.
 - Reproducible 9,960-stop compact BMTC index and `/api/stops` endpoint with normalized token search, result limits, and embedded provenance.
+- Full 57,836-trip BMTC Connection Scan index with 1,477,697 admitted connections, 5,153 recorded plausibility rejections, three-minute inter-trip transfer buffer, and exact path reconstruction.
+- `/api/network-journeys` date/stop/time validation, feed-window enforcement, provenance, schedule-only flag, and measured query latency.
 
 ## Incomplete features
 
@@ -39,6 +41,7 @@ Arbitrary place search/maps, full-feed preprocessing/spatial indexing, Android b
 
 - `npm run test:run`: passed, 22 tests across 9 files.
 - Stop-search milestone test total: passed, 24 tests across 10 files.
+- Full-network routing milestone: passed, 27 tests across 11 files.
 - `npm run typecheck`: passed.
 - `npm run build`: passed with static `/` and dynamic `/api/journeys` and `/api/recovery` routes.
 - Browser desktop/mobile journey, recovery, low-connectivity, and operator flows: passed in prior milestones.
@@ -52,6 +55,8 @@ Arbitrary place search/maps, full-feed preprocessing/spatial indexing, Android b
 - Operator UI hierarchy: passed for 53 trips, 216 stops, 3 routes, zero trained models, and evidence-gate explanation.
 - Device log scan: passed; no NammaLink fatal exception or ANR found.
 - Verified debug APK SHA-256: `BF3640B973F1E89E922ED0ED92D288B482FDE3F97F57D358DC4CEFC007136378`.
+- Full-feed production query: Kempegowda Bus Station 08:00 → Central Silk Board 08:50 with one six-minute transfer; repeated warm scans measured 205–256 ms.
+- Out-of-validity query: correctly returned HTTP 422.
 
 ## Dataset and ML limitations
 
@@ -69,7 +74,7 @@ Arbitrary place search/maps, full-feed preprocessing/spatial indexing, Android b
 
 ## Exact next implementation step
 
-Build a date-specific compact trip/stop-time routing index for the full BMTC feed, benchmark it, and connect Android autocomplete to `/api/stops` with a bundled fallback. Do not repeat the completed native scaffold or stop-index work.
+Connect Android origin/destination autocomplete to `/api/stops`, call `/api/network-journeys` through an injectable base URL, retain the bounded offline fallback, and validate the connected flow over `adb reverse`. Do not repeat the completed full-network index work.
 
 ## Restore commands
 

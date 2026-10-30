@@ -19,3 +19,11 @@ npm run data:build-stops
 ```
 
 The stop search index enables real feed-supported place selection but does not imply that every pair is routable by the current bounded schedule engine.
+
+`bmtc-connections.bin.gz` and `bmtc-connections.meta.json` are the full-feed schedule-routing index. The build converts adjacent GTFS stop times into time-sorted binary connection records, rejects physically implausible records, and gzip-compresses the result:
+
+```powershell
+npm run data:build-connections
+```
+
+The current snapshot contains 1,477,697 admitted connections and records the 5,153 rejected source connections in metadata. It is static schedule data, not realtime evidence.

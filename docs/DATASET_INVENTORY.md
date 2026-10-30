@@ -29,6 +29,10 @@ Its intended use is deterministic routing tests and the Jain–Banashankari–Al
 
 `data/bmtc-stops.json` is a 725 KB ODbL derivative containing all 9,960 valid ID/name/coordinate stop records from the same BMTC feed. The source `stops.txt` SHA-256 is `bc3cceb62c79b5fdd3bf6f4879a80c9c84bd60f2a73a3b7f3cedea2bcd410d81`. It is rebuilt with `npm run data:build-stops` and powers provenance-labelled stop search; it is not a full routing graph.
 
+## Committed full-network connection index
+
+`data/bmtc-connections.bin.gz` (13.60 MB) and `data/bmtc-connections.meta.json` (5.73 MB) contain the reproducible full-feed routing derivative: 57,836 trip identities and 1,477,697 time-sorted adjacent-stop connections. Preprocessing rejected 5,153 candidate connections with non-positive travel durations or implied inter-stop speeds above 25 m/s. The threshold and rejection count are embedded in metadata. Intended use is static stop-to-stop Connection Scan routing; the index contains no observed arrivals, realtime state, walking network, or reliability labels.
+
 ## Download and refresh policy
 
 Before accepting a new dataset:

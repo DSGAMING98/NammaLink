@@ -1,6 +1,6 @@
 # NammaLink architecture
 
-Last updated: 29 October 2026
+Last updated: 30 October 2026
 
 ## System boundary
 
@@ -23,6 +23,10 @@ flowchart LR
     O --> UI
     UI --> LS["Local saved journey + queued reports"]
     SW["Service worker app shell"] --> UI
+    UI --> SA["GET /api/stops"]
+    SA --> SI["9,960-stop compact index"]
+    UI --> NA["GET /api/network-journeys"]
+    NA --> CSA["Full-feed binary Connection Scan"]
 ```
 
 ## Components
@@ -36,6 +40,9 @@ flowchart LR
 | Offline storage | Last itinerary and bounded, deduplicated report queue | `lib/offline/` |
 | Schedule insights | Route trip counts, spans, headways, and shared stops | `lib/insights/` |
 | Data build | Extract selected routes and their dependencies from local BMTC GTFS | `scripts/build-demo-network.mjs` |
+| Stop search | Normalized, provenance-labelled search across 9,960 BMTC stops | `app/api/stops/`, `data/bmtc-stops.json` |
+| Full-network routing | Date-gated Connection Scan over 1,477,697 plausibility-filtered connections | `app/api/network-journeys/`, `lib/transit/connection-router.ts` |
+| Native Android | Compose planner, offline demonstration, recovery, saved state, and operator evidence | `android/`, physical-device QA |
 
 ## Request flow
 
@@ -58,7 +65,7 @@ flowchart LR
 
 ## Scale path
 
-The bounded enumerator is a correctness-oriented prototype. City-scale routing should materialize date-specific services and use CSA or RAPTOR with a spatial index, explicit station transfers, pedestrian-network routing, request budgets, and benchmarked latency. BMRCL and any future KSRTC data must retain operator-specific identifiers and provenance.
+The bounded enumerator remains the multi-constraint correctness prototype. City-scale BMTC stop-to-stop routing now uses a benchmarked CSA binary index; it still needs spatial access/egress, explicit station transfers, pedestrian-network routing, multi-criteria request budgets, and Android API integration. BMRCL and any future KSRTC data must retain operator-specific identifiers and provenance.
 
 ## External integrations
 

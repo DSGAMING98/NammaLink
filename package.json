@@ -9,6 +9,7 @@
     "build": "next build",
     "data:build": "node scripts/build-demo-network.mjs",
     "data:build-stops": "node scripts/build-stop-index.mjs",
+    "data:build-connections": "node --max-old-space-size=2048 scripts/build-connection-index.mjs",
     "start": "next start",
     "typecheck": "tsc --noEmit",
     "test": "vitest",
