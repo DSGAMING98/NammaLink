@@ -10,3 +10,12 @@ npm run data:build
 ```
 
 This is an unofficial static schedule fixture. It is not a live feed, does not establish that a service operated on a particular day, and must not be used as evidence of current vehicle location or punctuality.
+
+`bmtc-stops.json` is a compact 9,960-record search index from the same feed. It contains only stop ID, name, latitude, and longitude plus provenance; it is generated reproducibly with:
+
+```powershell
+$env:BMTC_GTFS_DIR = '..\bmtc'
+npm run data:build-stops
+```
+
+The stop search index enables real feed-supported place selection but does not imply that every pair is routable by the current bounded schedule engine.

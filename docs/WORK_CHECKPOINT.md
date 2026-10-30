@@ -12,7 +12,7 @@ Built the first genuine Kotlin/Jetpack Compose Android APK, installed it on an a
 
 ## Last verified working commit
 
-Previous verified web delivery: `c10b657` on `main`. The native milestone follows this commit and will be recorded after its verification commit is created.
+Verified native Android milestone: `ecc34ed` on `main`. The compact stop-search milestone follows this commit.
 
 ## Completed features
 
@@ -29,6 +29,7 @@ Previous verified web delivery: `c10b657` on `main`. The native milestone follow
 - Device screenshots under `research_outputs/device_evidence/`.
 - Machine-readable zero-model registry and professional ML artifact/evidence policy in `docs/ML_TRAINING_REPORT.md`.
 - Operator UI explicitly reports zero trained ML models instead of fabricating evaluation metrics.
+- Reproducible 9,960-stop compact BMTC index and `/api/stops` endpoint with normalized token search, result limits, and embedded provenance.
 
 ## Incomplete features
 
@@ -37,6 +38,7 @@ Arbitrary place search/maps, full-feed preprocessing/spatial indexing, Android b
 ## Verification evidence
 
 - `npm run test:run`: passed, 22 tests across 9 files.
+- Stop-search milestone test total: passed, 24 tests across 10 files.
 - `npm run typecheck`: passed.
 - `npm run build`: passed with static `/` and dynamic `/api/journeys` and `/api/recovery` routes.
 - Browser desktop/mobile journey, recovery, low-connectivity, and operator flows: passed in prior milestones.
@@ -67,7 +69,7 @@ Arbitrary place search/maps, full-feed preprocessing/spatial indexing, Android b
 
 ## Exact next implementation step
 
-Expand the full BMTC feed into a compact spatial/schedule index and expose arbitrary supported stop/place search through a tested API, then connect the Android planner to it with a bundled fallback. Do not repeat the completed native scaffold/device-validation work.
+Build a date-specific compact trip/stop-time routing index for the full BMTC feed, benchmark it, and connect Android autocomplete to `/api/stops` with a bundled fallback. Do not repeat the completed native scaffold or stop-index work.
 
 ## Restore commands
 

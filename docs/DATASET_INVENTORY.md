@@ -1,6 +1,6 @@
 # Dataset Inventory
 
-Last updated: 29 October 2026
+Last updated: 30 October 2026
 
 Raw data lives outside the repository. Reproducible generated artifacts will be stored under ignored `data/generated/` unless a small, licensed demo fixture is intentionally committed.
 
@@ -24,6 +24,10 @@ Raw data lives outside the repository. Reproducible generated artifacts will be 
 `data/demo-network.json` is an intentionally small ODbL derivative generated from BMTC feed version `20260907`. It contains routes `8931`, `2704`, and `8950`: 3 routes, 216 referenced stops, 53 trips, and 1,343 stop times (241,296 bytes). It was generated on 29 October 2026 with `npm run data:build`; SHA-256 is `F1156DC7B580712B275F0F75BF7B1A5927C597F1C603F52DEA0120E7454F7780`.
 
 Its intended use is deterministic routing tests and the Jain–Banashankari–Alliance-area demonstration. It is not a replacement for the full feed and is not evidence of live operation. Attribution and reproduction instructions are in `data/README.md`.
+
+## Committed stop-search index
+
+`data/bmtc-stops.json` is a 725 KB ODbL derivative containing all 9,960 valid ID/name/coordinate stop records from the same BMTC feed. The source `stops.txt` SHA-256 is `bc3cceb62c79b5fdd3bf6f4879a80c9c84bd60f2a73a3b7f3cedea2bcd410d81`. It is rebuilt with `npm run data:build-stops` and powers provenance-labelled stop search; it is not a full routing graph.
 
 ## Download and refresh policy
 

@@ -30,6 +30,7 @@
 - Bounded schedule-supply insights for operators.
 - Responsive browser-verified interface.
 - Native Kotlin/Jetpack Compose Android app built, installed, and flow-tested on a physical Android 16 phone.
+- Reproducible 9,960-stop BMTC index and provenance-labelled `/api/stops` search for arbitrary feed-supported stop selection.
 
 ## Native Android app
 
