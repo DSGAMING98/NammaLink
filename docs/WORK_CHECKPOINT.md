@@ -12,7 +12,7 @@ Enforced safest/fastest/direct behavior and hard transfer-walking budgets in the
 
 ## Last verified working commit
 
-Calendar-aware bus + Metro milestone: `0cfa474` on `main`, verified by GitHub Actions run `41036767610`.
+City-scale Journey Contract milestone: `480a030` on `main`, verified by GitHub Actions run `41037654792`.
 
 ## Completed features
 
@@ -90,6 +90,7 @@ Arbitrary place search/maps, coordinate-based access/egress, pedestrian-network 
 - GitHub Actions run `41036767610`: web/routing/data tests, strict type-check, production build, native APK build, checksum recording, and artifact upload all passed; artifact `12968352261` is retained for 14 days.
 - Real-index walking-budget adaptation: the 400 m HSR Layout → Whitefield result used a 128 m SAP Labs transfer; a 100 m contract selected an alternate 83 m Kundalahalli Metro Station transfer and still arrived at 09:15.
 - Physical direct-contract journey: Kempegowda Bus Station 09:55 → Central Silk Board 10:42 on `348-C`, 0 transfers, 0/400 m walking, 53 ms; screenshot/UI hierarchy captured and fatal/ANR scan clean.
+- GitHub Actions run `41037654792`: all 38 tests, strict type-check, production web build, native APK build, checksum recording, and artifact upload passed for `480a030`; artifact `12969365276` is retained until 13 November 2026.
 
 ## Dataset and ML limitations
 
