@@ -10,6 +10,13 @@ out/
 coverage/
 *.tsbuildinfo
 
+# Android local/build outputs.
+android/.gradle/
+android/local.properties
+android/**/build/
+*.apk
+*.aab
+
 # Local datasets and generated outputs.
 data/raw/
 data/processed/

@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "updated_at": "2026-10-30",
+  "trained_models": [],
+  "status": "not_trained",
+  "reason": "No validated labelled historical actual-arrival or delay dataset is available. Static schedules cannot legitimately evaluate a delay predictor.",
+  "required_artifacts_for_future_runs": {
+    "graphs": [
+      "actual_vs_predicted",
+      "residual_distribution",
+      "baseline_vs_model_mae_rmse",
+      "feature_importance_or_explainability",
+      "station_wise_performance",
+      "time_wise_performance"
+    ],
+    "conditional_graphs": ["training_vs_validation_loss_when_exposed"],
+    "metrics_formats": ["json", "csv"],
+    "graph_formats": ["png", "svg"]
+  }
+}

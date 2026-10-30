@@ -8,6 +8,7 @@
 
 [![Build](https://img.shields.io/badge/build-passing-16c784)](#verification)
 [![Tests](https://img.shields.io/badge/tests-22%20passing-16c784)](#verification)
+[![Android](https://img.shields.io/badge/Android-native%20APK-156b52)](#native-android-app)
 [![Data](https://img.shields.io/badge/data-static%20GTFS-f0b429)](#data-and-honesty)
 [![Hackathon](https://img.shields.io/badge/CodeSangram%203.0-CS%2F26--002-07130f)](#hackathon)
 
@@ -28,6 +29,22 @@
 - Connection status, saved last journey, local report queue, manifest, and service-worker shell cache.
 - Bounded schedule-supply insights for operators.
 - Responsive browser-verified interface.
+- Native Kotlin/Jetpack Compose Android app built, installed, and flow-tested on a physical Android 16 phone.
+
+## Native Android app
+
+The `android/` project is a real Compose application—not a WebView. Its first verified milestone includes constraint controls, a GTFS-derived demonstration journey, a native route schematic, persisted offline save state, a clearly simulated recovery flow, and honest operator insights.
+
+Requirements: Android SDK 36, JDK 17+ (Android Studio's bundled JDK is recommended), and an authorized USB device or emulator.
+
+```powershell
+Set-Location android
+$env:ANDROID_HOME = "$env:LOCALAPPDATA\Android\Sdk"
+.\gradlew.bat :app:assembleDebug
+.\gradlew.bat :app:installDebug
+```
+
+The generated development APK is under `android/app/build/outputs/apk/debug/`. Build artifacts and signing material are intentionally excluded from Git. See [ML training report](docs/ML_TRAINING_REPORT.md) for the evidence gate and [work checkpoint](docs/WORK_CHECKPOINT.md) for verified device details.
 
 ## Central demonstration
 
@@ -65,6 +82,7 @@ See [Architecture](docs/ARCHITECTURE.md) and [Algorithms](docs/ALGORITHMS.md).
 ## Stack
 
 - Next.js 16 App Router, React 19, strict TypeScript.
+- Kotlin, Jetpack Compose, Android Gradle Plugin 9.2.1, and Gradle 9.4.1.
 - Zod request validation.
 - Vitest unit and integration tests.
 - Pure TypeScript schedule routing and recovery.
