@@ -12,7 +12,7 @@ Added minute-precision latest-departure search for city-scale arrive-by contract
 
 ## Last verified working commit
 
-City-scale Journey Contract milestone: `480a030` on `main`, verified by GitHub Actions run `41037654792`.
+City-scale arrive-by milestone: `be13ffd` on `main`, verified by GitHub Actions run `41046438069`.
 
 ## Completed features
 
@@ -94,6 +94,7 @@ Arbitrary place search/maps, coordinate-based access/egress, pedestrian-network 
 - GitHub Actions run `41037654792`: all 38 tests, strict type-check, production web build, native APK build, checksum recording, and artifact upload passed for `480a030`; artifact `12969365276` is retained until 13 November 2026.
 - Real-index Metro arrive-by query: Whitefield 08:00 → Challaghatta 09:20 for a 09:30 deadline; latest start 08:00, 11 scans, 598 ms measured locally.
 - Physical arrive-by journey: latest start 10:10 for an 11:00 Kempegowda Bus Station → Central Silk Board deadline, arrival 10:42, 0/400 m walking, 859 ms; screenshot/UI hierarchy captured and fatal/ANR scan clean.
+- GitHub Actions run `41046438069`: all 40 tests, strict type-check, production web build, native APK build, checksum recording, and artifact upload passed for `be13ffd`; artifact `12972746779` is retained until 13 November 2026.
 
 ## Dataset and ML limitations
 
