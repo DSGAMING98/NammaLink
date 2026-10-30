@@ -49,7 +49,7 @@ $env:ANDROID_HOME = "$env:LOCALAPPDATA\Android\Sdk"
 
 For local USB-connected backend testing, run the production web server on port 3000 and forward the device port with `adb reverse tcp:3000 tcp:3000`. For a deployed backend, pass `-PNAMMALINK_API_BASE_URL=https://your-host` to Gradle.
 
-The generated development APK is under `android/app/build/outputs/apk/debug/`. Build artifacts and signing material are intentionally excluded from Git. See [ML training report](docs/ML_TRAINING_REPORT.md) for the evidence gate and [work checkpoint](docs/WORK_CHECKPOINT.md) for verified device details.
+The generated development APK is under `android/app/build/outputs/apk/debug/`. Build artifacts and signing material are intentionally excluded from Git. Production packaging fails closed until all external signing values are supplied; see [Android release signing](docs/ANDROID_RELEASE.md). See [ML training report](docs/ML_TRAINING_REPORT.md) for the evidence gate and [work checkpoint](docs/WORK_CHECKPOINT.md) for verified device details.
 
 ## Central demonstration
 

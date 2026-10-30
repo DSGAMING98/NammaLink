@@ -4,15 +4,15 @@ Updated: 30 October 2026
 
 ## Current phase
 
-Phase 12 — Full-network schedule routing and native integration.
+Phase 13 — Verified continuous integration and release hardening.
 
 ## Last completed task
 
-Built and benchmarked a full-feed binary Connection Scan index and a date-gated network journey API, including physical-plausibility filtering, transfer feasibility, and exact connection-chain reconstruction.
+Verified the complete GitHub Actions pipeline on `main`: all web/data tests, strict type-check, production web build, native Android build, checksum step, and retained APK artifact passed against the pushed commit.
 
 ## Last verified working commit
 
-Verified full-network routing milestone: `6425d24` on `main`. The Android network-client integration follows this commit and is build-verified; connected UI validation awaits an unlocked handset.
+CI milestone: `5b6226f` on `main`, verified by GitHub Actions run `41006581144`. The Android network-client integration is build-verified; connected UI validation still awaits an unlocked handset.
 
 ## Completed features
 
@@ -22,7 +22,7 @@ Verified full-network routing milestone: `6425d24` on `main`. The Android networ
 - Calendar-aware schedule routing with hard arrive-by, walking, transfer, and directness constraints.
 - Multiple ranking strategies, source-labelled timeline, evidence-aware simulated incident, and recovery preserving the completed leg.
 - Installable responsive web app with offline shell, saved journey, local report queue, and schedule-supply operator insights.
-- 22 passing web/router/API/operator tests plus strict type-check and production build.
+- 28 passing web/router/API/operator tests plus strict type-check and production build.
 - Native Kotlin/Jetpack Compose project using AGP 9.2.1, Gradle 9.4.1, compile/target SDK 36, and minimum SDK 26.
 - Native constraint planner, GTFS-derived demonstration itinerary, schematic route view, locally persisted saved journey, explicit simulated disruption/recovery, and operator screen.
 - Physical Android 16 installation and UI-hierarchy validation on Vivo V2513.
@@ -36,10 +36,11 @@ Verified full-network routing milestone: `6425d24` on `main`. The Android networ
 - Website Android download section and repository-hosted 17.15 MB development APK, explicitly labelled debug-signed with SHA-256.
 - Full-feed operator supply graph with 9,960 stops, 57,836 trips, 4,416 route records, 1,477,697 admitted connections, and top-eight route trip bars.
 - GitHub Actions verification for tests, type-check, production web build, native Android build, APK checksum, and 14-day APK artifact retention.
+- Fail-closed Android release signing configuration: production packaging requires four external environment values and a readable keystore; signing files are ignored by Git.
 
 ## Incomplete features
 
-Arbitrary place search/maps, full-feed preprocessing/spatial indexing, Android backend integration beyond the bounded offline demonstration, persistent server-side disruption reporting/moderation, authentication, notifications, legitimately trained ML, release signing/distribution, and deployment remain incomplete.
+Arbitrary place search/maps, spatial nearest-stop indexing, persistent server-side disruption reporting/moderation, authentication, notifications, legitimately trained ML, secure release signing, and public backend deployment remain incomplete. Full-feed Android integration is implemented and build-verified but still requires connected UI validation on the locked handset.
 
 ## Verification evidence
 
@@ -69,6 +70,9 @@ Arbitrary place search/maps, full-feed preprocessing/spatial indexing, Android b
 - Operator graph production HTML: passed for all full-feed totals, rejection count, and zero-model label.
 - Operator graph visual QA: passed in the in-app browser at desktop and 390×844 mobile viewport; cards, bars, disclaimers, and following download section rendered without observed overflow.
 - CI command parity check: frozen pnpm install, 28 tests, strict type-check, and production build passed locally before workflow push.
+- GitHub Actions run [`41006581144`](https://github.com/DSGAMING98/NammaLink/actions/runs/41006581144): both `Web, routing, and data tests` and `Native Android APK` completed successfully for commit `5b6226fbaf16ae5d2c0f1fbb83365503fd856c93`.
+- CI Android artifact `NammaLink-android-debug-5b6226fbaf16ae5d2c0f1fbb83365503fd856c93`: 9,947,921-byte ZIP retained until 2026-11-13; GitHub artifact digest `sha256:2a5a2c02c6f4793e1209bc3cfdccdd8c9ce7dcf907cee5967bd620aa0df6ce1e`.
+- Release-safety verification: `:app:assembleRelease` without credentials failed at `verifyReleaseSigning` with the expected four-variable message, including on a reused Gradle configuration cache; `:app:assembleDebug` still passed.
 
 ## Dataset and ML limitations
 
@@ -82,7 +86,7 @@ Arbitrary place search/maps, full-feed preprocessing/spatial indexing, Android b
 
 - Google Places minimal probes returned HTTP 403; API enablement, billing, or key restrictions remain unresolved.
 - Supabase schema/access has not been verified.
-- Release signing and a public APK host are not configured.
+- Secure release signing is not configured. A clearly labelled debug-signed development APK is publicly available from the repository-backed website surface, but the network backend itself is not publicly deployed.
 - The connected Vivo handset is securely locked, so updated autocomplete/button UI validation requires the owner to unlock it; ADB authentication bypass was not attempted.
 
 ## Exact next implementation step

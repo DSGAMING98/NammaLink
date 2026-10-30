@@ -17,6 +17,9 @@ android/**/build/
 *.apk
 *.aab
 !public/downloads/*.apk
+*.jks
+*.keystore
+android/signing.properties
 
 # Local datasets and generated outputs.
 data/raw/

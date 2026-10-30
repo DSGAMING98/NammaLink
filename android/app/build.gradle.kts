@@ -1,6 +1,50 @@
+import java.io.File
+import org.gradle.api.DefaultTask
+import org.gradle.api.provider.Property
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Optional
+import org.gradle.api.tasks.TaskAction
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.plugin.compose")
+}
+
+abstract class VerifyReleaseSigningTask : DefaultTask() {
+    @get:Input
+    abstract val signingConfigured: Property<Boolean>
+
+    @get:Input
+    @get:Optional
+    abstract val keyStorePath: Property<String>
+
+    @TaskAction
+    fun verify() {
+        if (!signingConfigured.get()) {
+            throw GradleException(
+                "Release signing is not configured. Set NAMMALINK_KEYSTORE_PATH, " +
+                    "NAMMALINK_KEYSTORE_PASSWORD, NAMMALINK_KEY_ALIAS, and NAMMALINK_KEY_PASSWORD.",
+            )
+        }
+
+        if (!File(keyStorePath.get()).isFile) {
+            throw GradleException("NAMMALINK_KEYSTORE_PATH does not point to a readable file.")
+        }
+    }
+}
+
+val releaseSigningVariables = mapOf(
+    "NAMMALINK_KEYSTORE_PATH" to providers.environmentVariable("NAMMALINK_KEYSTORE_PATH").orNull,
+    "NAMMALINK_KEYSTORE_PASSWORD" to providers.environmentVariable("NAMMALINK_KEYSTORE_PASSWORD").orNull,
+    "NAMMALINK_KEY_ALIAS" to providers.environmentVariable("NAMMALINK_KEY_ALIAS").orNull,
+    "NAMMALINK_KEY_PASSWORD" to providers.environmentVariable("NAMMALINK_KEY_PASSWORD").orNull,
+)
+val configuredReleaseSigningVariables = releaseSigningVariables.filterValues { !it.isNullOrBlank() }
+val releaseSigningConfigured = configuredReleaseSigningVariables.size == releaseSigningVariables.size
+
+if (configuredReleaseSigningVariables.isNotEmpty() && !releaseSigningConfigured) {
+    val missing = releaseSigningVariables.filterValues { it.isNullOrBlank() }.keys.joinToString()
+    throw GradleException("Incomplete NammaLink release signing configuration. Missing: $missing")
 }
 
 android {
@@ -23,10 +67,24 @@ android {
         buildConfig = true
     }
 
+    signingConfigs {
+        if (releaseSigningConfigured) {
+            create("release") {
+                storeFile = file(releaseSigningVariables.getValue("NAMMALINK_KEYSTORE_PATH")!!)
+                storePassword = releaseSigningVariables.getValue("NAMMALINK_KEYSTORE_PASSWORD")
+                keyAlias = releaseSigningVariables.getValue("NAMMALINK_KEY_ALIAS")
+                keyPassword = releaseSigningVariables.getValue("NAMMALINK_KEY_PASSWORD")
+            }
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            if (releaseSigningConfigured) {
+                signingConfig = signingConfigs.getByName("release")
+            }
         }
     }
 
@@ -34,6 +92,19 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
+}
+
+val verifyReleaseSigning by tasks.registering(VerifyReleaseSigningTask::class) {
+    group = "verification"
+    description = "Fails release packaging unless all external signing variables and the keystore are present."
+    signingConfigured.set(releaseSigningConfigured)
+    releaseSigningVariables["NAMMALINK_KEYSTORE_PATH"]?.let {
+        keyStorePath.set(it)
+    }
+}
+
+tasks.matching { it.name == "assembleRelease" || it.name == "bundleRelease" }.configureEach {
+    dependsOn(verifyReleaseSigning)
 }
 
 dependencies {
