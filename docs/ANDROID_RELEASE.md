@@ -1,6 +1,6 @@
 # Android release signing
 
-NammaLink's downloadable `0.1.0-dev` APK is intentionally debug-signed. It is suitable for prototype testing, not an app-store or production release.
+NammaLink's downloadable `0.1.0-presentation` APK is intentionally signed with the Android debug certificate. It is compiled against `https://nammalink.vercel.app` and is suitable for prototype/presentation testing, not an app-store release.
 
 The app now has three explicit variants:
 

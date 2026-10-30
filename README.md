@@ -57,7 +57,7 @@ $env:ANDROID_HOME = "$env:LOCALAPPDATA\Android\Sdk"
 
 For local USB-connected backend testing, run the web server on port 3000 and forward the device port with `adb reverse tcp:3000 tcp:3000`. This is debug-only. A distributable presentation build must use `:app:assemblePresentation -PNAMMALINK_API_BASE_URL=https://your-host`; the build rejects loopback, cleartext, emulator-only, and placeholder endpoints, and Android disables cleartext traffic. At startup the app checks `/api/health`, shows the deployed version, disables network planning when the service is unavailable, and preserves saved/offline journeys.
 
-The generated development APK is under `android/app/build/outputs/apk/debug/`. Build artifacts and signing material are intentionally excluded from Git. Production packaging fails closed until all external signing values are supplied; see [Android release signing](docs/ANDROID_RELEASE.md). See [ML training report](docs/ML_TRAINING_REPORT.md) for the evidence gate and [work checkpoint](docs/WORK_CHECKPOINT.md) for verified device details.
+The repository website serves the physical-device-tested presentation APK connected to `https://nammalink.vercel.app`; its checksum is printed beside the download. Local build outputs and signing material remain excluded from Git. Store-release packaging fails closed until all external signing values are supplied; see [Android release signing](docs/ANDROID_RELEASE.md). See [ML training report](docs/ML_TRAINING_REPORT.md) for the evidence gate and [work checkpoint](docs/WORK_CHECKPOINT.md) for verified device details.
 
 ## Central demonstration
 

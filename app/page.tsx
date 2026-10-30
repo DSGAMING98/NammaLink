@@ -41,18 +41,18 @@ export default function HomePage() {
 
       <section className="downloadSection" id="android">
         <div>
-          <p className="eyebrow">Native Android · development preview</p>
+          <p className="eyebrow">Native Android · presentation build</p>
           <h2>Take the journey contract onto your phone.</h2>
           <p>
             This is the physically tested Kotlin/Jetpack Compose preview—not a WebView. It includes the bounded offline
-            demonstration; full-network search requires a reachable NammaLink backend. Android may ask you to allow installs
+            demonstration and connects to the verified public NammaLink backend over HTTPS. Android may ask you to allow installs
             from your browser or file manager.
           </p>
-          <p className="downloadHash"><strong>SHA-256</strong> EBFA83535D5471B8BCB91EC484E7AFB8FC6574A14181C24307B09B735228EEB8</p>
+          <p className="downloadHash"><strong>SHA-256</strong> 45CFEA744CE361383947BCF8F67D2E1CFD53C101622A026E98DE1A613EA5E3E2</p>
         </div>
         <div className="downloadActions">
-          <a className="primaryButton" href="/downloads/NammaLink-0.1.0-dev.apk" download>Download APK · 17.2 MB</a>
-          <span>Version 0.1.0-dev · debug-signed · Android 8+</span>
+          <a className="primaryButton" href="/downloads/NammaLink-0.1.0-dev.apk" download>Download APK · 7.0 MB</a>
+          <span>Version 0.1.0-presentation · HTTPS backend · debug certificate · Android 8+</span>
         </div>
       </section>
 

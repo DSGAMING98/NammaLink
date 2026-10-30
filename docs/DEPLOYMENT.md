@@ -35,8 +35,10 @@ Set-Location android
 
 That build fails unless the origin is public HTTPS. Cleartext traffic is disabled in presentation/release manifests. `debug` is the only variant allowed to use `127.0.0.1` with `adb reverse`.
 
-## Current external state
+## Current production deployment
 
-No public deployment URL is claimed. The connected Vercel integration currently exposes no team or project, and no supported deployment-provider credential is available in the development environment. Connecting a Vercel team/project (or providing another approved host) is the one required owner action before the no-USB public-phone acceptance gate can run.
+The Git-connected Vercel project `nammalink` (`prj_hDHPsaFmt2af4neb8s8bO5vaXjt6`) is deployed under the personal `dsgaming98` account at `https://nammalink.vercel.app`. Production deployment `dpl_AGv3WmmXkYTuJ6u3GeLKh7jHmFXV` built commit `896bbfc4d120964af0d8fe8005c1ca81613fbf9d` and reached `READY`. Unauthenticated HTTPS checks passed for `/api/health`, stop search, and a real indexed 08:00–08:50 journey. The presentation APK was then built against that origin and passed physical Vivo testing with no ADB reverse rule.
+
+The Vercel connector can create and inspect deployments in this personal scope, but its runtime-error aggregation endpoint returned HTTP 403 for this project. Public API responses and Android logcat were clean; deeper Vercel observability still requires that connector permission.
 
 Google Routes and Geocoding authorization probes pass. Places Autocomplete is implemented but its current key returns `PERMISSION_DENIED` for server calls because requests without an HTTP referrer are blocked. Correct that key restriction or supply a server-restricted Places key before enabling arbitrary-place search.

@@ -44,7 +44,7 @@ Engineering milestone `49b66b2` on `main`, fully verified by GitHub Actions run 
 - Calendar-filtered 61,115-trip multimodal Connection Scan index with 1,563,324 admitted connections, 670 explicit transfer footpaths, 5,153 recorded plausibility rejections, three-minute inter-trip buffer, and exact ride/walk reconstruction.
 - `/api/network-journeys` date/stop/time/contract validation, depart-after and arrive-by search, hard walking budgets, safest/fastest/direct behavior, feed-window enforcement, provenance, schedule-only flag, and measured query latency.
 - Android debounced stop autocomplete, injectable backend URL, depart-after/arrive-by selection, enforced priority/walking controls, city-scale journey parsing/rendering, explicit request errors, and separately selected offline fallback.
-- Website Android download section and repository-hosted 17.15 MB development APK, explicitly labelled debug-signed with SHA-256.
+- Website Android download section and repository-hosted 7.03 MB presentation APK, explicitly labelled with its debug certificate, HTTPS backend, and SHA-256.
 - Full-feed operator supply graph with 10,043 searchable stops, 61,115 trips, 4,419 route records, 1,563,324 admitted connections, and top-eight route trip bars.
 - GitHub Actions verification for tests, type-check, production web build, native Android build, APK checksum, and 14-day APK artifact retention.
 - Fail-closed Android release signing configuration: production packaging requires four external environment values and a readable keystore; signing files are ignored by Git.
@@ -52,7 +52,7 @@ Engineering milestone `49b66b2` on `main`, fully verified by GitHub Actions run 
 
 ## Incomplete features
 
-Arbitrary place search/maps, coordinate-based access/egress, pedestrian-network geometry, city-scale multi-label Pareto alternatives, persistent server-side disruption reporting/moderation, authentication, notifications, legitimately trained ML, secure release signing, and public backend deployment remain incomplete.
+Arbitrary place search/maps, coordinate-based access/egress, pedestrian-network geometry, city-scale multi-label Pareto alternatives, persistent server-side disruption reporting/moderation, authentication, notifications, legitimately trained ML, and store-grade release signing remain incomplete.
 
 ## Verification evidence
 
@@ -138,6 +138,9 @@ Arbitrary place search/maps, coordinate-based access/egress, pedestrian-network 
 
 - Engineering foundation GitHub Actions run [`41086371223`](https://github.com/DSGAMING98/NammaLink/actions/runs/41086371223): secret hygiene, all 53 tests, strict type-check, production build, standalone health/stop smoke tests, debug APK, public-endpoint fail-closed test, presentation APK, checksum, and artifact upload all passed for `49b66b2`.
 - CI Android artifact `NammaLink-android-debug-49b66b27109d88a7a0f8de0b812f81587ac6de42` (`12992151752`): 10,002,974-byte ZIP retained until 13 November 2026; digest `sha256:073cd8da8ed911629c3d58d579348682b31f7047a7bb859f84a9bb057efd6cd8`.
+- Vercel production deployment `dpl_AGv3WmmXkYTuJ6u3GeLKh7jHmFXV` reached READY at `https://nammalink.vercel.app` from commit `896bbfc`; unauthenticated health returned revision `896bbfc`, Majestic search returned indexed bus/Metro stops, and the public journey API returned Kempegowda Bus Station 08:00 → Central Silk Board 08:50 with two rides.
+- Presentation APK `0.1.0-presentation` was compiled against the public HTTPS origin: 7,028,336 bytes, SHA-256 `45CFEA744CE361383947BCF8F67D2E1CFD53C101622A026E98DE1A613EA5E3E2`.
+- Physical Vivo V2513 acceptance passed with zero ADB reverse entries: service revision `896bbfc` rendered, Majestic autocomplete returned Kempegowda Bus Station and Nadaprabhu Kempegowda Station Metro, full-network journey planning rendered, and no presentation-app fatal exception or ANR was found.
 
 ## Dataset and ML limitations
 
@@ -151,8 +154,8 @@ Arbitrary place search/maps, coordinate-based access/egress, pedestrian-network 
 
 - Google Routes and Geocoding probes pass. Places Autocomplete returns HTTP 403 because the configured key blocks server requests without an HTTP referrer; its restriction must be corrected or a server key supplied.
 - Supabase schema/access has not been verified.
-- Secure release signing is not configured. A clearly labelled debug-signed development APK is publicly available from the repository-backed website surface, but the network backend itself is not publicly deployed.
-- The connected Vercel context contains no team or linked project, so public deployment requires the owner to connect a Vercel account/team.
+- Store-grade release signing is not configured. The presentation APK is intentionally signed with Android's debug certificate; the public network backend is deployed and verified.
+- Vercel production is live. The connector's runtime-error aggregation endpoint returns HTTP 403 for the personal scope, so deeper platform-log inspection requires an additional observability permission.
 
 ## Known bugs and coverage gaps
 
@@ -163,7 +166,7 @@ Arbitrary place search/maps, coordinate-based access/egress, pedestrian-network 
 
 ## Deployment state
 
-No public deployment is claimed. The standalone production build, non-root container definition, `/api/health`, deployment smoke procedure, presentation APK, and public-HTTPS build gate pass. Publishing remains blocked because the connected Vercel integration contains no team/project. A release-signed APK separately requires the owner-held signing key; the presentation APK is installable without that key once a public origin exists.
+Production is live at `https://nammalink.vercel.app`. The standalone build, `/api/health`, stop search, journey planning, presentation APK, public-HTTPS guard, and no-USB-tunnel physical-phone gate pass. A store-release-signed APK separately requires the owner-held signing key; the current presentation APK uses Android's debug certificate and is suitable for the MVP presentation.
 
 ## Uncommitted work
 
@@ -171,7 +174,7 @@ None. Engineering phases 27–31 are committed and pushed. Device evidence is sa
 
 ## Exact next implementation step
 
-Connect a Vercel team/project (or another approved deployment target), publish the verified standalone service, set its server secrets, run `docs/DEPLOYMENT.md` smoke checks, build the presentation APK against that HTTPS origin, and prove the physical-phone flow with USB forwarding removed. Then begin Phase 32 feature work.
+Begin Phase 32 feature work: Google place/map integration and airport mode. Before enabling Places Autocomplete in production, correct the supplied Places key's server restriction and add the server-only Google variables to the new Vercel project.
 
 ## Restore commands
 
