@@ -34,6 +34,7 @@ Verified full-network routing milestone: `6425d24` on `main`. The Android networ
 - `/api/network-journeys` date/stop/time validation, feed-window enforcement, provenance, schedule-only flag, and measured query latency.
 - Android debounced stop autocomplete, injectable backend URL, city-scale journey parsing/rendering, explicit request errors, and separately selected offline fallback.
 - Website Android download section and repository-hosted 17.15 MB development APK, explicitly labelled debug-signed with SHA-256.
+- Full-feed operator supply graph with 9,960 stops, 57,836 trips, 4,416 route records, 1,477,697 admitted connections, and top-eight route trip bars.
 
 ## Incomplete features
 
@@ -44,6 +45,7 @@ Arbitrary place search/maps, full-feed preprocessing/spatial indexing, Android b
 - `npm run test:run`: passed, 22 tests across 9 files.
 - Stop-search milestone test total: passed, 24 tests across 10 files.
 - Full-network routing milestone: passed, 27 tests across 11 files.
+- Full-feed operator graph milestone: passed, 28 tests across 12 files.
 - `npm run typecheck`: passed.
 - `npm run build`: passed with static `/` and dynamic `/api/journeys` and `/api/recovery` routes.
 - Browser desktop/mobile journey, recovery, low-connectivity, and operator flows: passed in prior milestones.
@@ -63,6 +65,8 @@ Arbitrary place search/maps, full-feed preprocessing/spatial indexing, Android b
 - `adb reverse tcp:3000 tcp:3000`: configured successfully; updated APK streamed install passed.
 - Production website APK check: HTTP 200, `application/vnd.android.package-archive`, 17,150,016-byte content length, visible debug-signing label.
 - Current development APK SHA-256: `1F4DBCE3A07E69EF9719B268EF9EDEEEBDCE2E99FE17895D7ABD3197DE501356`.
+- Operator graph production HTML: passed for all full-feed totals, rejection count, and zero-model label.
+- Operator graph visual QA: passed in the in-app browser at desktop and 390×844 mobile viewport; cards, bars, disclaimers, and following download section rendered without observed overflow.
 
 ## Dataset and ML limitations
 

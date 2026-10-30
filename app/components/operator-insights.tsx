@@ -2,9 +2,13 @@ import demoNetwork from "@/data/demo-network.json";
 import { analyzeSchedule } from "@/lib/insights/schedule";
 import { formatServiceTime } from "@/lib/transit/time";
 import type { TransitNetwork } from "@/lib/transit/types";
+import fullNetwork from "@/data/bmtc-connections.meta.json";
+import { analyzeFullNetworkSupply } from "@/lib/insights/full-network";
 
 export function OperatorInsights() {
   const insights = analyzeSchedule(demoNetwork as TransitNetwork);
+  const fullSupply = analyzeFullNetworkSupply(fullNetwork.trips);
+  const topRoutes = fullSupply.routes.slice(0, 8);
 
   return (
     <section className="insightsSection" id="insights">
@@ -30,6 +34,26 @@ export function OperatorInsights() {
         ))}
       </div>
       <p className="insightNote">Bounded BMTC fixture · static schedule version 20260907 · direction-aware median headways</p>
+      <div className="fullSupplyHeading">
+        <p className="eyebrow">Full-feed scheduled supply</p>
+        <h3>City-scale coverage and the busiest scheduled route families.</h3>
+        <p>This expands coverage to the full community feed. Bar length represents trip count only—not ridership, reliability, occupancy, or revenue.</p>
+      </div>
+      <div className="insightTotals fullTotals">
+        <div><strong>{fullNetwork.stopCount.toLocaleString("en-IN")}</strong><span>indexed stops</span></div>
+        <div><strong>{fullSupply.totalTrips.toLocaleString("en-IN")}</strong><span>scheduled trips</span></div>
+        <div><strong>{fullSupply.totalRoutes.toLocaleString("en-IN")}</strong><span>route records</span></div>
+        <div><strong>{fullNetwork.connectionCount.toLocaleString("en-IN")}</strong><span>admitted connections</span></div>
+      </div>
+      <div className="supplyBars" aria-label="Top full-feed routes by scheduled trip count">
+        {topRoutes.map((route) => (
+          <div className="supplyRow" key={route.routeId}>
+            <div><strong>{route.route}</strong><span>{route.trips.toLocaleString("en-IN")} trips</span></div>
+            <div className="supplyTrack"><span style={{ width: `${(route.trips / fullSupply.maximumTrips) * 100}%` }} /></div>
+          </div>
+        ))}
+      </div>
+      <p className="insightNote">Full BMTC community GTFS 20260907 · {fullNetwork.plausibilityGate.rejectedConnections.toLocaleString("en-IN")} implausible connections excluded · zero trained ML models</p>
     </section>
   );
 }

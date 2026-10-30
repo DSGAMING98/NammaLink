@@ -58,7 +58,7 @@ Until those criteria are met, NammaLink uses deterministic schedule planning and
 
 ## Dashboard integration
 
-The native operator dashboard displays `0 trained ML models` and explains why evaluation charts are absent. The web operator dashboard continues to display meaningful real-data schedule-supply graphs. When a validated model run exists, only generated artifacts whose run identifiers and numerical metrics pass the above policy will be integrated.
+The native operator dashboard displays `0 trained ML models` and explains why evaluation charts are absent. The web operator dashboard displays meaningful real-data schedule-supply graphs for the bounded demonstration and full BMTC feed, including 57,836 scheduled trips and top-route trip counts. These are explicitly labelled as supply—not ML evaluation, ridership, reliability, occupancy, or revenue. When a validated model run exists, only generated artifacts whose run identifiers and numerical metrics pass the above policy will be integrated.
 
 ## Device evidence
 
