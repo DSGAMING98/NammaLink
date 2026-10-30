@@ -10,21 +10,25 @@ export default function HomePage() {
           <span className="brandMark" aria-hidden="true">ನ</span>
           <span>NammaLink</span>
         </a>
-        <span className="prototypePill">Engineering prototype</span>
+        <div className="topbarLinks">
+          <a href="#journey">Plan journey</a>
+          <a href="#android">Android app</a>
+          <a href="#evidence">Data evidence</a>
+          <span className="locationPill"><span aria-hidden="true">●</span> Bengaluru</span>
+        </div>
       </nav>
 
       <section className="hero" id="top">
         <div className="heroCopy">
           <p className="eyebrow">Bengaluru, connected end to end</p>
-          <h1>Reach on time.<br /><span>Wait less.</span></h1>
+          <h1>Reach on<br /><span>time.</span></h1>
           <p className="lede">
-            NammaLink plans the whole public-transport journey, protects the limits that matter to you,
-            and finds a way forward when a connection breaks.
+            BMTC buses, Namma Metro and dependable connections. One thoughtful journey,
+            from first mile to last.
           </p>
           <div className="heroActions">
             <a className="primaryButton" href="#journey">Plan a journey</a>
-            <a className="textButton" href="#android">Get Android preview <span aria-hidden="true">↓</span></a>
-            <a className="textButton" href="#evidence">See data evidence <span aria-hidden="true">↗</span></a>
+            <span className="madeForBengaluru"><span aria-hidden="true">●</span> Made for Bengaluru, with care.</span>
           </div>
         </div>
 
