@@ -36,10 +36,12 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -54,6 +56,11 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import java.time.LocalDate
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 private val Ink = Color(0xFF12211B)
 private val Paper = Color(0xFFF5F4EC)
@@ -77,6 +84,7 @@ private fun NammaLinkApp() {
     var saved by rememberSaveable {
         mutableStateOf(context.getSharedPreferences("journeys", Context.MODE_PRIVATE).getBoolean("saved", false))
     }
+    var networkJourney by remember { mutableStateOf<NetworkJourney?>(null) }
 
     MaterialTheme {
         Scaffold(
@@ -96,8 +104,12 @@ private fun NammaLinkApp() {
         ) { padding ->
             Box(Modifier.padding(padding).fillMaxSize()) {
                 when (tab) {
-                    0 -> PlannerScreen(onPlan = { tab = 1 })
+                    0 -> PlannerScreen(
+                        onPlan = { journey -> networkJourney = journey; tab = 1 },
+                        onOfflineDemo = { networkJourney = null; tab = 1 },
+                    )
                     1 -> JourneyScreen(
+                        networkJourney = networkJourney,
                         saved = saved,
                         onSave = {
                             saved = !saved
@@ -123,20 +135,36 @@ private fun ScreenHeader(kicker: String, title: String, subtitle: String) {
 }
 
 @Composable
-private fun PlannerScreen(onPlan: () -> Unit) {
-    var from by rememberSaveable { mutableStateOf("Majestic") }
-    var to by rememberSaveable { mutableStateOf("Silk Board") }
-    var arriveBy by rememberSaveable { mutableStateOf("09:35") }
+private fun PlannerScreen(onPlan: (NetworkJourney) -> Unit, onOfflineDemo: () -> Unit) {
+    var from by rememberSaveable { mutableStateOf("Kempegowda Bus Station") }
+    var to by rememberSaveable { mutableStateOf("Central Silk Board") }
+    var departAfter by rememberSaveable { mutableStateOf("08:00") }
     var ranking by rememberSaveable { mutableStateOf("Safest") }
     var maxWalk by rememberSaveable { mutableStateOf("800 m") }
+    var origin by remember { mutableStateOf(StopOption("20921", "Kempegowda Bus Station", 12.98, 77.57)) }
+    var destination by remember { mutableStateOf(StopOption("20707", "Central Silk Board", 12.92, 77.62)) }
+    var suggestions by remember { mutableStateOf(emptyList<StopOption>()) }
+    var activeField by rememberSaveable { mutableStateOf("") }
+    var planning by remember { mutableStateOf(false) }
+    var error by remember { mutableStateOf<String?>(null) }
+    val scope = rememberCoroutineScope()
+
+    val activeQuery = if (activeField == "from") from else to
+    LaunchedEffect(activeField, activeQuery) {
+        if (activeField.isBlank() || activeQuery.length < 2) { suggestions = emptyList(); return@LaunchedEffect }
+        delay(300)
+        suggestions = runCatching { withContext(Dispatchers.IO) { searchNetworkStops(activeQuery) } }.getOrElse { emptyList() }
+    }
 
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
         ScreenHeader("Bengaluru public transport", "Arrive with confidence.", "A journey contract that plans for your deadline—not just the shortest path.")
         Column(Modifier.padding(horizontal = 20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            StatusPill("● Offline-ready schedule demo", Green)
-            OutlinedTextField(from, { from = it }, label = { Text("From") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
-            OutlinedTextField(to, { to = it }, label = { Text("To") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
-            OutlinedTextField(arriveBy, { arriveBy = it }, label = { Text("Arrive by") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+            StatusPill("● 9,960 searchable BMTC stops · static schedule", Green)
+            OutlinedTextField(from, { from = it; origin = origin.copy(id = ""); activeField = "from" }, label = { Text("From") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+            if (activeField == "from") StopSuggestions(suggestions) { origin = it; from = it.name; activeField = "" }
+            OutlinedTextField(to, { to = it; destination = destination.copy(id = ""); activeField = "to" }, label = { Text("To") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+            if (activeField == "to") StopSuggestions(suggestions) { destination = it; to = it.name; activeField = "" }
+            OutlinedTextField(departAfter, { departAfter = it }, label = { Text("Depart after (HH:MM)") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
             Text("Priority", fontWeight = FontWeight.Bold, color = Ink)
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 listOf("Safest", "Fastest", "Direct").forEach { choice ->
@@ -150,25 +178,62 @@ private fun PlannerScreen(onPlan: () -> Unit) {
                 }
             }
             Button(
-                onClick = onPlan,
+                onClick = {
+                    if (origin.id.isBlank() || destination.id.isBlank()) { error = "Select both stops from the verified suggestions."; return@Button }
+                    planning = true; error = null
+                    scope.launch {
+                        runCatching { withContext(Dispatchers.IO) { planNetworkJourney(origin, destination, LocalDate.now().toString(), departAfter) } }
+                            .onSuccess(onPlan)
+                            .onFailure { error = it.message ?: "Network journey unavailable." }
+                        planning = false
+                    }
+                },
+                enabled = !planning,
                 modifier = Modifier.fillMaxWidth().height(54.dp).semantics { contentDescription = "Plan journey" },
                 colors = ButtonDefaults.buttonColors(containerColor = Green),
                 shape = RoundedCornerShape(14.dp)
-            ) { Text("Build my journey contract", fontWeight = FontWeight.Bold) }
-            Text("Current native milestone uses the repository's bounded, ODbL-attributed BMTC schedule fixture. Unsupported places are not silently invented.", color = Muted, fontSize = 12.sp)
+            ) { Text(if (planning) "Scanning the schedule…" else "Plan across the BMTC network", fontWeight = FontWeight.Bold) }
+            error?.let { Text(it, color = Coral, fontWeight = FontWeight.Bold, fontSize = 13.sp) }
+            OutlinedButton(onClick = onOfflineDemo, modifier = Modifier.fillMaxWidth()) { Text("Open bounded offline demonstration") }
+            Text("Full-network results optimize scheduled arrival with a three-minute transfer buffer. Walking limits and priority chips remain Journey Contract preferences but are not yet enforced by the city-scale scan. The offline demonstration remains available explicitly.", color = Muted, fontSize = 12.sp)
             Spacer(Modifier.height(16.dp))
         }
     }
 }
 
 @Composable
-private fun JourneyScreen(saved: Boolean, onSave: () -> Unit) {
+private fun StopSuggestions(stops: List<StopOption>, onSelect: (StopOption) -> Unit) {
+    Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        stops.forEach { stop ->
+            Card(Modifier.fillMaxWidth().clickable { onSelect(stop) }, colors = CardDefaults.cardColors(containerColor = Color.White)) {
+                Column(Modifier.padding(12.dp)) { Text(stop.name, fontWeight = FontWeight.Bold, color = Ink); Text("BMTC stop ${stop.id}", color = Muted, fontSize = 11.sp) }
+            }
+        }
+    }
+}
+
+@Composable
+private fun JourneyScreen(networkJourney: NetworkJourney?, saved: Boolean, onSave: () -> Unit) {
     var disrupted by rememberSaveable { mutableStateOf(false) }
+    if (networkJourney != null) {
+        Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
+            ScreenHeader("Full-network schedule", "Arrive at ${networkJourney.arrival}.", "Depart ${networkJourney.departure} · ${networkJourney.transfers} transfer${if (networkJourney.transfers == 1) "" else "s"} · static BMTC feed")
+            Column(Modifier.padding(horizontal = 20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                StatusPill("Verified indexed schedule · ${networkJourney.queryMilliseconds.toInt()} ms", Green)
+                RouteMap(false, networkJourney.origin, networkJourney.destination)
+                networkJourney.rides.forEach { ride -> ItineraryCard(ride.departure, "Take ${ride.route}", "${ride.from} → ${ride.to} · toward ${ride.headsign}", "${ride.stopCount} stops", Green) }
+                OutlinedButton(onClick = onSave, modifier = Modifier.fillMaxWidth()) { Text(if (saved) "Saved ✓" else "Save offline") }
+                Text("Schedule-only result. It does not use live vehicle positions, observed delay, or a trained prediction model.", color = Muted, fontSize = 12.sp)
+                Spacer(Modifier.height(16.dp))
+            }
+        }
+        return
+    }
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
         ScreenHeader("Journey contract", if (disrupted) "Recovery is ready." else "You can make 09:35.", if (disrupted) "Your completed leg is preserved; only the remaining journey changed." else "Scheduled arrival 09:18 · 17-minute safety margin")
         Column(Modifier.padding(horizontal = 20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             StatusPill(if (disrupted) "Deadline at risk · arrive 09:42" else "Verified against static GTFS schedule", if (disrupted) Coral else Green)
-            RouteMap(disrupted)
+            RouteMap(disrupted, "Majestic", "Silk Board")
             ItineraryCard("08:20", "Majestic", "Walk 240 m to Kempegowda Bus Station", "6 min", Green)
             ItineraryCard("08:28", if (disrupted) "Take route 500-D" else "Take route 365", if (disrupted) "Board from platform 12 · recovery option" else "Kempegowda Bus Station → Corporation", "24 min", if (disrupted) Coral else Green)
             ItineraryCard("08:55", "Transfer at Corporation", "8-minute protected connection · platform evidence unavailable", "8 min", Amber)
@@ -184,7 +249,7 @@ private fun JourneyScreen(saved: Boolean, onSave: () -> Unit) {
 }
 
 @Composable
-private fun RouteMap(disrupted: Boolean) {
+private fun RouteMap(disrupted: Boolean, origin: String, destination: String) {
     Card(colors = CardDefaults.cardColors(containerColor = Color(0xFFE8E5D8)), shape = RoundedCornerShape(18.dp)) {
         Box(Modifier.fillMaxWidth().height(190.dp).padding(20.dp)) {
             Canvas(Modifier.fillMaxSize()) {
@@ -196,8 +261,8 @@ private fun RouteMap(disrupted: Boolean) {
                     drawCircle(Ink, 13f, Offset(size.width * x, y), style = Stroke(5f))
                 }
             }
-            Text("Majestic", Modifier.align(Alignment.BottomStart), color = Ink, fontWeight = FontWeight.Bold, fontSize = 12.sp)
-            Text("Silk Board", Modifier.align(Alignment.BottomEnd), color = Ink, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+            Text(origin.take(18), Modifier.align(Alignment.BottomStart), color = Ink, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+            Text(destination.take(18), Modifier.align(Alignment.BottomEnd), color = Ink, fontWeight = FontWeight.Bold, fontSize = 12.sp)
             Text(if (disrupted) "Schematic · recovery path" else "Native schematic · map key not required", Modifier.align(Alignment.TopStart), color = Muted, fontSize = 12.sp)
         }
     }

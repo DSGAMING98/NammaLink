@@ -35,7 +35,7 @@
 
 ## Native Android app
 
-The `android/` project is a real Compose application—not a WebView. Its first verified milestone includes constraint controls, a GTFS-derived demonstration journey, a native route schematic, persisted offline save state, a clearly simulated recovery flow, and honest operator insights.
+The `android/` project is a real Compose application—not a WebView. It includes debounced search across the 9,960-stop API, full-network schedule requests through an injectable API base URL, constraint controls, a native route schematic, persisted offline save state, a clearly simulated recovery flow, and honest operator insights. The bounded demonstration remains an explicit offline option rather than a silent substitute for a failed network request.
 
 Requirements: Android SDK 36, JDK 17+ (Android Studio's bundled JDK is recommended), and an authorized USB device or emulator.
 
@@ -45,6 +45,8 @@ $env:ANDROID_HOME = "$env:LOCALAPPDATA\Android\Sdk"
 .\gradlew.bat :app:assembleDebug
 .\gradlew.bat :app:installDebug
 ```
+
+For local USB-connected backend testing, run the production web server on port 3000 and forward the device port with `adb reverse tcp:3000 tcp:3000`. For a deployed backend, pass `-PNAMMALINK_API_BASE_URL=https://your-host` to Gradle.
 
 The generated development APK is under `android/app/build/outputs/apk/debug/`. Build artifacts and signing material are intentionally excluded from Git. See [ML training report](docs/ML_TRAINING_REPORT.md) for the evidence gate and [work checkpoint](docs/WORK_CHECKPOINT.md) for verified device details.
 

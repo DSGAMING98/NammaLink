@@ -12,7 +12,7 @@ Built and benchmarked a full-feed binary Connection Scan index and a date-gated 
 
 ## Last verified working commit
 
-Verified compact stop-search milestone: `587c70d` on `main`. The full-network routing milestone follows this commit.
+Verified full-network routing milestone: `6425d24` on `main`. The Android network-client integration follows this commit and is build-verified; connected UI validation awaits an unlocked handset.
 
 ## Completed features
 
@@ -32,6 +32,7 @@ Verified compact stop-search milestone: `587c70d` on `main`. The full-network ro
 - Reproducible 9,960-stop compact BMTC index and `/api/stops` endpoint with normalized token search, result limits, and embedded provenance.
 - Full 57,836-trip BMTC Connection Scan index with 1,477,697 admitted connections, 5,153 recorded plausibility rejections, three-minute inter-trip transfer buffer, and exact path reconstruction.
 - `/api/network-journeys` date/stop/time validation, feed-window enforcement, provenance, schedule-only flag, and measured query latency.
+- Android debounced stop autocomplete, injectable backend URL, city-scale journey parsing/rendering, explicit request errors, and separately selected offline fallback.
 
 ## Incomplete features
 
@@ -57,6 +58,8 @@ Arbitrary place search/maps, full-feed preprocessing/spatial indexing, Android b
 - Verified debug APK SHA-256: `BF3640B973F1E89E922ED0ED92D288B482FDE3F97F57D358DC4CEFC007136378`.
 - Full-feed production query: Kempegowda Bus Station 08:00 → Central Silk Board 08:50 with one six-minute transfer; repeated warm scans measured 205–256 ms.
 - Out-of-validity query: correctly returned HTTP 422.
+- Updated Android `:app:assembleDebug`: passed with the stop-search and network-journey client.
+- `adb reverse tcp:3000 tcp:3000`: configured successfully; updated APK streamed install passed.
 
 ## Dataset and ML limitations
 
@@ -71,10 +74,11 @@ Arbitrary place search/maps, full-feed preprocessing/spatial indexing, Android b
 - Google Places minimal probes returned HTTP 403; API enablement, billing, or key restrictions remain unresolved.
 - Supabase schema/access has not been verified.
 - Release signing and a public APK host are not configured.
+- The connected Vivo handset is securely locked, so updated autocomplete/button UI validation requires the owner to unlock it; ADB authentication bypass was not attempted.
 
 ## Exact next implementation step
 
-Connect Android origin/destination autocomplete to `/api/stops`, call `/api/network-journeys` through an injectable base URL, retain the bounded offline fallback, and validate the connected flow over `adb reverse`. Do not repeat the completed full-network index work.
+After the handset is unlocked, validate autocomplete and full-network journey rendering over `adb reverse`, capture device evidence, then add secure release signing/distribution and an APK download surface. Do not repeat the completed backend or Android integration code.
 
 ## Restore commands
 
