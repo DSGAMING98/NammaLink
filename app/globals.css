@@ -53,6 +53,12 @@ h1 { margin: 0; max-width: 720px; font-size: clamp(58px, 7.7vw, 112px); line-hei
 h1 span { color: var(--green-dark); }
 .lede { max-width: 650px; margin: 32px 0; font-size: clamp(18px, 2vw, 22px); line-height: 1.55; color: #36443e; }
 .heroActions { display: flex; align-items: center; gap: 26px; flex-wrap: wrap; }
+.downloadSection { margin: 40px clamp(20px, 6vw, 96px); padding: clamp(28px, 5vw, 64px); border-radius: 30px; background: #d9efe4; display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(240px, .7fr); gap: 40px; align-items: center; }
+.downloadSection h2 { margin: 8px 0 16px; max-width: 700px; }
+.downloadSection p { color: #52655c; max-width: 760px; line-height: 1.7; }
+.downloadActions { display: flex; flex-direction: column; gap: 12px; align-items: flex-start; }
+.downloadActions span { color: #52655c; font-size: .82rem; }
+.downloadHash { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: .72rem; overflow-wrap: anywhere; }
 .primaryButton { display: inline-flex; align-items: center; justify-content: center; min-height: 52px; padding: 0 24px; border-radius: 14px; background: var(--ink); color: white; font-weight: 750; box-shadow: 0 12px 34px rgba(7,19,15,.18); }
 .primaryButton:hover { background: #163126; transform: translateY(-1px); }
 .textButton { font-size: 14px; font-weight: 750; border-bottom: 1px solid currentColor; padding-bottom: 3px; }
@@ -170,6 +176,7 @@ footer p { margin: 0; }
 
 @media (max-width: 900px) {
   .hero { grid-template-columns: 1fr; padding-top: 70px; }
+  .downloadSection { grid-template-columns: 1fr; }
   .journeyPanel { max-width: 620px; }
   .plannerWrap { max-width: 620px; }
   .principleStrip, .statusGrid { grid-template-columns: 1fr; }

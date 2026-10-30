@@ -23,6 +23,7 @@ export default function HomePage() {
           </p>
           <div className="heroActions">
             <a className="primaryButton" href="#journey">Plan a journey</a>
+            <a className="textButton" href="#android">Get Android preview <span aria-hidden="true">↓</span></a>
             <a className="textButton" href="#evidence">See data evidence <span aria-hidden="true">↗</span></a>
           </div>
         </div>
@@ -37,6 +38,23 @@ export default function HomePage() {
       </section>
 
       <OperatorInsights />
+
+      <section className="downloadSection" id="android">
+        <div>
+          <p className="eyebrow">Native Android · development preview</p>
+          <h2>Take the journey contract onto your phone.</h2>
+          <p>
+            This is the physically tested Kotlin/Jetpack Compose preview—not a WebView. It includes the bounded offline
+            demonstration; full-network search requires a reachable NammaLink backend. Android may ask you to allow installs
+            from your browser or file manager.
+          </p>
+          <p className="downloadHash"><strong>SHA-256</strong> 1F4DBCE3A07E69EF9719B268EF9EDEEEBDCE2E99FE17895D7ABD3197DE501356</p>
+        </div>
+        <div className="downloadActions">
+          <a className="primaryButton" href="/downloads/NammaLink-0.1.0-dev.apk" download>Download APK · 17.2 MB</a>
+          <span>Version 0.1.0-dev · debug-signed · Android 8+</span>
+        </div>
+      </section>
 
       <section className="evidenceSection" id="evidence">
         <div className="sectionHeading">

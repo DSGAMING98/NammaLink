@@ -21,6 +21,10 @@ Last updated: 29 October 2026
 | Notifications | Planned | In-app first; no external delivery provider verified |
 | ML delay prediction | Blocked | No labelled observed arrival/delay data found |
 | Schedule-based ETA baseline | Implemented and tested | GTFS times plus explicit walking/waiting; every output labelled scheduled |
+| Full-network stop search | Implemented and tested | 9,960-stop normalized API with embedded feed provenance |
+| Full-network schedule routing | Implemented and benchmarked | 1,477,697-connection CSA index; three-minute transfers; static-feed validity gate |
+| Native Android client | Implemented; updated connected flow awaits unlocked-device QA | Compose APK, network autocomplete/journey client, explicit offline fallback |
+| APK distribution | Development preview available | Website serves a checksum-labelled debug-signed APK; production signing remains incomplete |
 | Low-connectivity mode | Partially implemented | Connection status, saved journey, local report queue, manifest, and service-worker shell cache implemented; full offline device test remains |
 | Operator insights | Implemented and tested | Bounded route trip counts, service spans, direction-aware median headways, and shared-stop analysis; explicitly not actual fleet utilization |
 | Deployment | Planned | Application builds locally; no deployment has been created or verified |
