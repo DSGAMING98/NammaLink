@@ -7,7 +7,7 @@
 **A constraint-aware scheduled public-transport planner and journey-recovery prototype for Bengaluru**
 
 [![Build](https://img.shields.io/badge/build-passing-16c784)](#verification)
-[![Tests](https://img.shields.io/badge/tests-45%20passing-16c784)](#verification)
+[![Tests](https://img.shields.io/badge/tests-47%20passing-16c784)](#verification)
 [![Android](https://img.shields.io/badge/Android-native%20APK-156b52)](#native-android-app)
 [![CI](https://github.com/DSGAMING98/NammaLink/actions/workflows/ci.yml/badge.svg)](https://github.com/DSGAMING98/NammaLink/actions/workflows/ci.yml)
 [![Data](https://img.shields.io/badge/data-static%20GTFS-f0b429)](#data-and-honesty)
@@ -36,6 +36,7 @@
 - City-scale depart-after and arrive-by contracts with enforced walking budgets and safest/fastest/direct behavior.
 - Physical-device verification of bus-only, Metro-only, and mixed BMTC–walk–BMRCL journeys.
 - On-demand Android location permission flow with distance-ranked nearby-stop lookup and a tested manual-search fallback when permission or feed coverage is unavailable.
+- Door-to-stop access walking integrated into departure time and the same hard walking budget when a nearby origin is selected.
 - Native geographic route fallback projected from real stop coordinates, with a bus/Metro/walk legend, session-only current-fix handling, explicit straight-line limits, and offline persistence.
 
 ## Native Android app
@@ -163,7 +164,7 @@ Consequences:
 
 At the latest documented checkpoint:
 
-- 45 tests across 15 files pass.
+- 47 tests across 15 files pass.
 - Strict TypeScript checking passes.
 - Production build passes.
 - Journey and recovery APIs are integration-tested.

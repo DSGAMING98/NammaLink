@@ -108,17 +108,18 @@ fun findNearbyNetworkStops(latitude: Double, longitude: Double): List<StopOption
     }
 }
 
-fun planNetworkJourney(origin: StopOption, destination: StopOption, serviceDate: String, timeMode: String, requestedTime: String, priority: String, maximumWalkingMeters: Int): NetworkJourney {
+fun planNetworkJourney(origin: StopOption, destination: StopOption, serviceDate: String, timeMode: String, requestedTime: String, priority: String, maximumWalkingMeters: Int, accessLocation: DeviceLocation? = null): NetworkJourney {
     val encodedOrigin = URLEncoder.encode(origin.id, StandardCharsets.UTF_8)
     val encodedDestination = URLEncoder.encode(destination.id, StandardCharsets.UTF_8)
     val encodedTime = URLEncoder.encode(requestedTime, StandardCharsets.UTF_8)
     val timeParameter = if (timeMode == "arriveBy") "arriveBy" else "departAfter"
-    val path = "/api/network-journeys?origin=$encodedOrigin&destination=$encodedDestination&date=$serviceDate&$timeParameter=$encodedTime&priority=$priority&maxWalkingMeters=$maximumWalkingMeters"
+    val accessParameters = accessLocation?.let { "&accessLat=${it.latitude}&accessLon=${it.longitude}" } ?: ""
+    val path = "/api/network-journeys?origin=$encodedOrigin&destination=$encodedDestination&date=$serviceDate&$timeParameter=$encodedTime&priority=$priority&maxWalkingMeters=$maximumWalkingMeters$accessParameters"
     val response = request(path)
-    val journey = response.optJSONObject("journey") ?: error("No scheduled path found for these stops and time.")
+    val journey = response.optJSONObject("journey") ?: error(response.optString("evidence", "No scheduled path found for these stops and time."))
     val contract = journey.getJSONObject("contract")
     val ridesJson = journey.getJSONArray("rides")
-    val rides = List(ridesJson.length()) { index ->
+    val transitRides = List(ridesJson.length()) { index ->
         val ride = ridesJson.getJSONObject(index)
         val fromStop = ride.getJSONObject("from")
         val toStop = ride.getJSONObject("to")
@@ -139,8 +140,21 @@ fun planNetworkJourney(origin: StopOption, destination: StopOption, serviceDate:
             toLon = toStop.getDouble("lon"),
         )
     }
+    val access = journey.optJSONObject("access")?.let { walk ->
+        val fromStop = walk.getJSONObject("from")
+        val toStop = walk.getJSONObject("to")
+        NetworkRide(
+            route = "Walk", agency = "NammaLink", mode = "walk", headsign = "",
+            from = fromStop.getString("name"), to = toStop.getString("name"),
+            departure = walk.getString("departure"), arrival = walk.getString("arrival"),
+            stopCount = 0, distanceMeters = walk.getInt("distanceMeters"),
+            fromLat = fromStop.getDouble("lat"), fromLon = fromStop.getDouble("lon"),
+            toLat = toStop.getDouble("lat"), toLon = toStop.getDouble("lon"),
+        )
+    }
+    val rides = listOfNotNull(access) + transitRides
     return NetworkJourney(
-        origin = journey.getJSONObject("origin").getString("name"),
+        origin = access?.from ?: journey.getJSONObject("origin").getString("name"),
         destination = journey.getJSONObject("destination").getString("name"),
         departure = journey.getString("departure"),
         arrival = journey.getString("arrival"),

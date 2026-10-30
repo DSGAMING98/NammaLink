@@ -83,3 +83,10 @@ The post-flow device log scan matched no `FATAL EXCEPTION`, NammaLink ANR, or An
 - Verified matching bus/Metro/walk legend entries and mode-coloured timeline dots. The Journey screen opened at the top instead of inheriting the scrolled Planner position.
 - The previously requested current fix was outside the plotted route bounds; the map displayed `Current fix is outside this route view · session only` and did not distort the geographic extent.
 - Evidence: `geographic-legend.png`/`.xml`, `multimodal-geographic-top.png`/`.xml`, and `multimodal-geographic-lower.png`/`.xml`; the post-flow fatal/ANR scan was clean.
+
+## Access-walking contract regression
+
+- The production API counted a 116 m current-location access walk against an 800 m maximum, leaving 684 m for indexed transfer walks and separating 08:00 door departure, 08:01 stop arrival, and 08:15 boarding.
+- A 2,447 m boarding walk under a 100 m maximum returned no journey with explicit evidence instead of ignoring the access constraint.
+- Installed the access-aware APK and planned the default manually selected stop-to-stop journey. It retained `0/800 m walk`, added no `Current location` leg, and produced no fatal/ANR log match.
+- Evidence: `access-manual-regression.png`/`.xml`; the positive access leg is covered by API tests because the physical device was outside the indexed nearby-stop radius.

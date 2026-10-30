@@ -3,6 +3,7 @@ import stopIndex from "@/data/transit-stops.json";
 import { earliestArrival, formatServiceTime, latestDeparture, parseServiceTime } from "@/lib/transit/connection-router";
 import { loadFullConnectionIndex } from "@/lib/transit/full-index";
 import { activeTripsForDate } from "@/lib/transit/service-calendar";
+import { distanceMeters } from "@/lib/transit/stop-search";
 
 export const runtime = "nodejs";
 
@@ -26,6 +27,11 @@ export async function GET(request: Request) {
   const requestedTime = parseServiceTime(requestedTimeInput);
   const priority = url.searchParams.get("priority") ?? "safest";
   const maximumWalkingMeters = Number(url.searchParams.get("maxWalkingMeters") ?? "5000");
+  const accessLatitudeInput = url.searchParams.get("accessLat");
+  const accessLongitudeInput = url.searchParams.get("accessLon");
+  const hasAccessLocation = accessLatitudeInput !== null || accessLongitudeInput !== null;
+  const accessLatitude = Number(accessLatitudeInput);
+  const accessLongitude = Number(accessLongitudeInput);
   const selectedOrigin = stopIndex.stops.find((stop) => stop.id === originId);
   const selectedDestination = stopIndex.stops.find((stop) => stop.id === destinationId);
 
@@ -35,22 +41,44 @@ export async function GET(request: Request) {
   if (!["safest", "fastest", "direct"].includes(priority) || !Number.isInteger(maximumWalkingMeters) || maximumWalkingMeters < 0 || maximumWalkingMeters > 5_000) {
     return Response.json({ error: "Provide priority=safest|fastest|direct and maxWalkingMeters from 0 to 5000." }, { status: 400 });
   }
+  if (hasAccessLocation && (
+    accessLatitudeInput === null || accessLongitudeInput === null
+    || !Number.isFinite(accessLatitude) || accessLatitude < -90 || accessLatitude > 90
+    || !Number.isFinite(accessLongitude) || accessLongitude < -180 || accessLongitude > 180
+  )) {
+    return Response.json({ error: "Provide both valid accessLat and accessLon values when planning from current location." }, { status: 400 });
+  }
   if (date < metadata.validFrom || date > metadata.validUntil) {
     return Response.json({ error: "Date is outside the static feed validity window.", validFrom: metadata.validFrom, validUntil: metadata.validUntil }, { status: 422 });
   }
 
   const started = performance.now();
+  const accessWalkingMeters = hasAccessLocation ? Math.round(distanceMeters({ lat: accessLatitude, lon: accessLongitude }, selectedOrigin)) : 0;
+  const accessDurationSeconds = Math.ceil(accessWalkingMeters / 1.25);
+  const remainingWalkingMeters = maximumWalkingMeters - accessWalkingMeters;
+  const routingRequestedTime = timeMode === "departAfter" ? requestedTime + accessDurationSeconds : requestedTime;
+  const baseContract = { timeMode, requestedTime: requestedTimeInput, priority, maximumWalkingMeters, accessWalkingMeters, remainingWalkingMeters: Math.max(0, remainingWalkingMeters), minimumTransferSeconds: priority === "safest" ? 180 : 0, directOnly: priority === "direct" };
+  if (remainingWalkingMeters < 0) {
+    return Response.json({
+      journey: null,
+      queryMilliseconds: Math.round((performance.now() - started) * 10) / 10,
+      contract: { ...baseContract, latestStart: null, deadlineMet: false },
+      scanCount: 0,
+      evidence: `The estimated ${accessWalkingMeters} m walk to ${selectedOrigin.name} exceeds the ${maximumWalkingMeters} m journey contract.`,
+    });
+  }
   const index = await loadFullConnectionIndex();
   const activeTrips = activeTripsForDate(metadata.trips, metadata.services, date);
   const minimumTransferSeconds = priority === "safest" ? 180 : 0;
   const originStops = routableStops(selectedOrigin);
   const destinationStops = routableStops(selectedDestination);
-  const scanOptions = { maximumWalkingMeters, directOnly: priority === "direct" };
+  const scanOptions = { maximumWalkingMeters: remainingWalkingMeters, directOnly: priority === "direct" };
   const arriveByResult = timeMode === "arriveBy" ? latestDeparture(index, originStops, destinationStops, requestedTime, minimumTransferSeconds, activeTrips, scanOptions) : null;
-  const legs = arriveByResult?.legs ?? (timeMode === "departAfter" ? earliestArrival(index, originStops, destinationStops, requestedTime, minimumTransferSeconds, activeTrips, scanOptions) : null);
+  const legs = arriveByResult?.legs ?? (timeMode === "departAfter" ? earliestArrival(index, originStops, destinationStops, routingRequestedTime, minimumTransferSeconds, activeTrips, scanOptions) : null);
   const scanCount = arriveByResult?.scanCount ?? 1;
-  const latestStart = arriveByResult?.departAfter ?? (timeMode === "departAfter" ? requestedTime : null);
-  const contract = { timeMode, requestedTime: requestedTimeInput, latestStart: latestStart === null ? null : formatServiceTime(latestStart), deadlineMet: timeMode === "arriveBy" ? legs !== null : null, priority, maximumWalkingMeters, minimumTransferSeconds, directOnly: priority === "direct" };
+  const latestStartAtStop = arriveByResult?.departAfter ?? (timeMode === "departAfter" ? routingRequestedTime : null);
+  const latestStart = latestStartAtStop === null ? null : Math.max(0, latestStartAtStop - accessDurationSeconds);
+  const contract = { ...baseContract, latestStart: latestStart === null ? null : formatServiceTime(latestStart), deadlineMet: timeMode === "arriveBy" ? legs !== null : null };
   const queryMilliseconds = Math.round((performance.now() - started) * 10) / 10;
   if (!legs) {
     return Response.json({ journey: null, queryMilliseconds, contract, scanCount, evidence: "No scheduled path found that satisfies this journey contract in the indexed static feed." });
@@ -74,8 +102,19 @@ export async function GET(request: Request) {
     }
   }
 
+  const firstDeparture = parseServiceTime(rides[0]?.departure ?? "");
+  const access = hasAccessLocation && firstDeparture !== null ? {
+    mode: "walk",
+    from: { id: "current-location", name: "Current location", lat: accessLatitude, lon: accessLongitude },
+    to: selectedOrigin,
+    departure: formatServiceTime(timeMode === "departAfter" ? requestedTime : Math.max(0, (latestStartAtStop ?? firstDeparture) - accessDurationSeconds)),
+    arrival: formatServiceTime(timeMode === "departAfter" ? requestedTime + accessDurationSeconds : (latestStartAtStop ?? firstDeparture)),
+    distanceMeters: accessWalkingMeters,
+    durationSeconds: accessDurationSeconds,
+  } : null;
+
   return Response.json({
-    journey: { origin: selectedOrigin, destination: selectedDestination, departure: rides[0]?.departure, arrival: rides.at(-1)?.arrival, transfers: Math.max(0, rides.filter((ride) => ride.mode !== "walk").length - 1), walkingMeters: rides.reduce((sum, ride) => sum + (ride.distanceMeters ?? 0), 0), modes: [...new Set(rides.filter((ride) => ride.mode !== "walk").map((ride) => ride.mode))], contract, rides },
+    journey: { origin: selectedOrigin, destination: selectedDestination, departure: access?.departure ?? rides[0]?.departure, arrival: rides.at(-1)?.arrival, transfers: Math.max(0, rides.filter((ride) => ride.mode !== "walk").length - 1), walkingMeters: accessWalkingMeters + rides.reduce((sum, ride) => sum + (ride.distanceMeters ?? 0), 0), access, modes: [...new Set(rides.filter((ride) => ride.mode !== "walk").map((ride) => ride.mode))], contract, rides },
     queryMilliseconds,
     network: { feedVersions: metadata.feedVersions, validFrom: metadata.validFrom, validUntil: metadata.validUntil, stops: metadata.searchableStopCount, routingNodes: metadata.stopCount, trips: metadata.tripCount, activeTrips: activeTrips.reduce((sum, value) => sum + value, 0), connections: metadata.connectionCount, transferFootpaths: metadata.footpaths.length, scanCount, scanStrategy: timeMode === "arriveBy" ? "minute-precision monotone deadline search" : "single forward scan", footpathPolicy: metadata.footpathPolicy, plausibilityGate: metadata.plausibilityGate, sources: metadata.sources, license: metadata.license, realtime: false },
   });

@@ -4,15 +4,15 @@ Updated: 30 October 2026
 
 ## Current phase
 
-Phase 22 — Multimodal map legend and session-only location context.
+Phase 23 — Door-to-stop access walking contract.
 
 ## Last completed task
 
-Added a bus/Metro/walk map legend, session-only current-fix handling, distinct Metro timeline colour, and tab-isolated scroll state, then physically verified a real bus–walk–Metro journey.
+Integrated current-location access walking into the door departure and hard walking budget, added explicit over-budget evidence, and verified that manual stop-to-stop planning remains unchanged on the physical device.
 
 ## Last verified working commit
 
-Multimodal map-context milestone: `5469f7e` on `main`, verified by GitHub Actions run `41050897769`.
+Multimodal map-context milestone: `5469f7e` on `main`, verified by GitHub Actions run `41050897769`. The Phase 23 access-contract milestone is under verification and will replace this line after CI passes.
 
 ## Current branch
 
@@ -26,13 +26,14 @@ Multimodal map-context milestone: `5469f7e` on `main`, verified by GitHub Action
 - Calendar-aware schedule routing with hard arrive-by, walking, transfer, and directness constraints.
 - Multiple ranking strategies, source-labelled timeline, evidence-aware simulated incident, and recovery preserving the completed leg.
 - Installable responsive web app with offline shell, saved journey, local report queue, and schedule-supply operator insights.
-- 45 passing web/router/API/operator/calendar/contract/location tests plus strict type-check and production build.
+- 47 passing web/router/API/operator/calendar/contract/location tests plus strict type-check and production build.
 - Native Kotlin/Jetpack Compose project using AGP 9.2.1, Gradle 9.4.1, compile/target SDK 36, and minimum SDK 26.
 - Native constraint planner, GTFS-derived demonstration itinerary, schematic route view, versioned full-itinerary local save/restore, explicit simulated disruption/recovery, and full-feed operator screen.
 - Physical Android 16 installation and UI-hierarchy validation on Vivo V2513.
 - Android on-demand precise/approximate location permission, current-fix acquisition, distance-ranked nearby-stop lookup, denial-safe manual search, and outside-feed fallback.
 - Native geographic projection from real boarding/transfer/alighting coordinates with bus/Metro/walk colours and explicit straight-line limitations.
 - Map legend, mode-coloured timeline markers, and privacy-preserving current-fix context that remains in memory only and does not alter saved journeys.
+- Optional current-location access leg with budget reservation, door-time calculation, and evidence-backed over-budget rejection.
 - Device screenshots under `research_outputs/device_evidence/`.
 - Machine-readable zero-model registry and professional ML artifact/evidence policy in `docs/ML_TRAINING_REPORT.md`.
 - Operator UI explicitly reports zero trained ML models instead of fabricating evaluation metrics.
@@ -77,7 +78,7 @@ Arbitrary place search/maps, coordinate-based access/egress, pedestrian-network 
 - Updated Android `:app:assembleDebug`: passed with the stop-search and network-journey client.
 - `adb reverse tcp:3000 tcp:3000`: configured successfully; updated APK streamed install passed.
 - Production website APK check: HTTP 200, `application/vnd.android.package-archive`, 17,150,016-byte content length, visible debug-signing label.
-- Current multimodal-map development APK SHA-256: `ECBEB0F7ACF611F8B5DDAB01DC34EB3BA9E33EBB82A94CB170B1740768DA5453` (17,150,016 bytes).
+- Current access-contract development APK SHA-256: `195C68443034C019F7FE3FF7FC28E17AF784A9AC81B5E24B1A8E14FBEFD6317D` (17,150,016 bytes).
 - Operator graph production HTML: passed for all full-feed totals, rejection count, and zero-model label.
 - Operator graph visual QA: passed in the in-app browser at desktop and 390×844 mobile viewport; cards, bars, disclaimers, and following download section rendered without observed overflow.
 - CI command parity check: frozen pnpm install, 36 tests, strict type-check, production web build, and native Android debug build passed locally before workflow push.
@@ -117,6 +118,8 @@ Arbitrary place search/maps, coordinate-based access/egress, pedestrian-network 
 - Physical multimodal map: two BMTC legs, a 128 m estimated walk, and Purple Line rendered with consistent green/amber/purple map and timeline colours; current fix outside the route was disclosed as session-only; scroll state opened at the journey header; fatal/ANR scan clean.
 - GitHub Actions run [`41050897769`](https://github.com/DSGAMING98/NammaLink/actions/runs/41050897769): all 45 tests, strict type-check, production web build, native APK build, checksum recording, and artifact upload passed for `5469f7e`.
 - CI Android artifact `NammaLink-android-debug-5469f7e0c4ffa6689cedbe86e6d59afa15e66090` (`12975130370`): 9,983,918-byte ZIP retained until 13 November 2026; GitHub artifact digest `sha256:6e20c4157a4c3764c248e40ac85c99a834cb274166d04c8e5b912b8808d486e2`.
+- Access-contract API smoke: 116 m access under an 800 m maximum left 684 m, separated door/stop/boarding times, and a 2,447 m access under a 100 m maximum returned no journey with explicit evidence.
+- Physical manual-stop regression: unchanged `0/800 m walk`, no injected current-location leg, updated APK install successful, and fatal/ANR scan clean.
 
 ## Dataset and ML limitations
 
@@ -136,7 +139,7 @@ Arbitrary place search/maps, coordinate-based access/egress, pedestrian-network 
 ## Known bugs and coverage gaps
 
 - The native fallback uses real stop coordinates and can show a session-only current-fix marker near the plotted route, but still lacks street-following transit shapes, pedestrian geometry, map tiles, and pan/zoom.
-- Nearby discovery selects an indexed boarding stop but does not yet add the device-to-stop access distance to the journey contract's transfer-walking total.
+- Access distance uses straight-line geometry and a fixed 1.25 m/s walking speed; pedestrian-network routing remains unavailable.
 - The connected phone's physical location was outside the five-kilometre indexed-stop radius, so the positive nearby-result UI is API-tested but not physically exercised at an in-coverage location.
 - Full-network planning requires a reachable backend unless an already-saved journey or the explicit bounded offline demonstration is used.
 
@@ -146,11 +149,11 @@ No public deployment is claimed. The production Next.js build and local producti
 
 ## Uncommitted work
 
-None. Phase 22 source, APK, documentation, and device evidence are committed, remotely verified, and pushed; this closure is documentation-only.
+Phase 23 source, tests, APK, documentation, and device evidence are being committed as one verified milestone. After CI closure, the working tree must be clean.
 
 ## Exact next implementation step
 
-Integrate the selected nearby-stop access distance into the journey contract and rendered total instead of treating nearby discovery only as a stop selector. Public deployment and release signing remain owner-dependent production steps once account and keystore access are available.
+Add explicit waiting time and recommendation reasoning to full-network Android results so passengers can compare why a journey was selected. Public deployment and release signing remain owner-dependent production steps once account and keystore access are available.
 
 ## Restore commands
 

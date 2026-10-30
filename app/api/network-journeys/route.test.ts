@@ -53,4 +53,32 @@ describe("multimodal network journey API", () => {
     const response = await GET(request({ origin: "metro:WHTM", destination: "metro:CLGA", date: "2027-09-01", departAfter: "08:00" }));
     expect(response.status).toBe(422);
   });
+
+  it("counts current-location access against the walking contract and door departure", async () => {
+    const response = await GET(request({
+      origin: "20921", destination: "20707", date: "2026-10-30", departAfter: "08:00",
+      priority: "safest", maxWalkingMeters: "800", accessLat: "12.9779", accessLon: "77.5724",
+    }));
+    const body = await response.json();
+    expect(response.status).toBe(200);
+    expect(body.journey.access).toMatchObject({ mode: "walk", departure: "08:00", to: { id: "20921" } });
+    expect(body.journey.access.distanceMeters).toBeGreaterThan(0);
+    expect(body.journey.walkingMeters).toBe(body.journey.access.distanceMeters);
+    expect(body.journey.contract).toMatchObject({ maximumWalkingMeters: 800, accessWalkingMeters: body.journey.access.distanceMeters });
+    expect(body.journey.contract.remainingWalkingMeters).toBe(800 - body.journey.access.distanceMeters);
+
+    const rejected = await GET(request({
+      origin: "20921", destination: "20707", date: "2026-10-30", departAfter: "08:00",
+      maxWalkingMeters: "100", accessLat: "12.99", accessLon: "77.59",
+    }));
+    const rejectedBody = await rejected.json();
+    expect(rejectedBody.journey).toBeNull();
+    expect(rejectedBody.contract.accessWalkingMeters).toBeGreaterThan(100);
+    expect(rejectedBody.evidence).toContain("exceeds the 100 m journey contract");
+  });
+
+  it("validates paired current-location coordinates", async () => {
+    const response = await GET(request({ origin: "20921", destination: "20707", date: "2026-10-30", departAfter: "08:00", accessLat: "12.9" }));
+    expect(response.status).toBe(400);
+  });
 });

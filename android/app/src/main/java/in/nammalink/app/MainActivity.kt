@@ -166,6 +166,7 @@ private fun PlannerScreen(onPlan: (NetworkJourney) -> Unit, onOfflineDemo: () ->
     var destination by remember { mutableStateOf(StopOption("20707", "Central Silk Board", 12.92, 77.62)) }
     var suggestions by remember { mutableStateOf(emptyList<StopOption>()) }
     var nearby by remember { mutableStateOf(emptyList<StopOption>()) }
+    var currentFix by remember { mutableStateOf<DeviceLocation?>(null) }
     var activeField by rememberSaveable { mutableStateOf("") }
     var planning by remember { mutableStateOf(false) }
     var locating by remember { mutableStateOf(false) }
@@ -196,6 +197,7 @@ private fun PlannerScreen(onPlan: (NetworkJourney) -> Unit, onOfflineDemo: () ->
             fix to stops
         }.onSuccess { (fix, stops) ->
             onLocationUpdated(fix)
+            currentFix = fix
             nearby = stops
             locationStatus = if (stops.isEmpty()) {
                 "Location found (±${fix.accuracyMeters.toInt()} m), but no indexed stop is within 5 km. Search manually instead."
@@ -210,7 +212,7 @@ private fun PlannerScreen(onPlan: (NetworkJourney) -> Unit, onOfflineDemo: () ->
         ScreenHeader("Bengaluru public transport", "Arrive with confidence.", "A journey contract that plans for your deadline—not just the shortest path.")
         Column(Modifier.padding(horizontal = 20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             StatusPill("● 10,043 searchable bus + Metro stops · static schedule", Green)
-            OutlinedTextField(from, { from = it; origin = origin.copy(id = ""); activeField = "from" }, label = { Text("From") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+            OutlinedTextField(from, { from = it; origin = origin.copy(id = "", distanceMeters = null); activeField = "from" }, label = { Text("From") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
             if (activeField == "from") StopSuggestions(suggestions) { origin = it; from = it.name; activeField = "" }
             OutlinedButton(
                 onClick = {
@@ -254,7 +256,8 @@ private fun PlannerScreen(onPlan: (NetworkJourney) -> Unit, onOfflineDemo: () ->
                         val maximumWalkingMeters = when (maxWalk) { "400 m" -> 400; "800 m" -> 800; else -> 1_500 }
                         val priorityValue = ranking.lowercase()
                         val timeModeValue = if (timeMode == "Arrive by") "arriveBy" else "departAfter"
-                        runCatching { withContext(Dispatchers.IO) { planNetworkJourney(origin, destination, LocalDate.now().toString(), timeModeValue, requestedTime, priorityValue, maximumWalkingMeters) } }
+                        val accessLocation = currentFix.takeIf { origin.distanceMeters != null }
+                        runCatching { withContext(Dispatchers.IO) { planNetworkJourney(origin, destination, LocalDate.now().toString(), timeModeValue, requestedTime, priorityValue, maximumWalkingMeters, accessLocation) } }
                             .onSuccess(onPlan)
                             .onFailure { error = it.message ?: "Network journey unavailable." }
                         planning = false

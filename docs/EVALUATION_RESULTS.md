@@ -85,6 +85,12 @@ Physical-device QA planned the real 08:00 Kempegowda Bus Station → Central Sil
 
 A second device flow planned the real 08:02 14th Main HSR Layout → Whitefield Metro journey. The map and timeline consistently rendered two BMTC legs in green, the 128 m estimated transfer walk in amber, and the Purple Line leg in purple. The bus/Metro/walk legend remained visible. A current device fix obtained earlier in the active session was outside the plotted journey bounds, so the app disclosed that state instead of distorting the route or drawing a misleading marker. Changing tabs no longer carries the planner's scroll offset into the journey screen.
 
+## Door-to-stop access contract
+
+A production API query from a coordinate near Kempegowda Bus Station measured a 116 m straight-line access walk. Under an 800 m walking contract, the engine reserved 116 m for access, left 684 m for indexed transfer footpaths, set door departure to 08:00, estimated stop arrival at 08:01, and boarded the first scheduled service at 08:15. A second query measured 2,447 m to the same stop under a 100 m contract and correctly returned no journey with an explicit over-budget explanation.
+
+The physical Android regression used manually selected stops and retained the existing 0/800 m walking contract with no injected current-location leg. This proves the optional access parameters do not alter ordinary stop-to-stop planning. The connected device was outside nearby-stop coverage, so a positive access-leg Android rendering remains API/integration-tested rather than physically exercised at an in-coverage location.
+
 ## Operator schedule analysis
 
 The bounded fixture contains 53 scheduled trips across 216 referenced stops and 3 selected routes. Direction-aware median scheduled headways are 48 minutes for `O EXP V-213VJ` (32 trips), 50 minutes for `600-CA` (17 trips), and 32 minutes for `365-BB BSK-BNP-ANK` (4 trips). The displayed service spans are 05:30–21:35, 07:20–16:30, and 17:13–20:00 respectively.
