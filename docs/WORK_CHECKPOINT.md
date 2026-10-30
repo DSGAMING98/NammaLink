@@ -164,11 +164,11 @@ No public deployment is claimed. The production Next.js build and local producti
 
 ## Uncommitted work
 
-Planning-only work: `docs/MVP_ENGINEERING_ROADMAP.md` defines the engineering-first 11-phase route from the verified Phase 26 baseline. No Phase 27 implementation has started.
+Planning-only work: `docs/MVP_ENGINEERING_ROADMAP.md` now defines both the full 11-phase route and a 6.5–9.5-hour, four-block overnight critical path from the verified Phase 26 baseline. No Phase 27 implementation has started.
 
 ## Exact next implementation step
 
-Begin Phase 27 only after plan approval: deploy a public HTTPS backend, add health/configuration gates, fail presentation/release builds on loopback URLs, and prove physical-phone search with USB forwarding removed. Follow `docs/MVP_ENGINEERING_ROADMAP.md`.
+Overnight Block A after plan approval: confirm deployment and Google API access in the first 15 minutes, deploy a public HTTPS backend, add health/configuration gates, fail presentation builds on loopback URLs, and prove physical-phone search with USB forwarding removed. Follow `docs/MVP_ENGINEERING_ROADMAP.md`.
 
 ## Restore commands
 

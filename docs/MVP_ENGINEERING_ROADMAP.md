@@ -41,17 +41,53 @@ This was a release-blocking architecture defect. The permanent controls are:
 
 ## Credible target for tomorrow's 50-mark MVP presentation
 
-The full 11-phase end state is approximately **7–12 focused engineering days**, with deployment, signing, realtime, and ticketing-partner dependencies. It is not credible to claim every production integration is complete tomorrow.
+The full 11-phase production end state is approximately **7–12 focused engineering days**, with deployment, signing, realtime, and ticketing-partner dependencies. The available window is only overnight, so implementation must use the following four-block critical path instead of completing every phase sequentially.
 
-The strongest honest presentation target is:
+### Overnight execution plan
 
-1. Phases 27–31 complete or all owner-dependent blockers clearly isolated.
-2. Phase 32 complete: working Google place search and real mapped journey on the installed phone.
-3. Phase 33 complete: focused airport mode using validated KIA schedule/route data.
-4. Phase 34 core complete: Kannada switch for the primary passenger flow plus polished branding.
-5. Phase 36 demonstration boundary: a clearly labelled partner handoff/deep-link flow and hypothetical revenue model; no fake completed booking or commission claim.
-6. Phase 35 values limited to verified schedules/fares; no fabricated realtime state.
-7. Phase 37 limited to satellite map toggle and saved/last-known guidance if time remains.
+| Block | Maximum focus | Work included | Must-pass outcome |
+| --- | --- | --- | --- |
+| **A. Rescue engineering** | 1.5–2 hours | Phase 27 plus the essential parts of 28/29: public HTTPS backend, health endpoint, no-loopback presentation build, Google API probes, normalized connectivity/search errors | Search and route planning work on the physical phone with `adb reverse` removed and the laptop server stopped |
+| **B. Judge-visible core features** | 2.5–3.5 hours | Phase 32 core and Phase 33: Google place search/map/geometry if API access passes; To/From Airport mode; current-location airport options; validated KIA schedules/stops/routes | A physical-phone flow from current/place search to a mapped airport-bus journey works using sourced static data |
+| **C. Presentation features** | 1.5–2.5 hours | Phase 34 core, Phase 36 safe boundary, selected Phase 37 items: English/Kannada switch for primary screens, brand/UI polish, partner booking handoff, hypothetical revenue card, satellite toggle/saved guidance | The presentation visibly includes Kannada, airport planning, ticket handoff/revenue explanation, and low-connectivity value without false claims |
+| **D. Freeze and verification** | 1–1.5 hours | Phase 31 acceptance subset: tests, type-check, production build, Android build/install, no-USB device run, screenshots, demo reset, docs, commit/push, CI observation | One exact APK and one exact demo path are reproducible before presentation; no new feature work after freeze |
+
+Expected total: **6.5–9.5 focused hours**, provided deployment access and Google API enablement are available immediately.
+
+### Hard priority order
+
+1. **Installed search works without USB or localhost.** Nothing else outranks this.
+2. **Airport mode works with validated scheduled data.** This is the main new feature.
+3. **Google place search and mapped geometry work** if the configured APIs pass their probes.
+4. **Kannada primary flow and visual polish.** Translate planner, airport result, journey result, offline state, and common errors first.
+5. **Partner booking handoff and revenue explanation.** Deep link only; no payment ownership claim.
+6. **Satellite toggle and saved guidance** only after the previous gates pass.
+
+### Explicit overnight cuts
+
+These remain in the full roadmap but are not honest overnight commitments without external support:
+
+- production ONDC/Namma BMTC/Namma Metro purchase completion, refunds, or verified commission callbacks;
+- live bus positions or realtime arrivals without an authorized feed;
+- unverified fares;
+- full-app Kannada coverage beyond the primary passenger/demo flow;
+- production signing if the owner keystore is unavailable;
+- server-side authentication/moderation and notification delivery;
+- new ML training without labelled observed-arrival data;
+- any claim that phone sensors create satellite or internet connectivity.
+
+For the presentation, unavailable integrations must appear as clearly labelled partner handoffs or roadmap items—not simulated production success.
+
+### First 15-minute dependency gate
+
+Before coding, verify:
+
+1. a deployable public backend account/domain is accessible;
+2. Places API (New), Routes API, Geocoding API, and Maps SDK for Android return authorized responses under the configured restrictions;
+3. the Android package name and debug/release SHA fingerprints are allowed by the Android Maps key;
+4. the exact presentation phone has normal internet access without USB forwarding.
+
+If the public deployment account is unavailable, the user must connect one immediately; another laptop tunnel would repeat the Round 3 failure. If Google returns 403, fix service enablement/billing/restrictions before building map UI. A MapLibre/local-search fallback may remain available for resilience, but it must not be presented as completed Google Maps integration.
 
 ## Google Maps architecture
 
