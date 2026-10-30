@@ -181,7 +181,19 @@ None. Engineering phases 27–31 are committed and pushed. Device evidence is sa
 
 ## Exact next implementation step
 
-Deploy and smoke-test the completed Phase 32–37 feature set, install the rebuilt presentation APK on the Vivo device, and validate Airport Mode plus saved/offline recovery over the public HTTPS backend. Places remains safely degraded to verified-stop search until the supplied server key restriction is corrected.
+Correct the supplied Google Places server-key restriction if full place autocomplete is required; production currently returns an explicit `CONFIGURATION_ERROR` and the verified-stop fallback remains functional. Partner conversion callbacks and actual commission reporting remain disabled until an authorized contract/API exists.
+
+## Phases 32–37 feature checkpoint — 31 October 2026
+
+- Production deployment for commit `068992160617508ab0d047a52934e27f56483c78` reached `READY` at `https://nammalink.vercel.app`.
+- `/api/health` returned `ok` with the exact deployed revision.
+- `/api/airport` returned six Silk Board corridor matches in the requested direction, with `realtime: false` and dated GTFS provenance.
+- Browser QA passed Airport Mode search, route map rendering, scheduled departures, Kannada switching, device-local airport saving, and low-data/referral evidence states.
+- 57 tests across 19 files, strict TypeScript, secret hygiene, and the Next.js production build passed.
+- Android `test assemblePresentation` passed against the public HTTPS endpoint.
+- Presentation APK SHA-256 is `3D2364081AAF309A54E0A380D21467688CA4F39CA5DAA746773A0EE8CAC368B1` (8,056,434 bytes).
+- The rebuilt APK installed and launched on Vivo device `10BFAB14ED0026H` with no ADB reverse rules. Native Airport Mode loaded KIA scheduled results; the sampled log scan contained no fatal exception or ANR.
+- Google Places remains externally blocked/missing in production (`503 CONFIGURATION_ERROR`); stop search fallback returned results and no broken search control is exposed.
 
 ## Restore commands
 
