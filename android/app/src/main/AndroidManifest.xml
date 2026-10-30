@@ -10,7 +10,7 @@
         android:label="NammaLink"
         android:supportsRtl="true"
         android:theme="@style/Theme.NammaLink"
-        android:usesCleartextTraffic="true">
+        android:usesCleartextTraffic="${usesCleartextTraffic}">
         <activity
             android:name=".MainActivity"
             android:exported="true"

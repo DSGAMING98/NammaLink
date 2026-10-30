@@ -4,7 +4,7 @@ Last updated: 30 October 2026
 
 ## System boundary
 
-NammaLink is currently a single Next.js application with a pure TypeScript transit domain. The runnable prototype is intentionally local-first: static schedule data is committed as a bounded licensed fixture, routing and recovery are deterministic, and no database or paid API is required for the core demonstration.
+NammaLink is a deployable Next.js service with a pure TypeScript transit domain and a native Android client. Static schedule routing remains deterministic and independent of paid APIs. Optional map functions cross a server-only Google gateway so provider keys are never compiled into Android or browser bundles.
 
 ```mermaid
 flowchart LR
@@ -27,6 +27,9 @@ flowchart LR
     SA --> SI["10,043-stop bus + Metro search index"]
     UI --> NA["GET /api/network-journeys"]
     NA --> CSA["Calendar-filtered bus + Metro Connection Scan"]
+    UI --> H["GET /api/health"]
+    UI --> MG["Validated /api/maps gateway"]
+    MG --> GP["Google Places / Geocoding / Routes"]
 ```
 
 ## Components
@@ -43,6 +46,9 @@ flowchart LR
 | Stop discovery | Normalized text search plus bounded great-circle nearby lookup across 9,960 BMTC stops and 83 BMRCL stations | `app/api/stops/`, `lib/transit/stop-search.ts`, `data/transit-stops.json` |
 | Full-network routing | GTFS-calendar-filtered scan over 1,563,324 bus/Metro connections and 670 explicit transfer footpaths; optional current-location access reserves walking budget before the scan | `app/api/network-journeys/`, `lib/transit/connection-router.ts` |
 | Native Android | Compose planner, on-demand platform location and nearby-stop selection, real-coordinate geographic fallback, offline demonstration, recovery, versioned full-itinerary local restoration, and full-feed operator evidence | `android/`, physical-device QA |
+| Readiness and versioning | Secret-safe service, revision, dataset-validity, and capability contract | `app/api/health/` |
+| Maps gateway | Bounded validation, Bengaluru bias, timeouts, per-client rate limiting, normalized errors, and server-only provider credentials | `app/api/maps/`, `lib/server/` |
+| Deployment | Standalone Next.js output plus non-root multi-stage container and repeatable release checks | `Dockerfile`, `docs/DEPLOYMENT.md`, `.github/workflows/ci.yml` |
 
 ## Request flow
 
@@ -58,6 +64,8 @@ flowchart LR
 - `.env.local` is ignored; server keys are not imported by client components.
 - API input is schema-validated and numerically bounded.
 - Security headers disable framing, MIME sniffing, and permissive referrer leakage.
+- Map requests receive opaque request IDs, bounded inputs, timeouts, stable error codes, and privacy-safe failure logs.
+- A tracked-file secret hygiene gate runs locally and in CI.
 - The service worker excludes API responses from its cache.
 - Saved journeys and report drafts remain on the current device. The UI states that drafts are not uploaded.
 - No continuous location, account, email, SMS, or push permission is required.
@@ -69,4 +77,4 @@ The bounded enumerator remains the multi-constraint correctness prototype. City-
 
 ## External integrations
 
-Google keys are locally present, but minimal Places requests returned HTTP 403. Google maps/place/routing features are therefore blocked and not part of the working core. An authorized realtime feed, notification provider, and verified Supabase backend are also absent. The architecture keeps those optional so schedule planning continues without them.
+Google Routes and Geocoding live authorization probes pass. Places Autocomplete currently returns HTTP 403 because the configured key rejects server requests without an HTTP referrer; the gateway is implemented but remains degraded until the key restriction is corrected. An authorized realtime feed, notification provider, and verified Supabase backend are also absent. The architecture keeps all of these optional so schedule planning continues without them.

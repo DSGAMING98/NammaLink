@@ -174,6 +174,9 @@ private fun PlannerScreen(onPlan: (NetworkJourney) -> Unit, onOfflineDemo: () ->
     var locationRequestNonce by remember { mutableIntStateOf(0) }
     var locationStatus by remember { mutableStateOf<String?>(null) }
     var error by remember { mutableStateOf<String?>(null) }
+    var backendState by remember { mutableStateOf("checking") }
+    var backendDetail by remember { mutableStateOf("Checking NammaLink service…") }
+    var healthRetry by remember { mutableIntStateOf(0) }
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { grants ->
@@ -181,11 +184,28 @@ private fun PlannerScreen(onPlan: (NetworkJourney) -> Unit, onOfflineDemo: () ->
         else locationStatus = "Location permission was not granted. You can still search for any stop manually."
     }
 
+    LaunchedEffect(healthRetry) {
+        backendState = "checking"
+        backendDetail = "Checking NammaLink service…"
+        runCatching { withContext(Dispatchers.IO) { checkBackendHealth() } }
+            .onSuccess { health ->
+                backendState = "ready"
+                backendDetail = "Service ready · API ${health.version} · ${health.revision.take(7)}"
+            }
+            .onFailure { failure ->
+                backendState = "unavailable"
+                backendDetail = failure.userMessage()
+            }
+    }
+
     val activeQuery = if (activeField == "from") from else to
     LaunchedEffect(activeField, activeQuery) {
         if (activeField.isBlank() || activeQuery.length < 2) { suggestions = emptyList(); return@LaunchedEffect }
         delay(300)
-        suggestions = runCatching { withContext(Dispatchers.IO) { searchNetworkStops(activeQuery) } }.getOrElse { emptyList() }
+        if (backendState != "ready") { suggestions = emptyList(); return@LaunchedEffect }
+        suggestions = runCatching { withContext(Dispatchers.IO) { searchNetworkStops(activeQuery) } }
+            .onFailure { error = it.userMessage() }
+            .getOrElse { emptyList() }
     }
 
     LaunchedEffect(locationRequestNonce) {
@@ -213,6 +233,10 @@ private fun PlannerScreen(onPlan: (NetworkJourney) -> Unit, onOfflineDemo: () ->
         ScreenHeader("Bengaluru public transport", "Arrive with confidence.", "A journey contract that plans for your deadline—not just the shortest path.")
         Column(Modifier.padding(horizontal = 20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             StatusPill("● 10,043 searchable bus + Metro stops · static schedule", Green)
+            StatusPill(backendDetail, if (backendState == "ready") Green else if (backendState == "checking") Amber else Coral)
+            if (backendState == "unavailable") {
+                OutlinedButton(onClick = { healthRetry += 1 }, modifier = Modifier.fillMaxWidth()) { Text("Retry service connection") }
+            }
             OutlinedTextField(from, { from = it; origin = origin.copy(id = "", distanceMeters = null); activeField = "from" }, label = { Text("From") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
             if (activeField == "from") StopSuggestions(suggestions) { origin = it; from = it.name; activeField = "" }
             OutlinedButton(
@@ -260,11 +284,11 @@ private fun PlannerScreen(onPlan: (NetworkJourney) -> Unit, onOfflineDemo: () ->
                         val accessLocation = currentFix.takeIf { origin.distanceMeters != null }
                         runCatching { withContext(Dispatchers.IO) { planNetworkJourney(origin, destination, LocalDate.now().toString(), timeModeValue, requestedTime, priorityValue, maximumWalkingMeters, accessLocation) } }
                             .onSuccess(onPlan)
-                            .onFailure { error = it.message ?: "Network journey unavailable." }
+                            .onFailure { error = it.userMessage() }
                         planning = false
                     }
                 },
-                enabled = !planning,
+                enabled = !planning && backendState == "ready",
                 modifier = Modifier.fillMaxWidth().height(54.dp).semantics { contentDescription = "Plan journey" },
                 colors = ButtonDefaults.buttonColors(containerColor = Green),
                 shape = RoundedCornerShape(14.dp)

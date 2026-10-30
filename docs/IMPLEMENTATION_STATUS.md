@@ -19,7 +19,7 @@ Last updated: 30 October 2026
 | Arrive-by and Journey Contract constraints | Implemented and tested | Deadline, safety buffer, walking, transfers, and five ranking preferences are enforced in pure TypeScript |
 | Journey API | Implemented and tested | Zod-validated POST endpoint returns source-labelled schedule results; API tests cover valid and invalid requests |
 | Mobile-first journey UI | Implemented and tested | Interactive Journey Contract and itinerary timeline verified in desktop and 390×844 browser views |
-| Google Maps / Places / Routes integration | Blocked | Variables are present, but two minimal Places API probes returned HTTP 403; no keys were exposed |
+| Google Maps service gateway | Implemented and contract-tested; Places degraded | Server-only autocomplete, geocoding, place resolution, and walking-route endpoints have validation, Bengaluru bounds, rate limits, timeouts, request IDs, and normalized errors. Routes/Geocoding probes pass; Places key restrictions return HTTP 403 |
 | Journey disruption evidence | Partially implemented | Typed report states and transparent scoring are tested; submission, persistence, and moderation UI remain |
 | Recovery simulation | Simulated for demonstration | Verified-labelled synthetic incident preserves the completed leg and returns the next feasible continuation with a deadline violation |
 | Authentication / moderation | Planned | Supabase variables present; backend state unverified |
@@ -30,7 +30,9 @@ Last updated: 30 October 2026
 | Full-network schedule routing | Implemented and benchmarked | 1,563,324-connection calendar-filtered CSA; depart-after/arrive-by, bus, Metro, interchange, 670 transfer footpaths, hard walking budgets, and safest/fastest/direct behavior |
 | Native Android client | Implemented and physical-device validated | Compose APK, live autocomplete, permission-aware nearby-stop discovery, contract planning, geographic fallback, full-network rendering, coordinate-preserving offline save/restore, explicit bounded fallback; evidence under `research_outputs/device_evidence/` |
 | APK distribution | Development preview available | Website serves a checksum-labelled debug-signed APK; production signing remains incomplete |
-| Low-connectivity mode | Partially implemented | Android full-itinerary restoration passed with the backend tunnel removed; web connection status, local report queue, manifest, and service-worker shell cache remain, but web app-shell offline reload is not device-verified |
+| Low-connectivity mode | Implemented for core Android journey continuity | Android service readiness, retry, unavailable state, explicit offline demo, and full-itinerary restoration are physical-device verified; web polls real backend health and retains its existing app shell/save behavior |
 | Operator insights | Implemented and tested | Web and native views report full-feed totals plus top-eight scheduled route trip counts; bounded-fixture headways remain separately labelled; explicitly not ridership, punctuality, occupancy, revenue, or actual utilization |
-| Deployment | Blocked on account connection | Application builds locally; connected Vercel context returned no team/project, so no deployment target is available |
+| Deployment package | Implemented; publish blocked on account connection | Standalone production output, non-root Docker image definition, health contract, secret gate, CI checks, and smoke procedure pass locally; connected Vercel context has no team/project, so no public target exists |
+| Android production connectivity | Implemented and physical-device validated | Debug and presentation/release variants are separated; distributable builds require public HTTPS and disable cleartext, startup checks backend health, and unavailable state preserves offline access |
+| Release pipeline | Implemented except owner signing/publish | CI verifies web, secret hygiene, debug APK, endpoint fail-closed behavior, and presentation compilation; release remains correctly blocked without owner keystore |
 

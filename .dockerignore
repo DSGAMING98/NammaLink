@@ -1,0 +1,11 @@
+.git
+.github
+.next
+node_modules
+android
+docs
+research_outputs
+.env*
+!.env.example
+npm-debug.log*
+pnpm-debug.log*

@@ -1,6 +1,7 @@
 package `in`.nammalink.app
 
 import java.net.HttpURLConnection
+import java.net.SocketTimeoutException
 import java.net.URI
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
@@ -17,6 +18,15 @@ data class NetworkRide(
 )
 data class ContractAlternative(val priority: String, val departure: String, val arrival: String, val durationMinutes: Int, val scheduledWaitingMinutes: Int, val transfers: Int, val walkingMeters: Int, val journey: NetworkJourney? = null)
 data class NetworkJourney(val origin: String, val destination: String, val departure: String, val arrival: String, val transfers: Int, val walkingMeters: Int, val timeMode: String, val requestedTime: String, val latestStart: String, val deadlineMet: Boolean, val priority: String, val maximumWalkingMeters: Int, val rides: List<NetworkRide>, val queryMilliseconds: Double, val durationMinutes: Int = 0, val scheduledWaitingMinutes: Int = 0, val recommendationTitle: String = "Schedule recommendation", val recommendationReasons: List<String> = emptyList(), val alternatives: List<ContractAlternative> = emptyList())
+
+enum class NetworkFailure { CONFIGURATION, OFFLINE, TIMEOUT, SERVER, RESPONSE }
+class NammaLinkNetworkException(val failure: NetworkFailure, message: String, val requestId: String? = null) : Exception(message)
+data class BackendHealth(val service: String, val version: String, val revision: String)
+
+fun Throwable.userMessage(): String = when (this) {
+    is NammaLinkNetworkException -> message.orEmpty() + (requestId?.let { " (reference $it)" } ?: "")
+    else -> message ?: "NammaLink could not complete the request."
+}
 
 private fun serviceMinute(value: String): Int? {
     val parts = value.split(":")
@@ -136,7 +146,13 @@ fun decodeStoredJourney(value: String?): NetworkJourney? = runCatching {
 }.getOrNull()
 
 private fun request(path: String): JSONObject {
-    val connection = URI.create("${BuildConfig.API_BASE_URL}$path").toURL().openConnection() as HttpURLConnection
+    val baseUri = runCatching { URI.create(BuildConfig.API_BASE_URL) }.getOrElse {
+        throw NammaLinkNetworkException(NetworkFailure.CONFIGURATION, "The app backend address is invalid.")
+    }
+    if (BuildConfig.IS_PRESENTATION_BUILD && (baseUri.scheme != "https" || baseUri.host in setOf("localhost", "127.0.0.1", "10.0.2.2"))) {
+        throw NammaLinkNetworkException(NetworkFailure.CONFIGURATION, "This build is not connected to a public HTTPS service.")
+    }
+    val connection = baseUri.resolve(path).toURL().openConnection() as HttpURLConnection
     connection.connectTimeout = 4_000
     connection.readTimeout = 8_000
     connection.requestMethod = "GET"
@@ -144,13 +160,35 @@ private fun request(path: String): JSONObject {
     return connection.run {
         try {
             val stream = if (responseCode in 200..299) inputStream else errorStream
-            val body = stream.bufferedReader().use { it.readText() }
-            if (responseCode !in 200..299) error(JSONObject(body).optString("error", "Request failed ($responseCode)"))
+            val body = stream?.bufferedReader()?.use { it.readText() }.orEmpty()
+            if (responseCode !in 200..299) {
+                val json = runCatching { JSONObject(body) }.getOrNull()
+                val errorObject = json?.optJSONObject("error")
+                val message = errorObject?.optString("message")?.takeIf { it.isNotBlank() }
+                    ?: json?.optString("error")?.takeIf { it.isNotBlank() }
+                    ?: "NammaLink service returned HTTP $responseCode."
+                throw NammaLinkNetworkException(NetworkFailure.SERVER, message, headerFields["X-Request-Id"]?.firstOrNull())
+            }
+            if (body.isBlank()) throw NammaLinkNetworkException(NetworkFailure.RESPONSE, "The service returned an empty response.")
             JSONObject(body)
+        } catch (error: SocketTimeoutException) {
+            throw NammaLinkNetworkException(NetworkFailure.TIMEOUT, "The service took too long to respond. Check your connection and retry.")
+        } catch (error: NammaLinkNetworkException) {
+            throw error
+        } catch (error: java.io.IOException) {
+            throw NammaLinkNetworkException(NetworkFailure.OFFLINE, "Cannot reach NammaLink. Check internet access and retry.")
+        } catch (error: org.json.JSONException) {
+            throw NammaLinkNetworkException(NetworkFailure.RESPONSE, "The service returned an unreadable response.")
         } finally {
             disconnect()
         }
     }
+}
+
+fun checkBackendHealth(): BackendHealth {
+    val response = request("/api/health")
+    if (response.optString("status") != "ok") throw NammaLinkNetworkException(NetworkFailure.SERVER, "NammaLink is not ready yet.")
+    return BackendHealth(response.optString("service", "nammalink-api"), response.optString("version", "unknown"), response.optString("revision", "unknown"))
 }
 
 fun searchNetworkStops(query: String): List<StopOption> {

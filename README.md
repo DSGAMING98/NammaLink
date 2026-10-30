@@ -55,7 +55,7 @@ $env:ANDROID_HOME = "$env:LOCALAPPDATA\Android\Sdk"
 .\gradlew.bat :app:installDebug
 ```
 
-For local USB-connected backend testing, run the production web server on port 3000 and forward the device port with `adb reverse tcp:3000 tcp:3000`. For a deployed backend, pass `-PNAMMALINK_API_BASE_URL=https://your-host` to Gradle.
+For local USB-connected backend testing, run the web server on port 3000 and forward the device port with `adb reverse tcp:3000 tcp:3000`. This is debug-only. A distributable presentation build must use `:app:assemblePresentation -PNAMMALINK_API_BASE_URL=https://your-host`; the build rejects loopback, cleartext, emulator-only, and placeholder endpoints, and Android disables cleartext traffic. At startup the app checks `/api/health`, shows the deployed version, disables network planning when the service is unavailable, and preserves saved/offline journeys.
 
 The generated development APK is under `android/app/build/outputs/apk/debug/`. Build artifacts and signing material are intentionally excluded from Git. Production packaging fails closed until all external signing values are supplied; see [Android release signing](docs/ANDROID_RELEASE.md). See [ML training report](docs/ML_TRAINING_REPORT.md) for the evidence gate and [work checkpoint](docs/WORK_CHECKPOINT.md) for verified device details.
 
@@ -121,7 +121,8 @@ Useful commands:
 npm run test:run
 npm run typecheck
 npm run build
-npm run start
+npm run secrets:check
+npm run verify:engineering
 ```
 
 To rebuild the committed fixture from a local BMTC feed:
@@ -139,15 +140,17 @@ Copy `.env.example` to `.env.local` and fill only services you intend to enable.
 | --- | --- | --- |
 | `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` | Browser | Planned map; not required for core |
 | `NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID` | Browser | Planned map style |
-| `GOOGLE_ROUTES_API_KEY` | Server | Planned supplemental routes |
-| `GOOGLE_PLACES_API_KEY` | Server | Blocked by HTTP 403 in minimal probes |
-| `GOOGLE_GEOCODING_API_KEY` | Server | Not enabled in core |
+| `GOOGLE_ROUTES_API_KEY` | Server | Secure walking-route gateway; live authorization probe passed |
+| `GOOGLE_PLACES_API_KEY` | Server | Secure autocomplete gateway; current key is blocked for server requests by referrer restrictions |
+| `GOOGLE_GEOCODING_API_KEY` | Server | Secure address/place resolution gateway; live authorization probe passed |
 | `OVERPASS_API_URL` | Server/tooling | Optional future pedestrian context |
 | `NEXT_PUBLIC_SUPABASE_URL` | Browser | Authentication not enabled |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Browser | Authentication not enabled |
 | `SUPABASE_SERVICE_ROLE_KEY` | Server only | Never expose to browser; backend unverified |
 
 Never commit `.env.local` or credentials.
+
+Production deployment, health checks, container packaging, environment boundaries, and post-deploy smoke commands are documented in [Deployment](docs/DEPLOYMENT.md).
 
 ## Data and honesty
 

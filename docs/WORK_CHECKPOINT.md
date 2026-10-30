@@ -4,15 +4,15 @@ Updated: 30 October 2026
 
 ## Current phase
 
-Phase 26 — Selectable alternatives and Round 3 handoff.
+Engineering phases 27–31 — production connectivity, deployment package, API gateway, reliability, and release pipeline.
 
 ## Last completed task
 
-Made returned contract comparisons selectable as complete itineraries, added schema-version-5 offline alternative persistence, verified online Direct selection and offline switching back to Safest, and froze feature expansion for the Round 3 handoff.
+Implemented the production health/version contract, server-only Google gateway, normalized failures, request IDs, rate limits, timeouts, standalone/container deployment package, secret hygiene gate, Android service-readiness flow, and fail-closed presentation/release endpoint policy. Physical Android QA passed for both service-ready and backend-unavailable states without a fatal exception or ANR.
 
 ## Last verified working commit
 
-Round 3 Phase 26 milestone: `f13c756` on `main`, fully verified by GitHub Actions run `41054502414` after the hosted Android runner delay cleared.
+Pending the engineering milestone commit and hosted CI result. Local verification passes: 51 tests, strict type-check, production build, debug APK, presentation APK, endpoint guards, production health smoke, and physical-device readiness/degraded-mode QA.
 
 ## Current branch
 
@@ -146,7 +146,7 @@ Arbitrary place search/maps, coordinate-based access/egress, pedestrian-network 
 
 ## External blockers
 
-- Google Places minimal probes returned HTTP 403; API enablement, billing, or key restrictions remain unresolved.
+- Google Routes and Geocoding probes pass. Places Autocomplete returns HTTP 403 because the configured key blocks server requests without an HTTP referrer; its restriction must be corrected or a server key supplied.
 - Supabase schema/access has not been verified.
 - Secure release signing is not configured. A clearly labelled debug-signed development APK is publicly available from the repository-backed website surface, but the network backend itself is not publicly deployed.
 - The connected Vercel context contains no team or linked project, so public deployment requires the owner to connect a Vercel account/team.
@@ -160,15 +160,15 @@ Arbitrary place search/maps, coordinate-based access/egress, pedestrian-network 
 
 ## Deployment state
 
-No public deployment is claimed. The production Next.js build and local production smoke tests pass; the downloadable debug-signed APK is committed and checksum-labelled. A public backend and release-signed APK remain blocked on account connection and owner-held signing credentials.
+No public deployment is claimed. The standalone production build, non-root container definition, `/api/health`, deployment smoke procedure, presentation APK, and public-HTTPS build gate pass. Publishing remains blocked because the connected Vercel integration contains no team/project. A release-signed APK separately requires the owner-held signing key; the presentation APK is installable without that key once a public origin exists.
 
 ## Uncommitted work
 
-Planning-only work: `docs/MVP_ENGINEERING_ROADMAP.md` now defines both the full 11-phase route and a 6.5–9.5-hour, four-block overnight critical path from the verified Phase 26 baseline. No Phase 27 implementation has started.
+Engineering phases 27–31 are implemented locally and await commit, push, and hosted CI verification. Device evidence is saved under `research_outputs/device_evidence/nammalink-engineering-*`.
 
 ## Exact next implementation step
 
-Overnight Block A after plan approval: confirm deployment and Google API access in the first 15 minutes, deploy a public HTTPS backend, add health/configuration gates, fail presentation builds on loopback URLs, and prove physical-phone search with USB forwarding removed. Follow `docs/MVP_ENGINEERING_ROADMAP.md`.
+Connect a Vercel team/project (or another approved deployment target), publish the verified standalone service, set its server secrets, run `docs/DEPLOYMENT.md` smoke checks, build the presentation APK against that HTTPS origin, and prove the physical-phone flow with USB forwarding removed. Then begin Phase 32 feature work.
 
 ## Restore commands
 

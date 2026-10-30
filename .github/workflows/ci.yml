@@ -27,9 +27,22 @@ jobs:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - run: pnpm secrets:check
       - run: pnpm test:run
       - run: pnpm typecheck
       - run: pnpm build
+      - name: Smoke standalone service
+        run: |
+          PORT=3100 HOSTNAME=127.0.0.1 pnpm start > /tmp/nammalink-server.log 2>&1 &
+          server_pid=$!
+          trap 'kill $server_pid 2>/dev/null || true' EXIT
+          for attempt in {1..20}; do
+            if curl --fail --silent --show-error http://127.0.0.1:3100/api/health > /tmp/health.json; then break; fi
+            sleep 1
+          done
+          node -e "const h=require('/tmp/health.json'); if(h.status!=='ok'||h.network.connectionCount<1000000) process.exit(1)"
+          curl --fail --silent --show-error 'http://127.0.0.1:3100/api/stops?q=Majestic&limit=3' > /tmp/stops.json
+          node -e "const s=require('/tmp/stops.json'); if(!Array.isArray(s.stops)||s.stops.length===0) process.exit(1)"
 
   android:
     name: Native Android APK
@@ -49,6 +62,15 @@ jobs:
         run: chmod +x gradlew
       - name: Build debug APK
         run: ./gradlew :app:assembleDebug --no-daemon
+      - name: Verify distributable endpoint guard
+        run: |
+          if ./gradlew :app:verifyProductionEndpoint --no-daemon; then
+            echo "Endpoint guard unexpectedly accepted the placeholder URL"
+            exit 1
+          fi
+          ./gradlew :app:verifyProductionEndpoint -PNAMMALINK_API_BASE_URL=https://example.com --no-daemon
+      - name: Compile presentation variant
+        run: ./gradlew :app:assemblePresentation -PNAMMALINK_API_BASE_URL=https://example.com --no-daemon
       - name: Record APK checksum
         run: sha256sum app/build/outputs/apk/debug/app-debug.apk
       - uses: actions/upload-artifact@v7
