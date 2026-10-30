@@ -1,4 +1,4 @@
-import stopIndex from "@/data/bmtc-stops.json";
+import stopIndex from "@/data/transit-stops.json";
 import { searchStops } from "@/lib/transit/stop-search";
 
 export const runtime = "nodejs";
@@ -15,10 +15,9 @@ export function GET(request: Request) {
     stops,
     provenance: {
       name: stopIndex.metadata.name,
-      feedVersion: stopIndex.metadata.feedVersion,
-      source: stopIndex.metadata.source,
       license: stopIndex.metadata.license,
-      indexedStops: stopIndex.metadata.count,
+      indexedStops: stopIndex.metadata.searchableCount,
+      feeds: stopIndex.metadata.feeds,
     },
   });
 }

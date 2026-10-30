@@ -25,13 +25,13 @@ Raw data lives outside the repository. Reproducible generated artifacts will be 
 
 Its intended use is deterministic routing tests and the Jain–Banashankari–Alliance-area demonstration. It is not a replacement for the full feed and is not evidence of live operation. Attribution and reproduction instructions are in `data/README.md`.
 
-## Committed stop-search index
+## Committed multimodal stop-search index
 
-`data/bmtc-stops.json` is a 725 KB ODbL derivative containing all 9,960 valid ID/name/coordinate stop records from the same BMTC feed. The source `stops.txt` SHA-256 is `bc3cceb62c79b5fdd3bf6f4879a80c9c84bd60f2a73a3b7f3cedea2bcd410d81`. It is rebuilt with `npm run data:build-stops` and powers provenance-labelled stop search; it is not a full routing graph.
+`data/transit-stops.json` is a 1.24 MB ODbL derivative containing 9,960 searchable BMTC stops, 83 searchable BMRCL stations, and 170 internal Metro platform nodes. BMTC `stops.txt` SHA-256 is `bc3cceb62c79b5fdd3bf6f4879a80c9c84bd60f2a73a3b7f3cedea2bcd410d81`; BMRCL `stops.txt` SHA-256 is `ff4e4a68097ef52ec994445e65421b03df40531980b1999178df7a2a026ebfd3`. It is rebuilt with `npm run data:build-stops`; platform nodes are not exposed as user suggestions.
 
 ## Committed full-network connection index
 
-`data/bmtc-connections.bin.gz` (13.60 MB) and `data/bmtc-connections.meta.json` (5.73 MB) contain the reproducible full-feed routing derivative: 57,836 trip identities and 1,477,697 time-sorted adjacent-stop connections. Preprocessing rejected 5,153 candidate connections with non-positive travel durations or implied inter-stop speeds above 25 m/s. The threshold and rejection count are embedded in metadata. Intended use is static stop-to-stop Connection Scan routing; the index contains no observed arrivals, realtime state, walking network, or reliability labels.
+`data/transit-connections.bin.gz` (14.29 MB) and `data/transit-connections.meta.json` contain the reproducible multimodal routing derivative: 61,115 trips, 1,563,324 time-sorted adjacent-stop connections, GTFS calendars/exceptions, and 670 directed bus–Metro transfer footpaths. Preprocessing rejected 5,153 candidate BMTC connections with non-positive duration or implied speed above 25 m/s; Metro uses a 45 m/s gate and had no rejection. Transfer footpaths join stops within 250 m using great-circle distance and 1.25 m/s, not a pedestrian network. The index contains no observed arrivals, realtime state, accessibility guarantee, or reliability labels.
 
 ## Download and refresh policy
 

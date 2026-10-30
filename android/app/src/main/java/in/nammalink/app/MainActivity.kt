@@ -159,7 +159,7 @@ private fun PlannerScreen(onPlan: (NetworkJourney) -> Unit, onOfflineDemo: () ->
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
         ScreenHeader("Bengaluru public transport", "Arrive with confidence.", "A journey contract that plans for your deadline—not just the shortest path.")
         Column(Modifier.padding(horizontal = 20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            StatusPill("● 9,960 searchable BMTC stops · static schedule", Green)
+            StatusPill("● 10,043 searchable bus + Metro stops · static schedule", Green)
             OutlinedTextField(from, { from = it; origin = origin.copy(id = ""); activeField = "from" }, label = { Text("From") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
             if (activeField == "from") StopSuggestions(suggestions) { origin = it; from = it.name; activeField = "" }
             OutlinedTextField(to, { to = it; destination = destination.copy(id = ""); activeField = "to" }, label = { Text("To") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
@@ -192,7 +192,7 @@ private fun PlannerScreen(onPlan: (NetworkJourney) -> Unit, onOfflineDemo: () ->
                 modifier = Modifier.fillMaxWidth().height(54.dp).semantics { contentDescription = "Plan journey" },
                 colors = ButtonDefaults.buttonColors(containerColor = Green),
                 shape = RoundedCornerShape(14.dp)
-            ) { Text(if (planning) "Scanning the schedule…" else "Plan across the BMTC network", fontWeight = FontWeight.Bold) }
+            ) { Text(if (planning) "Scanning the schedule…" else "Plan across bus + Metro", fontWeight = FontWeight.Bold) }
             error?.let { Text(it, color = Coral, fontWeight = FontWeight.Bold, fontSize = 13.sp) }
             OutlinedButton(onClick = onOfflineDemo, modifier = Modifier.fillMaxWidth()) { Text("Open bounded offline demonstration") }
             Text("Full-network results optimize scheduled arrival with a three-minute transfer buffer. Walking limits and priority chips remain Journey Contract preferences but are not yet enforced by the city-scale scan. The offline demonstration remains available explicitly.", color = Muted, fontSize = 12.sp)
@@ -206,7 +206,7 @@ private fun StopSuggestions(stops: List<StopOption>, onSelect: (StopOption) -> U
     Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
         stops.forEach { stop ->
             Card(Modifier.fillMaxWidth().clickable { onSelect(stop) }, colors = CardDefaults.cardColors(containerColor = Color.White)) {
-                Column(Modifier.padding(12.dp)) { Text(stop.name, fontWeight = FontWeight.Bold, color = Ink); Text("BMTC stop ${stop.id}", color = Muted, fontSize = 11.sp) }
+                Column(Modifier.padding(12.dp)) { Text(stop.name, fontWeight = FontWeight.Bold, color = Ink); Text("${stop.agency} ${stop.mode} stop ${stop.id.removePrefix("metro:")}", color = Muted, fontSize = 11.sp) }
             }
         }
     }
@@ -217,11 +217,19 @@ private fun JourneyScreen(networkJourney: NetworkJourney?, saved: Boolean, onSav
     var disrupted by rememberSaveable { mutableStateOf(false) }
     if (networkJourney != null) {
         Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
-            ScreenHeader("Full-network schedule", "Arrive at ${networkJourney.arrival}.", "Depart ${networkJourney.departure} · ${networkJourney.transfers} transfer${if (networkJourney.transfers == 1) "" else "s"} · static BMTC feed")
+            ScreenHeader("Full-network schedule", "Arrive at ${networkJourney.arrival}.", "Depart ${networkJourney.departure} · ${networkJourney.transfers} transfer${if (networkJourney.transfers == 1) "" else "s"} · static BMTC + BMRCL feeds")
             Column(Modifier.padding(horizontal = 20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 StatusPill("Verified indexed schedule · ${networkJourney.queryMilliseconds.toInt()} ms", Green)
                 RouteMap(false, networkJourney.origin, networkJourney.destination)
-                networkJourney.rides.forEach { ride -> ItineraryCard(ride.departure, "Take ${ride.route}", "${ride.from} → ${ride.to} · toward ${ride.headsign}", "${ride.stopCount} stops", Green) }
+                networkJourney.rides.forEach { ride ->
+                    ItineraryCard(
+                        ride.departure,
+                        when (ride.mode) { "metro" -> "Take Metro ${ride.route}"; "walk" -> "Walk ${ride.distanceMeters} m"; else -> "Take bus ${ride.route}" },
+                        if (ride.mode == "walk") "${ride.from} → ${ride.to} · estimated transfer walk" else "${ride.from} → ${ride.to} · toward ${ride.headsign}",
+                        if (ride.mode == "walk") "${ride.arrival} arrival" else "${ride.stopCount} stops",
+                        if (ride.mode == "walk") Amber else Green,
+                    )
+                }
                 OutlinedButton(onClick = onSave, modifier = Modifier.fillMaxWidth()) { Text(if (saved) "Saved ✓" else "Save offline") }
                 Text("Schedule-only result. It does not use live vehicle positions, observed delay, or a trained prediction model.", color = Muted, fontSize = 12.sp)
                 Spacer(Modifier.height(16.dp))

@@ -6,6 +6,6 @@ export default defineConfig({
     include: ["**/*.test.ts"],
     coverage: { reporter: ["text", "json-summary"] },
   },
-  resolve: { alias: { "@": import.meta.dirname } },
+  resolve: { alias: { "@": import.meta.dirname, "server-only": `${import.meta.dirname}/test/server-only.ts` } },
 });
 

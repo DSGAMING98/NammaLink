@@ -1,4 +1,4 @@
-export type SearchableStop = { id: string; name: string; lat: number; lon: number };
+export type SearchableStop = { id: string; name: string; lat: number; lon: number; agency?: string; mode?: string; searchable?: boolean };
 
 const normalize = (value: string) =>
   value.normalize("NFKD").toLocaleLowerCase("en-IN").replace(/[^a-z0-9]+/g, " ").trim();
@@ -8,6 +8,7 @@ export function searchStops(stops: SearchableStop[], query: string, limit = 10):
   if (needle.length < 2) return [];
   const tokens = needle.split(" ");
   return stops
+    .filter((stop) => stop.searchable !== false)
     .map((stop) => {
       const name = normalize(stop.name);
       if (!tokens.every((token) => name.includes(token))) return null;

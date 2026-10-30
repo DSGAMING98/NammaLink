@@ -1,10 +1,10 @@
 # Evaluation results
 
-Last updated: 29 October 2026
+Last updated: 30 October 2026
 
 ## Scope
 
-This checkpoint evaluates the bounded schedule-routing prototype, not the complete BMTC network and not real-world punctuality. The input is the committed ODbL demo fixture derived from BMTC community GTFS version `20260907`.
+This report covers both the bounded Journey Contract correctness fixture and the city-scale static BMTC/BMRCL Connection Scan. It does not evaluate real-world punctuality because no observed-arrival labels are available.
 
 ## Central journey
 
@@ -29,7 +29,7 @@ Direct-only mode returns no journey for this bounded network. A 09:00 deadline i
 
 ## Automated verification
 
-- 20 tests across 8 files pass.
+- 36 tests across 14 files pass.
 - Strict TypeScript checking passes.
 - Next.js production build passes, including dynamic `/api/journeys`.
 - Invalid negative walking constraints receive HTTP 400.
@@ -40,7 +40,19 @@ Direct-only mode returns no journey for this bounded network. A 09:00 deadline i
 
 ## Performance
 
-The full automated suite completes in under one second on the current development machine. The central request explores 107 boardings in the bounded fixture. This is not a full-feed performance benchmark, so no production latency or feasible-route discovery rate is claimed.
+The pure bounded suite completes in under one second on the current development machine. The complete suite, including real 31.27 MB indexed API scans, completes in approximately 3.5 seconds. This is local benchmark evidence, not a hosted service-level objective.
+
+## City-scale multimodal results
+
+The committed index contains 61,115 scheduled trips, 1,563,324 admitted connections, and 670 directed bus–Metro transfer footpaths. Friday 30 October 2026 activates 58,737 trips after GTFS calendar/exception filtering; Sunday 1 November activates 58,451.
+
+| Query | Verified scheduled result | Measured connected-device scan |
+| --- | --- | --- |
+| Kempegowda Bus Station → Central Silk Board, after 08:00 | 08:00–08:50; routes `316-B` and `G-3 SJSCBSE-CSB`; 1 transfer | 175 ms in the earlier bus-only device run |
+| Whitefield (Kadugodi) Metro → Challaghatta Metro, after 08:00 | 08:00–09:20; Purple Line; 36 stops; 0 transfers | 52 ms |
+| 14th Main HSR Layout → Whitefield Metro, after 08:00 | 08:02–09:15; two BMTC legs, 128 m estimated transfer walk, Purple Line; 2 transit transfers | 48 ms |
+
+The mixed result demonstrates exact reconstruction of ride and walking segments. Transfer walking is great-circle distance at 1.25 m/s between stops no more than 250 m apart; it is not claimed as accessible or pedestrian-network-valid geometry.
 
 ## Simulated recovery result
 
@@ -64,4 +76,4 @@ These values describe the committed static fixture only. They do not measure occ
 - A 5 km final walk is rejected by an 800 m hard limit, but actual walking geometry is not yet available.
 - The result uses static schedules and cannot account for cancellation, congestion, or vehicle delay.
 - No labelled arrival observations exist, so MAE/RMSE and delay-model improvement cannot be measured.
-- Full BMTC/BMRCL multimodal routing, fares, accessibility constraints, and KSRTC remain outside this checkpoint.
+- Arbitrary-coordinate access/egress, pedestrian geometry, fares, accessibility constraints, realtime state, and KSRTC remain outside this checkpoint.

@@ -7,7 +7,7 @@
 **A constraint-aware scheduled public-transport planner and journey-recovery prototype for Bengaluru**
 
 [![Build](https://img.shields.io/badge/build-passing-16c784)](#verification)
-[![Tests](https://img.shields.io/badge/tests-22%20passing-16c784)](#verification)
+[![Tests](https://img.shields.io/badge/tests-36%20passing-16c784)](#verification)
 [![Android](https://img.shields.io/badge/Android-native%20APK-156b52)](#native-android-app)
 [![CI](https://github.com/DSGAMING98/NammaLink/actions/workflows/ci.yml/badge.svg)](https://github.com/DSGAMING98/NammaLink/actions/workflows/ci.yml)
 [![Data](https://img.shields.io/badge/data-static%20GTFS-f0b429)](#data-and-honesty)
@@ -16,7 +16,7 @@
 </div>
 
 > [!IMPORTANT]
-> NammaLink is a runnable engineering prototype using an unofficial static community GTFS fixture. Results are **scheduled**, not live. The recovery incident is explicitly simulated. No deployment URL, authorized realtime feed, or trained delay model is claimed.
+> NammaLink is a runnable engineering prototype using unofficial static BMTC and BMRCL community GTFS feeds. Results are **scheduled**, not live. Transfer walks are straight-line estimates, and the recovery incident is explicitly simulated. No deployment URL, authorized realtime feed, or trained delay model is claimed.
 
 ## What works
 
@@ -31,12 +31,13 @@
 - Bounded schedule-supply insights for operators.
 - Responsive browser-verified interface.
 - Native Kotlin/Jetpack Compose Android app built, installed, and flow-tested on a physical Android 16 phone.
-- Reproducible 9,960-stop BMTC index and provenance-labelled `/api/stops` search for arbitrary feed-supported stop selection.
-- Full-feed Connection Scan endpoint covering 57,836 trips and 1,477,697 plausibility-filtered scheduled connections.
+- Reproducible 10,043-stop BMTC + BMRCL search index and provenance-labelled `/api/stops` selection.
+- Calendar-filtered Connection Scan covering 61,115 bus/Metro trips, 1,563,324 scheduled connections, and 670 explicit station-transfer footpaths.
+- Physical-device verification of bus-only, Metro-only, and mixed BMTC–walk–BMRCL journeys.
 
 ## Native Android app
 
-The `android/` project is a real Compose application—not a WebView. It includes debounced search across the 9,960-stop API, full-network schedule requests through an injectable API base URL, constraint controls, a native route schematic, persisted offline save state, a clearly simulated recovery flow, and honest operator insights. The bounded demonstration remains an explicit offline option rather than a silent substitute for a failed network request.
+The `android/` project is a real Compose application—not a WebView. It includes debounced search across 10,043 bus and Metro stops, calendar-filtered full-network requests through an injectable API base URL, explicit bus/Metro/walking timeline cards, constraint controls, a native route schematic, persisted offline save state, a clearly simulated recovery flow, and honest operator insights. The bounded demonstration remains an explicit offline option rather than a silent substitute for a failed network request.
 
 Requirements: Android SDK 36, JDK 17+ (Android Studio's bundled JDK is recommended), and an authorized USB device or emulator.
 
@@ -73,7 +74,7 @@ Direct-only mode returns no result in the bounded fixture. A simulated incident 
 flowchart LR
     UI["Journey Contract UI"] --> API["Validated Next.js APIs"]
     API --> ROUTER["Calendar-aware schedule router"]
-    DATA["ODbL bounded BMTC fixture"] --> ROUTER
+    DATA["ODbL BMTC + BMRCL static feeds"] --> ROUTER
     ROUTER --> RANK["Hard constraints + Pareto ranking"]
     RANK --> UI
     API --> RECOVERY["Evidence-aware recovery"]

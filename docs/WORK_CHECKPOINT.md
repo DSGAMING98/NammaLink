@@ -4,15 +4,15 @@ Updated: 30 October 2026
 
 ## Current phase
 
-Phase 14 — Connected full-network Android validation.
+Phase 15 — Calendar-aware bus + Metro routing and device validation.
 
 ## Last completed task
 
-Validated live stop autocomplete and full-network journey rendering on the physical Android 16 handset through USB-forwarded production backend, captured PNG/XML evidence, and completed a fatal/ANR log scan.
+Integrated BMRCL into the production stop/index pipeline, added GTFS calendar filtering and explicit bus–Metro walking transfers, rendered Metro/mixed journeys in Android, and validated both flows on the physical Android 16 handset.
 
 ## Last verified working commit
 
-Release-hardening milestone: `bdac2cc` on `main`, verified by GitHub Actions run `41007074104`. The Android network-client integration is build-verified; connected UI validation still awaits an unlocked handset.
+Connected bus-routing milestone: `e03879a` on `main`. The current multimodal extension is locally test/build/device verified and awaits its Git checkpoint.
 
 ## Completed features
 
@@ -22,26 +22,26 @@ Release-hardening milestone: `bdac2cc` on `main`, verified by GitHub Actions run
 - Calendar-aware schedule routing with hard arrive-by, walking, transfer, and directness constraints.
 - Multiple ranking strategies, source-labelled timeline, evidence-aware simulated incident, and recovery preserving the completed leg.
 - Installable responsive web app with offline shell, saved journey, local report queue, and schedule-supply operator insights.
-- 28 passing web/router/API/operator tests plus strict type-check and production build.
+- 36 passing web/router/API/operator/calendar tests plus strict type-check and production build.
 - Native Kotlin/Jetpack Compose project using AGP 9.2.1, Gradle 9.4.1, compile/target SDK 36, and minimum SDK 26.
 - Native constraint planner, GTFS-derived demonstration itinerary, schematic route view, locally persisted saved journey, explicit simulated disruption/recovery, and operator screen.
 - Physical Android 16 installation and UI-hierarchy validation on Vivo V2513.
 - Device screenshots under `research_outputs/device_evidence/`.
 - Machine-readable zero-model registry and professional ML artifact/evidence policy in `docs/ML_TRAINING_REPORT.md`.
 - Operator UI explicitly reports zero trained ML models instead of fabricating evaluation metrics.
-- Reproducible 9,960-stop compact BMTC index and `/api/stops` endpoint with normalized token search, result limits, and embedded provenance.
-- Full 57,836-trip BMTC Connection Scan index with 1,477,697 admitted connections, 5,153 recorded plausibility rejections, three-minute inter-trip transfer buffer, and exact path reconstruction.
+- Reproducible 10,043-stop BMTC + BMRCL search index with station/platform normalization, mode labels, result limits, and embedded provenance.
+- Calendar-filtered 61,115-trip multimodal Connection Scan index with 1,563,324 admitted connections, 670 explicit transfer footpaths, 5,153 recorded plausibility rejections, three-minute inter-trip buffer, and exact ride/walk reconstruction.
 - `/api/network-journeys` date/stop/time validation, feed-window enforcement, provenance, schedule-only flag, and measured query latency.
 - Android debounced stop autocomplete, injectable backend URL, city-scale journey parsing/rendering, explicit request errors, and separately selected offline fallback.
 - Website Android download section and repository-hosted 17.15 MB development APK, explicitly labelled debug-signed with SHA-256.
-- Full-feed operator supply graph with 9,960 stops, 57,836 trips, 4,416 route records, 1,477,697 admitted connections, and top-eight route trip bars.
+- Full-feed operator supply graph with 10,043 searchable stops, 61,115 trips, 4,419 route records, 1,563,324 admitted connections, and top-eight route trip bars.
 - GitHub Actions verification for tests, type-check, production web build, native Android build, APK checksum, and 14-day APK artifact retention.
 - Fail-closed Android release signing configuration: production packaging requires four external environment values and a readable keystore; signing files are ignored by Git.
-- Physical-device validation of live 9,960-stop autocomplete and full-network journey rendering over USB-forwarded backend.
+- Physical-device validation of live bus/Metro autocomplete, bus-only routing, Metro-only routing, and a mixed BMTC–walk–BMRCL journey over the USB-forwarded backend.
 
 ## Incomplete features
 
-Arbitrary place search/maps, spatial nearest-stop indexing, persistent server-side disruption reporting/moderation, authentication, notifications, legitimately trained ML, secure release signing, and public backend deployment remain incomplete. Full-feed Android integration is implemented and build-verified but still requires connected UI validation on the locked handset.
+Arbitrary place search/maps, coordinate-based access/egress, pedestrian-network geometry, city-scale enforcement of all Journey Contract preferences, persistent server-side disruption reporting/moderation, authentication, notifications, legitimately trained ML, secure release signing, and public backend deployment remain incomplete.
 
 ## Verification evidence
 
@@ -49,8 +49,9 @@ Arbitrary place search/maps, spatial nearest-stop indexing, persistent server-si
 - Stop-search milestone test total: passed, 24 tests across 10 files.
 - Full-network routing milestone: passed, 27 tests across 11 files.
 - Full-feed operator graph milestone: passed, 28 tests across 12 files.
+- Multimodal/calendar milestone: passed, 36 tests across 14 files, including real indexed Metro and mixed-mode API queries.
 - `npm run typecheck`: passed.
-- `npm run build`: passed with static `/` and dynamic `/api/journeys` and `/api/recovery` routes.
+- `pnpm build`: passed with the static web app and all journey, recovery, stop-search, and full-network API routes.
 - Browser desktop/mobile journey, recovery, low-connectivity, and operator flows: passed in prior milestones.
 - Android `:app:assembleDebug`: passed on JDK 21 with SDK 36.
 - ADB streamed install: passed on connected Vivo V2513 running Android 16/API 36.
@@ -67,10 +68,10 @@ Arbitrary place search/maps, spatial nearest-stop indexing, persistent server-si
 - Updated Android `:app:assembleDebug`: passed with the stop-search and network-journey client.
 - `adb reverse tcp:3000 tcp:3000`: configured successfully; updated APK streamed install passed.
 - Production website APK check: HTTP 200, `application/vnd.android.package-archive`, 17,150,016-byte content length, visible debug-signing label.
-- Current development APK SHA-256: `1F4DBCE3A07E69EF9719B268EF9EDEEEBDCE2E99FE17895D7ABD3197DE501356`.
+- Current multimodal development APK SHA-256: `57447884BBE9F277D19019B24080107A6309CD4DEC8AC1D4022673012F49C44E` (17,150,016 bytes).
 - Operator graph production HTML: passed for all full-feed totals, rejection count, and zero-model label.
 - Operator graph visual QA: passed in the in-app browser at desktop and 390×844 mobile viewport; cards, bars, disclaimers, and following download section rendered without observed overflow.
-- CI command parity check: frozen pnpm install, 28 tests, strict type-check, and production build passed locally before workflow push.
+- CI command parity check: frozen pnpm install, 36 tests, strict type-check, production web build, and native Android debug build passed locally before workflow push.
 - GitHub Actions run [`41006581144`](https://github.com/DSGAMING98/NammaLink/actions/runs/41006581144): both `Web, routing, and data tests` and `Native Android APK` completed successfully for commit `5b6226fbaf16ae5d2c0f1fbb83365503fd856c93`.
 - CI Android artifact `NammaLink-android-debug-5b6226fbaf16ae5d2c0f1fbb83365503fd856c93`: 9,947,921-byte ZIP retained until 2026-11-13; GitHub artifact digest `sha256:2a5a2c02c6f4793e1209bc3cfdccdd8c9ce7dcf907cee5967bd620aa0df6ce1e`.
 - Release-safety verification: `:app:assembleRelease` without credentials failed at `verifyReleaseSigning` with the expected four-variable message, including on a reused Gradle configuration cache; `:app:assembleDebug` still passed.
@@ -79,6 +80,12 @@ Arbitrary place search/maps, spatial nearest-stop indexing, persistent server-si
 - Physical Android autocomplete: `kempe` returned indexed Kempegowda Arch and Kempegowda Bus Station matches with real BMTC stop IDs; PNG/XML evidence saved under `research_outputs/device_evidence/`.
 - Physical Android full-network journey: 08:00 Kempegowda Bus Station → 08:50 Central Silk Board, one transfer, routes `316-B` and `G-3 SJSCBSE-CSB`, 175 ms measured server scan, and schedule-only disclosure rendered correctly.
 - Post-flow device log scan: no `FATAL EXCEPTION`, NammaLink ANR, or AndroidRuntime fatal match.
+- Unified index regeneration: 10,043 searchable stops, 10,213 routing nodes, 61,115 trips, 1,563,324 connections, and 670 directed transfer footpaths.
+- GTFS calendar evidence: Friday 2026-10-30 activated 58,737 trips; Sunday 2026-11-01 activated 58,451 trips.
+- Physical Metro journey: Whitefield 08:00 → Challaghatta 09:20, Purple Line, 36 stops, 52 ms measured scan.
+- Physical mixed journey: 14th Main HSR Layout 08:02 → Whitefield Metro 09:15 using `V-500E ELCKIA-HBLB`, `500-F`, a 128 m estimated walk, and Purple Line; 48 ms measured scan.
+- Updated APK streamed installation and mixed-mode UI hierarchy passed; post-flow fatal/ANR scan remained clean.
+- Reproducibility rerun produced byte-identical artifacts: stop index SHA-256 `4A76778C271D7084BBA69910E861F3AFABD9E9992D6521D6A94C77F9FA260FE8`, metadata `6A1C0214E3E1317A55EE69FE1BD7879D4196758C993A7C86D270935E00306CB1`, and binary gzip `8261A316CA1C358343658908A1C5A957477A82A9548571F9B1020A318049EB42`.
 
 ## Dataset and ML limitations
 

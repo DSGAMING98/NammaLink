@@ -6,8 +6,8 @@ import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 import org.json.JSONObject
 
-data class StopOption(val id: String, val name: String, val lat: Double, val lon: Double)
-data class NetworkRide(val route: String, val headsign: String, val from: String, val to: String, val departure: String, val arrival: String, val stopCount: Int)
+data class StopOption(val id: String, val name: String, val lat: Double, val lon: Double, val agency: String = "BMTC", val mode: String = "bus")
+data class NetworkRide(val route: String, val agency: String, val mode: String, val headsign: String, val from: String, val to: String, val departure: String, val arrival: String, val stopCount: Int, val distanceMeters: Int)
 data class NetworkJourney(val origin: String, val destination: String, val departure: String, val arrival: String, val transfers: Int, val rides: List<NetworkRide>, val queryMilliseconds: Double)
 
 private fun request(path: String): JSONObject {
@@ -34,7 +34,7 @@ fun searchNetworkStops(query: String): List<StopOption> {
     val array = request("/api/stops?q=$encoded&limit=5").getJSONArray("stops")
     return List(array.length()) { index ->
         val stop = array.getJSONObject(index)
-        StopOption(stop.getString("id"), stop.getString("name"), stop.getDouble("lat"), stop.getDouble("lon"))
+        StopOption(stop.getString("id"), stop.getString("name"), stop.getDouble("lat"), stop.getDouble("lon"), stop.optString("agency", "BMTC"), stop.optString("mode", "bus"))
     }
 }
 
@@ -47,12 +47,15 @@ fun planNetworkJourney(origin: StopOption, destination: StopOption, serviceDate:
         val ride = ridesJson.getJSONObject(index)
         NetworkRide(
             route = ride.getString("route"),
+            agency = ride.optString("agency", "BMTC"),
+            mode = ride.optString("mode", "bus"),
             headsign = ride.optString("headsign"),
             from = ride.getJSONObject("from").getString("name"),
             to = ride.getJSONObject("to").getString("name"),
             departure = ride.getString("departure"),
             arrival = ride.getString("arrival"),
             stopCount = ride.getInt("stopCount"),
+            distanceMeters = ride.optInt("distanceMeters", 0),
         )
     }
     return NetworkJourney(

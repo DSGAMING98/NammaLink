@@ -25,4 +25,21 @@ describe("connection scan", () => {
     const index = fixture([[100, 120, 0, 1, 0], [121, 140, 1, 2, 1], [122, 150, 1, 2, 0]]);
     expect(earliestArrival(index, 0, 2, 90, 5)?.map((leg) => leg.trip)).toEqual([0, 0]);
   });
+
+  it("supports station endpoints with multiple platforms and calendar-filtered trips", () => {
+    const index = { ...fixture([[100, 120, 1, 2, 0], [105, 125, 0, 2, 1]]), tripCount: 2 };
+    expect(earliestArrival(index, [0, 1], [2, 3], 90, 0, new Uint8Array([1, 0]))?.map((leg) => leg.trip)).toEqual([0]);
+    expect(earliestArrival(index, [0, 1], [2, 3], 90, 0, new Uint8Array([0, 0]))).toBeNull();
+  });
+
+  it("reconstructs an explicit walking transfer between scheduled services", () => {
+    const index = {
+      ...fixture([[100, 120, 0, 1, 0], [300, 320, 2, 3, 1]]),
+      tripCount: 2,
+      footpaths: [{ from: 1, to: 2, distanceMeters: 125, durationSeconds: 100 }],
+    };
+    const result = earliestArrival(index, 0, 3, 90, 10);
+    expect(result?.map((leg) => leg.trip)).toEqual([0, -1, 1]);
+    expect(result?.[1]).toMatchObject({ from: 1, to: 2, distanceMeters: 125, departure: 120, arrival: 220 });
+  });
 });

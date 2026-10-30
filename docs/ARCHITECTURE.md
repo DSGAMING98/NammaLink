@@ -24,9 +24,9 @@ flowchart LR
     UI --> LS["Local saved journey + queued reports"]
     SW["Service worker app shell"] --> UI
     UI --> SA["GET /api/stops"]
-    SA --> SI["9,960-stop compact index"]
+    SA --> SI["10,043-stop bus + Metro search index"]
     UI --> NA["GET /api/network-journeys"]
-    NA --> CSA["Full-feed binary Connection Scan"]
+    NA --> CSA["Calendar-filtered bus + Metro Connection Scan"]
 ```
 
 ## Components
@@ -40,8 +40,8 @@ flowchart LR
 | Offline storage | Last itinerary and bounded, deduplicated report queue | `lib/offline/` |
 | Schedule insights | Route trip counts, spans, headways, and shared stops | `lib/insights/` |
 | Data build | Extract selected routes and their dependencies from local BMTC GTFS | `scripts/build-demo-network.mjs` |
-| Stop search | Normalized, provenance-labelled search across 9,960 BMTC stops | `app/api/stops/`, `data/bmtc-stops.json` |
-| Full-network routing | Date-gated Connection Scan over 1,477,697 plausibility-filtered connections | `app/api/network-journeys/`, `lib/transit/connection-router.ts` |
+| Stop search | Normalized, provenance-labelled search across 9,960 BMTC stops and 83 BMRCL stations | `app/api/stops/`, `data/transit-stops.json` |
+| Full-network routing | GTFS-calendar-filtered scan over 1,563,324 bus/Metro connections and 670 explicit transfer footpaths | `app/api/network-journeys/`, `lib/transit/connection-router.ts` |
 | Native Android | Compose planner, offline demonstration, recovery, saved state, and operator evidence | `android/`, physical-device QA |
 
 ## Request flow
@@ -65,7 +65,7 @@ flowchart LR
 
 ## Scale path
 
-The bounded enumerator remains the multi-constraint correctness prototype. City-scale BMTC stop-to-stop routing now uses a benchmarked CSA binary index; it still needs spatial access/egress, explicit station transfers, pedestrian-network routing, multi-criteria request budgets, and Android API integration. BMRCL and any future KSRTC data must retain operator-specific identifiers and provenance.
+The bounded enumerator remains the multi-constraint correctness prototype. City-scale BMTC/BMRCL stop-to-stop routing uses a benchmarked CSA binary index with service calendars, station/platform normalization, and estimated bus–Metro transfer walks. It still needs arbitrary-coordinate access/egress, pedestrian-network geometry, and multi-criteria request budgets. Any future KSRTC data must retain operator-specific identifiers and provenance.
 
 ## External integrations
 

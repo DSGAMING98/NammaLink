@@ -4,15 +4,15 @@ Last updated: 30 October 2026
 
 ## Full-network Connection Scan
 
-The city-scale schedule endpoint now uses a preprocessed Connection Scan Algorithm index containing 1,477,697 time-sorted adjacent-stop connections from 57,836 BMTC trips and 9,960 stops. The 29.55 MB binary table is stored as a 13.60 MB gzip artifact and loaded once per server process.
+The city-scale schedule endpoint uses a preprocessed Connection Scan Algorithm index containing 1,563,324 time-sorted adjacent-stop connections from 61,115 BMTC and BMRCL trips. The 31.27 MB binary table is stored as a 14.29 MB gzip artifact and loaded once per server process.
 
-Preprocessing rejects non-positive travel durations and inter-stop movements above 25 m/s (90 km/h). Exactly 5,153 of the source feed's 1,482,850 candidate connections are excluded by this deterministic plausibility gate. This protects routing from known coordinate/time defects without presenting the filter as observed operations data.
+Preprocessing rejects non-positive travel durations and movements above 25 m/s for buses or 45 m/s for Metro. Exactly 5,153 candidate bus connections are excluded; no Metro connection exceeds its gate. This protects routing from known coordinate/time defects without presenting the filter as observed operations data.
 
-At query time the scan maintains earliest stop arrivals, trip reachability, and connection-level predecessors. A passenger can remain aboard without a transfer penalty; boarding a different trip requires 180 seconds. Connection-level reconstruction is essential: it returns the exact feasible boarding chain rather than combining unrelated earliest-arrival labels.
+At query time the scan materializes the selected date's GTFS calendars and exceptions, then maintains earliest stop arrivals, trip reachability, and connection-level predecessors. A passenger can remain aboard without a transfer penalty; boarding a different trip requires 180 seconds. The index also contains 670 directed bus–Metro transfer footpaths between stops within 250 m. Walking uses 1.25 m/s and great-circle distance, is returned as an explicit estimated segment, and participates in exact path reconstruction.
 
-The production API is `GET /api/network-journeys` with stop IDs, service date, and `departAfter=HH:MM`. Dates outside the static feed's published 2026-09-07–2027-09-07 window return HTTP 422. Results include feed provenance, index counts, filter statistics, query time, and `realtime: false`.
+The production API is `GET /api/network-journeys` with stop IDs, service date, and `departAfter=HH:MM`. Dates outside the shared static-feed window, 2026-09-07–2027-08-17, return HTTP 422. Results include both feed versions, active-trip count, index/filter/footpath statistics, query time, and `realtime: false`.
 
-On the verified development machine, repeated warm Kempegowda Bus Station → Central Silk Board scans completed in 205–256 ms. The verified 08:00 result arrives at 08:50 with one six-minute transfer. Cold decompression is slower and is reported separately by the API timer.
+Verified examples include Kempegowda Bus Station 08:00 → Central Silk Board 08:50 by bus; Whitefield Metro 08:00 → Challaghatta Metro 09:20 on the Purple Line; and 14th Main HSR Layout 08:02 → Whitefield Metro 09:15 using two buses, a 128 m estimated walk, and the Purple Line. Warm device-connected queries for the latter two measured 52 ms and 48 ms respectively; cold decompression is slower.
 
 ## Implemented schedule router
 
@@ -49,7 +49,7 @@ This verifies dataset-supported timetable connectivity, not real-world operation
 
 The bounded enumerator is appropriate for the 53-trip demonstration fixture and completes the current test suite in well under one second. It caps explored boardings and reports when truncation occurs. It is not intended to enumerate the entire 57,836-trip feed in a request path.
 
-The remaining scale steps are spatial access/egress footpaths, explicit station transfers, multi-criteria rounds, service-exception materialization when feeds include it, and request-level scan budgets. The bounded router remains a correctness oracle for hard walking/deadline constraints that the full-network endpoint does not yet implement.
+The remaining scale steps are arbitrary-coordinate access/egress, pedestrian-network geometry, multi-criteria rounds, per-request hard walking/deadline constraints, and scan budgets. The bounded router remains a correctness oracle for those hard constraints.
 
 ## Evidence-aware disruption and recovery
 

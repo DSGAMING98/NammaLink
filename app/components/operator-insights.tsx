@@ -2,7 +2,7 @@ import demoNetwork from "@/data/demo-network.json";
 import { analyzeSchedule } from "@/lib/insights/schedule";
 import { formatServiceTime } from "@/lib/transit/time";
 import type { TransitNetwork } from "@/lib/transit/types";
-import fullNetwork from "@/data/bmtc-connections.meta.json";
+import fullNetwork from "@/data/transit-connections.meta.json";
 import { analyzeFullNetworkSupply } from "@/lib/insights/full-network";
 
 export function OperatorInsights() {
@@ -36,11 +36,11 @@ export function OperatorInsights() {
       <p className="insightNote">Bounded BMTC fixture · static schedule version 20260907 · direction-aware median headways</p>
       <div className="fullSupplyHeading">
         <p className="eyebrow">Full-feed scheduled supply</p>
-        <h3>City-scale coverage and the busiest scheduled route families.</h3>
+        <h3>City-scale bus and Metro coverage.</h3>
         <p>This expands coverage to the full community feed. Bar length represents trip count only—not ridership, reliability, occupancy, or revenue.</p>
       </div>
       <div className="insightTotals fullTotals">
-        <div><strong>{fullNetwork.stopCount.toLocaleString("en-IN")}</strong><span>indexed stops</span></div>
+        <div><strong>{fullNetwork.searchableStopCount.toLocaleString("en-IN")}</strong><span>searchable stops</span></div>
         <div><strong>{fullSupply.totalTrips.toLocaleString("en-IN")}</strong><span>scheduled trips</span></div>
         <div><strong>{fullSupply.totalRoutes.toLocaleString("en-IN")}</strong><span>route records</span></div>
         <div><strong>{fullNetwork.connectionCount.toLocaleString("en-IN")}</strong><span>admitted connections</span></div>
@@ -53,7 +53,7 @@ export function OperatorInsights() {
           </div>
         ))}
       </div>
-      <p className="insightNote">Full BMTC community GTFS 20260907 · {fullNetwork.plausibilityGate.rejectedConnections.toLocaleString("en-IN")} implausible connections excluded · zero trained ML models</p>
+      <p className="insightNote">BMTC {fullNetwork.feedVersions.BMTC} + BMRCL {fullNetwork.feedVersions.BMRCL} community GTFS · {fullNetwork.plausibilityGate.rejectedConnections.toLocaleString("en-IN")} implausible connections excluded · zero trained ML models</p>
     </section>
   );
 }

@@ -20,3 +20,11 @@ Validated on 30 October 2026 using a USB-connected Vivo V2513 running Android 16
 ## Stability
 
 The post-flow device log scan matched no `FATAL EXCEPTION`, NammaLink ANR, or AndroidRuntime fatal entry. These checks validate the connected prototype path; they do not establish production availability, realtime accuracy, or broad device compatibility.
+
+## Metro and mixed-mode extension
+
+- Searched and selected BMRCL stations from the unified 10,043-stop endpoint.
+- Verified Whitefield (Kadugodi) Metro 08:00 → Challaghatta Metro 09:20 on the Purple Line: 36 stops, zero transfers, 52 ms measured scan.
+- Verified 14th Main HSR Layout 08:02 → Whitefield Metro 09:15: two BMTC legs, a clearly labelled 128 m estimated transfer walk, and a six-stop Purple Line leg; 48 ms measured scan.
+- The updated APK installed successfully on the Vivo V2513, rendered bus, walk, and Metro cards, and produced no fatal/ANR log match.
+- Evidence: `metro-journey.png`, `metro-journey.xml`, `mixed-journey.png`, and `mixed-journey-lower.xml`.

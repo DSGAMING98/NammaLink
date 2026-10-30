@@ -16,4 +16,12 @@ describe("searchStops", () => {
   it("supports order-independent token matching and limits results", () => {
     expect(searchStops(stops, "station kempegowda", 1)).toEqual([stops[2]]);
   });
+
+  it("does not expose non-searchable platform routing nodes", () => {
+    const metroStops = [
+      { id: "metro:A", name: "Alpha Metro", lat: 1, lon: 1, searchable: true },
+      { id: "metro:A_PF1", name: "Alpha Metro Platform 1", lat: 1, lon: 1, searchable: false },
+    ];
+    expect(searchStops(metroStops, "alpha", 10).map((stop) => stop.id)).toEqual(["metro:A"]);
+  });
 });
