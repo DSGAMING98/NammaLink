@@ -12,7 +12,7 @@ Added a bus/Metro/walk map legend, session-only current-fix handling, distinct M
 
 ## Last verified working commit
 
-Real-coordinate native geographic fallback milestone: `7bd5a45` on `main`, verified by GitHub Actions run `41049872986`. The Phase 22 map-context milestone is under verification and will replace this line after CI passes.
+Multimodal map-context milestone: `5469f7e` on `main`, verified by GitHub Actions run `41050897769`.
 
 ## Current branch
 
@@ -115,6 +115,8 @@ Arbitrary place search/maps, coordinate-based access/egress, pedestrian-network 
 - GitHub Actions run [`41049872986`](https://github.com/DSGAMING98/NammaLink/actions/runs/41049872986): all 45 tests, strict type-check, production web build, native APK build, checksum recording, and artifact upload passed for `7bd5a45`.
 - CI Android artifact `NammaLink-android-debug-7bd5a453f7156e68cf1edddf6acc4d78a37309d9` (`12974331673`): 9,975,891-byte ZIP retained until 13 November 2026; GitHub artifact digest `sha256:ceb2c95b3f984b057cce316f82390ae77c887169692afeb7a1866b08c95a4001`.
 - Physical multimodal map: two BMTC legs, a 128 m estimated walk, and Purple Line rendered with consistent green/amber/purple map and timeline colours; current fix outside the route was disclosed as session-only; scroll state opened at the journey header; fatal/ANR scan clean.
+- GitHub Actions run [`41050897769`](https://github.com/DSGAMING98/NammaLink/actions/runs/41050897769): all 45 tests, strict type-check, production web build, native APK build, checksum recording, and artifact upload passed for `5469f7e`.
+- CI Android artifact `NammaLink-android-debug-5469f7e0c4ffa6689cedbe86e6d59afa15e66090` (`12975130370`): 9,983,918-byte ZIP retained until 13 November 2026; GitHub artifact digest `sha256:6e20c4157a4c3764c248e40ac85c99a834cb274166d04c8e5b912b8808d486e2`.
 
 ## Dataset and ML limitations
 
@@ -144,7 +146,7 @@ No public deployment is claimed. The production Next.js build and local producti
 
 ## Uncommitted work
 
-Phase 22 source, APK, documentation, and device evidence are being committed as one verified milestone. After CI closure, the working tree must be clean.
+None. Phase 22 source, APK, documentation, and device evidence are committed, remotely verified, and pushed; this closure is documentation-only.
 
 ## Exact next implementation step
 
