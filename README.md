@@ -36,7 +36,7 @@
 - City-scale depart-after and arrive-by contracts with enforced walking budgets and safest/fastest/direct behavior.
 - Physical-device verification of bus-only, Metro-only, and mixed BMTC–walk–BMRCL journeys.
 - On-demand Android location permission flow with distance-ranked nearby-stop lookup and a tested manual-search fallback when permission or feed coverage is unavailable.
-- Native geographic route fallback projected from real stop coordinates, explicitly labelled as straight stop-to-stop estimates and retained in offline saved journeys.
+- Native geographic route fallback projected from real stop coordinates, with a bus/Metro/walk legend, session-only current-fix handling, explicit straight-line limits, and offline persistence.
 
 ## Native Android app
 

@@ -76,3 +76,10 @@ The post-flow device log scan matched no `FATAL EXCEPTION`, NammaLink ANR, or An
 - Saved the journey into coordinate-bearing storage schema version 2, removed the USB backend reverse, force-stopped and relaunched the app, then reopened Journey with no reverse mapping present.
 - Verified the same map, routes, transfer node, and `restored offline` state after relaunch. This is a functional geographic fallback, not road/pedestrian geometry or live vehicle tracking.
 - Evidence: `geographic-map.png`/`.xml` and `geographic-map-offline.png`/`.xml`; the post-flow fatal/ANR scan was clean.
+
+## Multimodal map legend and session location
+
+- Planned and saved the real 08:02 14th Main HSR Layout → Whitefield Metro journey: two green BMTC segments, a 128 m amber estimated walk, and a Purple Line segment rendered in purple.
+- Verified matching bus/Metro/walk legend entries and mode-coloured timeline dots. The Journey screen opened at the top instead of inheriting the scrolled Planner position.
+- The previously requested current fix was outside the plotted route bounds; the map displayed `Current fix is outside this route view · session only` and did not distort the geographic extent.
+- Evidence: `geographic-legend.png`/`.xml`, `multimodal-geographic-top.png`/`.xml`, and `multimodal-geographic-lower.png`/`.xml`; the post-flow fatal/ANR scan was clean.

@@ -10,7 +10,7 @@ Last updated: 30 October 2026
 | Next.js application | Implemented and tested | Next.js 16 App Router shell; unit tests, strict type-check, and production build pass |
 | GTFS normalization | Implemented and tested | Reproducible bounded fixture plus combined BMTC/BMRCL stop, calendar, connection, and footpath indexes |
 | Nearby-stop search | Implemented and physical-device validated | Bounded great-circle API lookup plus Android on-demand permission/fix flow; real Bengaluru positive results are API-tested, while the connected device correctly exercised the outside-five-kilometre fallback |
-| Native journey map | Implemented and physical-device validated fallback | Projects actual ride/walk endpoint coordinates with mode colours and transfer nodes; explicitly labelled straight stop-to-stop estimates, not street or pedestrian geometry |
+| Native journey map | Implemented and physical-device validated fallback | Projects actual ride/walk endpoint coordinates with bus/Metro/walk legend and transfer nodes; a requested current fix is session-only and shown only near the route; explicitly not street or pedestrian geometry |
 | Transit routing | Implemented and tested | Bounded schedule enumerator, Pareto pruning, and real central-demo integration tests pass |
 | Arrive-by and Journey Contract constraints | Implemented and tested | Deadline, safety buffer, walking, transfers, and five ranking preferences are enforced in pure TypeScript |
 | Journey API | Implemented and tested | Zod-validated POST endpoint returns source-labelled schedule results; API tests cover valid and invalid requests |

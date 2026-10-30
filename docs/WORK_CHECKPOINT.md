@@ -4,15 +4,15 @@ Updated: 30 October 2026
 
 ## Current phase
 
-Phase 21 — Real-coordinate native geographic fallback.
+Phase 22 — Multimodal map legend and session-only location context.
 
 ## Last completed task
 
-Preserved real journey endpoint coordinates through Android parsing and versioned offline storage, rendered an honestly labelled geographic fallback, and physically verified online planning plus force-stop offline restoration.
+Added a bus/Metro/walk map legend, session-only current-fix handling, distinct Metro timeline colour, and tab-isolated scroll state, then physically verified a real bus–walk–Metro journey.
 
 ## Last verified working commit
 
-Real-coordinate native geographic fallback milestone: `7bd5a45` on `main`, verified by GitHub Actions run `41049872986`.
+Real-coordinate native geographic fallback milestone: `7bd5a45` on `main`, verified by GitHub Actions run `41049872986`. The Phase 22 map-context milestone is under verification and will replace this line after CI passes.
 
 ## Current branch
 
@@ -32,6 +32,7 @@ Real-coordinate native geographic fallback milestone: `7bd5a45` on `main`, verif
 - Physical Android 16 installation and UI-hierarchy validation on Vivo V2513.
 - Android on-demand precise/approximate location permission, current-fix acquisition, distance-ranked nearby-stop lookup, denial-safe manual search, and outside-feed fallback.
 - Native geographic projection from real boarding/transfer/alighting coordinates with bus/Metro/walk colours and explicit straight-line limitations.
+- Map legend, mode-coloured timeline markers, and privacy-preserving current-fix context that remains in memory only and does not alter saved journeys.
 - Device screenshots under `research_outputs/device_evidence/`.
 - Machine-readable zero-model registry and professional ML artifact/evidence policy in `docs/ML_TRAINING_REPORT.md`.
 - Operator UI explicitly reports zero trained ML models instead of fabricating evaluation metrics.
@@ -76,7 +77,7 @@ Arbitrary place search/maps, coordinate-based access/egress, pedestrian-network 
 - Updated Android `:app:assembleDebug`: passed with the stop-search and network-journey client.
 - `adb reverse tcp:3000 tcp:3000`: configured successfully; updated APK streamed install passed.
 - Production website APK check: HTTP 200, `application/vnd.android.package-archive`, 17,150,016-byte content length, visible debug-signing label.
-- Current geographic-fallback development APK SHA-256: `CBB11CF8A83A8F48D46FE2E9D2595E6B7577DBE5E8C19F57686C4022C9DF1984` (17,150,016 bytes).
+- Current multimodal-map development APK SHA-256: `ECBEB0F7ACF611F8B5DDAB01DC34EB3BA9E33EBB82A94CB170B1740768DA5453` (17,150,016 bytes).
 - Operator graph production HTML: passed for all full-feed totals, rejection count, and zero-model label.
 - Operator graph visual QA: passed in the in-app browser at desktop and 390×844 mobile viewport; cards, bars, disclaimers, and following download section rendered without observed overflow.
 - CI command parity check: frozen pnpm install, 36 tests, strict type-check, production web build, and native Android debug build passed locally before workflow push.
@@ -113,6 +114,7 @@ Arbitrary place search/maps, coordinate-based access/egress, pedestrian-network 
 - Physical geographic fallback: real 08:00–08:50 route endpoints and transfer projected cleanly; coordinate-bearing storage version 2 restored the same map and both route legs after backend reverse removal plus force-stop/relaunch; fatal/ANR scan clean.
 - GitHub Actions run [`41049872986`](https://github.com/DSGAMING98/NammaLink/actions/runs/41049872986): all 45 tests, strict type-check, production web build, native APK build, checksum recording, and artifact upload passed for `7bd5a45`.
 - CI Android artifact `NammaLink-android-debug-7bd5a453f7156e68cf1edddf6acc4d78a37309d9` (`12974331673`): 9,975,891-byte ZIP retained until 13 November 2026; GitHub artifact digest `sha256:ceb2c95b3f984b057cce316f82390ae77c887169692afeb7a1866b08c95a4001`.
+- Physical multimodal map: two BMTC legs, a 128 m estimated walk, and Purple Line rendered with consistent green/amber/purple map and timeline colours; current fix outside the route was disclosed as session-only; scroll state opened at the journey header; fatal/ANR scan clean.
 
 ## Dataset and ML limitations
 
@@ -131,7 +133,7 @@ Arbitrary place search/maps, coordinate-based access/egress, pedestrian-network 
 
 ## Known bugs and coverage gaps
 
-- The native fallback uses real stop coordinates but still lacks street-following transit shapes, pedestrian geometry, map tiles, pan/zoom, and current-location overlay.
+- The native fallback uses real stop coordinates and can show a session-only current-fix marker near the plotted route, but still lacks street-following transit shapes, pedestrian geometry, map tiles, and pan/zoom.
 - Nearby discovery selects an indexed boarding stop but does not yet add the device-to-stop access distance to the journey contract's transfer-walking total.
 - The connected phone's physical location was outside the five-kilometre indexed-stop radius, so the positive nearby-result UI is API-tested but not physically exercised at an in-coverage location.
 - Full-network planning requires a reachable backend unless an already-saved journey or the explicit bounded offline demonstration is used.
@@ -142,11 +144,11 @@ No public deployment is claimed. The production Next.js build and local producti
 
 ## Uncommitted work
 
-None. Phase 21 source, APK, documentation, and device evidence are committed, remotely verified, and pushed; this closure is documentation-only.
+Phase 22 source, APK, documentation, and device evidence are being committed as one verified milestone. After CI closure, the working tree must be clean.
 
 ## Exact next implementation step
 
-Add a privacy-aware current-location marker and a clear bus/Metro/walk legend to the geographic fallback, then verify a multimodal route on the physical device. Public deployment and release signing remain owner-dependent production steps once account and keystore access are available.
+Integrate the selected nearby-stop access distance into the journey contract and rendered total instead of treating nearby discovery only as a stop selector. Public deployment and release signing remain owner-dependent production steps once account and keystore access are available.
 
 ## Restore commands
 

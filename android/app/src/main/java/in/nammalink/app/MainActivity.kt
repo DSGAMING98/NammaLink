@@ -41,6 +41,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -74,6 +75,7 @@ private val Coral = Color(0xFFD95D39)
 private val Muted = Color(0xFF617068)
 private val PurpleLine = Color(0xFF8C2877)
 private val YellowLine = Color(0xFFD6A900)
+private val LocationBlue = Color(0xFF2F6FED)
 
 private data class RouteSupply(val route: String, val agency: String, val trips: Int, val color: Color)
 
@@ -93,6 +95,7 @@ private fun NammaLinkApp() {
     var saved by rememberSaveable { mutableStateOf(restoredJourney != null) }
     var networkJourney by remember { mutableStateOf(restoredJourney) }
     var restoredOffline by remember { mutableStateOf(restoredJourney != null) }
+    var deviceLocation by remember { mutableStateOf<DeviceLocation?>(null) }
 
     MaterialTheme {
         Scaffold(
@@ -111,26 +114,30 @@ private fun NammaLinkApp() {
             }
         ) { padding ->
             Box(Modifier.padding(padding).fillMaxSize()) {
-                when (tab) {
-                    0 -> PlannerScreen(
-                        onPlan = { journey -> networkJourney = journey; saved = false; restoredOffline = false; tab = 1 },
-                        onOfflineDemo = { networkJourney = null; saved = journeyPreferences.getBoolean("demo_saved", false); restoredOffline = false; tab = 1 },
-                    )
-                    1 -> JourneyScreen(
-                        networkJourney = networkJourney,
-                        saved = saved,
-                        restoredOffline = restoredOffline,
-                        onSave = {
-                            if (networkJourney != null) {
-                                if (saved) journeyPreferences.edit().remove("saved_network_journey").apply()
-                                else journeyPreferences.edit().putString("saved_network_journey", networkJourney!!.encodeForStorage()).apply()
-                            } else {
-                                journeyPreferences.edit().putBoolean("demo_saved", !saved).apply()
+                key(tab) {
+                    when (tab) {
+                        0 -> PlannerScreen(
+                            onPlan = { journey -> networkJourney = journey; saved = false; restoredOffline = false; tab = 1 },
+                            onOfflineDemo = { networkJourney = null; saved = journeyPreferences.getBoolean("demo_saved", false); restoredOffline = false; tab = 1 },
+                            onLocationUpdated = { deviceLocation = it },
+                        )
+                        1 -> JourneyScreen(
+                            networkJourney = networkJourney,
+                            deviceLocation = deviceLocation,
+                            saved = saved,
+                            restoredOffline = restoredOffline,
+                            onSave = {
+                                if (networkJourney != null) {
+                                    if (saved) journeyPreferences.edit().remove("saved_network_journey").apply()
+                                    else journeyPreferences.edit().putString("saved_network_journey", networkJourney!!.encodeForStorage()).apply()
+                                } else {
+                                    journeyPreferences.edit().putBoolean("demo_saved", !saved).apply()
+                                }
+                                saved = !saved
                             }
-                            saved = !saved
-                        }
-                    )
-                    else -> OperatorScreen()
+                        )
+                        else -> OperatorScreen()
+                    }
                 }
             }
         }
@@ -148,7 +155,7 @@ private fun ScreenHeader(kicker: String, title: String, subtitle: String) {
 }
 
 @Composable
-private fun PlannerScreen(onPlan: (NetworkJourney) -> Unit, onOfflineDemo: () -> Unit) {
+private fun PlannerScreen(onPlan: (NetworkJourney) -> Unit, onOfflineDemo: () -> Unit, onLocationUpdated: (DeviceLocation) -> Unit) {
     var from by rememberSaveable { mutableStateOf("Kempegowda Bus Station") }
     var to by rememberSaveable { mutableStateOf("Central Silk Board") }
     var timeMode by rememberSaveable { mutableStateOf("Depart after") }
@@ -188,6 +195,7 @@ private fun PlannerScreen(onPlan: (NetworkJourney) -> Unit, onOfflineDemo: () ->
             val stops = withContext(Dispatchers.IO) { findNearbyNetworkStops(fix.latitude, fix.longitude) }
             fix to stops
         }.onSuccess { (fix, stops) ->
+            onLocationUpdated(fix)
             nearby = stops
             locationStatus = if (stops.isEmpty()) {
                 "Location found (±${fix.accuracyMeters.toInt()} m), but no indexed stop is within 5 km. Search manually instead."
@@ -281,7 +289,7 @@ private fun StopSuggestions(stops: List<StopOption>, onSelect: (StopOption) -> U
 }
 
 @Composable
-private fun JourneyScreen(networkJourney: NetworkJourney?, saved: Boolean, restoredOffline: Boolean, onSave: () -> Unit) {
+private fun JourneyScreen(networkJourney: NetworkJourney?, deviceLocation: DeviceLocation?, saved: Boolean, restoredOffline: Boolean, onSave: () -> Unit) {
     var disrupted by rememberSaveable { mutableStateOf(false) }
     if (networkJourney != null) {
         Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
@@ -291,14 +299,14 @@ private fun JourneyScreen(networkJourney: NetworkJourney?, saved: Boolean, resto
                 if (networkJourney.timeMode == "arriveBy") {
                     StatusPill("Deadline ${networkJourney.requestedTime} met · latest start ${networkJourney.latestStart}", Green)
                 }
-                RouteMap(false, networkJourney.origin, networkJourney.destination, networkJourney.rides)
+                RouteMap(false, networkJourney.origin, networkJourney.destination, networkJourney.rides, deviceLocation)
                 networkJourney.rides.forEach { ride ->
                     ItineraryCard(
                         ride.departure,
                         when (ride.mode) { "metro" -> "Take Metro ${ride.route}"; "walk" -> "Walk ${ride.distanceMeters} m"; else -> "Take bus ${ride.route}" },
                         if (ride.mode == "walk") "${ride.from} → ${ride.to} · estimated transfer walk" else "${ride.from} → ${ride.to} · toward ${ride.headsign}",
                         if (ride.mode == "walk") "${ride.arrival} arrival" else "${ride.stopCount} stops",
-                        if (ride.mode == "walk") Amber else Green,
+                        when (ride.mode) { "walk" -> Amber; "metro" -> PurpleLine; else -> Green },
                     )
                 }
                 OutlinedButton(onClick = onSave, modifier = Modifier.fillMaxWidth()) { Text(if (saved) "Saved ✓" else "Save offline") }
@@ -328,13 +336,22 @@ private fun JourneyScreen(networkJourney: NetworkJourney?, saved: Boolean, resto
 }
 
 @Composable
-private fun RouteMap(disrupted: Boolean, origin: String, destination: String, rides: List<NetworkRide> = emptyList()) {
+private fun RouteMap(disrupted: Boolean, origin: String, destination: String, rides: List<NetworkRide> = emptyList(), deviceLocation: DeviceLocation? = null) {
     val geographicRides = rides.filter { ride ->
         ride.fromLat.isFinite() && ride.fromLon.isFinite() && ride.toLat.isFinite() && ride.toLon.isFinite()
     }
+    val currentLocationVisible = if (geographicRides.isNotEmpty() && deviceLocation != null) {
+        val latitudes = geographicRides.flatMap { listOf(it.fromLat, it.toLat) }
+        val longitudes = geographicRides.flatMap { listOf(it.fromLon, it.toLon) }
+        val latitudeMargin = (latitudes.max() - latitudes.min()).coerceAtLeast(.0001) * .2
+        val longitudeMargin = (longitudes.max() - longitudes.min()).coerceAtLeast(.0001) * .2
+        deviceLocation.latitude in (latitudes.min() - latitudeMargin)..(latitudes.max() + latitudeMargin)
+            && deviceLocation.longitude in (longitudes.min() - longitudeMargin)..(longitudes.max() + longitudeMargin)
+    } else false
     Card(colors = CardDefaults.cardColors(containerColor = Color(0xFFE8E5D8)), shape = RoundedCornerShape(18.dp)) {
-        Box(Modifier.fillMaxWidth().height(if (geographicRides.isEmpty()) 190.dp else 220.dp).padding(20.dp)) {
-            Canvas(Modifier.fillMaxSize()) {
+        Column {
+            Box(Modifier.fillMaxWidth().height(if (geographicRides.isEmpty()) 190.dp else 220.dp).padding(20.dp)) {
+                Canvas(Modifier.fillMaxSize()) {
                 if (geographicRides.isNotEmpty()) {
                     val latitudes = geographicRides.flatMap { listOf(it.fromLat, it.toLat) }
                     val longitudes = geographicRides.flatMap { listOf(it.fromLon, it.toLon) }
@@ -359,6 +376,15 @@ private fun RouteMap(disrupted: Boolean, origin: String, destination: String, ri
                         drawCircle(Paper, 9f, start); drawCircle(color, 9f, start, style = Stroke(4f))
                         drawCircle(Paper, 9f, end); drawCircle(color, 9f, end, style = Stroke(4f))
                     }
+                    val visibleFix = deviceLocation?.takeIf { currentLocationVisible }
+                    visibleFix?.let { fix ->
+                        val marker = point(fix.latitude, fix.longitude)
+                        val accuracyRadius = (fix.accuracyMeters * ((bottom - top) / (latRange * 111_320))).toFloat().coerceIn(10f, 34f)
+                        drawCircle(LocationBlue.copy(alpha = .18f), accuracyRadius, marker)
+                        drawCircle(Paper, 12f, marker)
+                        drawCircle(LocationBlue, 10f, marker)
+                        drawCircle(Color.White, 3.5f, marker)
+                    }
                 } else {
                     val y = size.height * .52f
                     drawLine(Green, Offset(20f, y), Offset(size.width - 20f, y), strokeWidth = 14f, cap = StrokeCap.Round)
@@ -368,16 +394,41 @@ private fun RouteMap(disrupted: Boolean, origin: String, destination: String, ri
                         drawCircle(Ink, 13f, Offset(size.width * x, y), style = Stroke(5f))
                     }
                 }
+                }
+                Text(origin.take(18), Modifier.align(Alignment.BottomStart), color = Ink, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                Text(destination.take(18), Modifier.align(Alignment.BottomEnd), color = Ink, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                Text(
+                    when { geographicRides.isNotEmpty() -> "Geographic fallback · straight stop-to-stop estimates"; disrupted -> "Schematic · recovery path"; else -> "Native schematic · map key not required" },
+                    Modifier.align(Alignment.TopStart).semantics { contentDescription = if (geographicRides.isNotEmpty()) "Geographic route fallback using real stop coordinates and straight estimated segments" else "Route schematic" },
+                    color = Muted,
+                    fontSize = 12.sp,
+                )
             }
-            Text(origin.take(18), Modifier.align(Alignment.BottomStart), color = Ink, fontWeight = FontWeight.Bold, fontSize = 12.sp)
-            Text(destination.take(18), Modifier.align(Alignment.BottomEnd), color = Ink, fontWeight = FontWeight.Bold, fontSize = 12.sp)
-            Text(
-                when { geographicRides.isNotEmpty() -> "Geographic fallback · straight stop-to-stop estimates"; disrupted -> "Schematic · recovery path"; else -> "Native schematic · map key not required" },
-                Modifier.align(Alignment.TopStart).semantics { contentDescription = if (geographicRides.isNotEmpty()) "Geographic route fallback using real stop coordinates and straight estimated segments" else "Route schematic" },
-                color = Muted,
-                fontSize = 12.sp,
-            )
+            if (geographicRides.isNotEmpty()) {
+                Row(Modifier.fillMaxWidth().padding(horizontal = 20.dp), horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+                    LegendItem("Bus", Green)
+                    LegendItem("Metro", PurpleLine)
+                    LegendItem("Walk", Amber)
+                    if (currentLocationVisible) LegendItem("You", LocationBlue)
+                }
+                deviceLocation?.let {
+                    Text(
+                        if (currentLocationVisible) "Current fix ±${it.accuracyMeters.toInt()} m · session only" else "Current fix is outside this route view · session only",
+                        Modifier.padding(horizontal = 20.dp, vertical = 10.dp),
+                        color = Muted,
+                        fontSize = 11.sp,
+                    )
+                } ?: Spacer(Modifier.height(14.dp))
+            }
         }
+    }
+}
+
+@Composable
+private fun LegendItem(label: String, color: Color) {
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+        Box(Modifier.size(9.dp).background(color, CircleShape))
+        Text(label, color = Muted, fontSize = 10.sp, fontWeight = FontWeight.Bold)
     }
 }
 
