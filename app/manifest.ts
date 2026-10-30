@@ -9,6 +9,19 @@ export default function manifest(): MetadataRoute.Manifest {
     display: "standalone",
     background_color: "#f2f0e8",
     theme_color: "#07130f",
-    icons: [{ src: "/icon.svg", sizes: "any", type: "image/svg+xml" }],
+    icons: [
+      {
+        src: "/assets/nammalink-logo.png",
+        sizes: "1254x1254",
+        type: "image/png",
+        purpose: "any",
+      },
+      {
+        src: "/assets/nammalink-logo.png",
+        sizes: "1254x1254",
+        type: "image/png",
+        purpose: "maskable",
+      },
+    ],
   };
 }

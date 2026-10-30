@@ -139,7 +139,7 @@ Arbitrary place search/maps, coordinate-based access/egress, pedestrian-network 
 - Engineering foundation GitHub Actions run [`41086371223`](https://github.com/DSGAMING98/NammaLink/actions/runs/41086371223): secret hygiene, all 53 tests, strict type-check, production build, standalone health/stop smoke tests, debug APK, public-endpoint fail-closed test, presentation APK, checksum, and artifact upload all passed for `49b66b2`.
 - CI Android artifact `NammaLink-android-debug-49b66b27109d88a7a0f8de0b812f81587ac6de42` (`12992151752`): 10,002,974-byte ZIP retained until 13 November 2026; digest `sha256:073cd8da8ed911629c3d58d579348682b31f7047a7bb859f84a9bb057efd6cd8`.
 - Vercel production deployment `dpl_AGv3WmmXkYTuJ6u3GeLKh7jHmFXV` reached READY at `https://nammalink.vercel.app` from commit `896bbfc`; unauthenticated health returned revision `896bbfc`, Majestic search returned indexed bus/Metro stops, and the public journey API returned Kempegowda Bus Station 08:00 → Central Silk Board 08:50 with two rides.
-- Presentation APK `0.1.0-presentation` was compiled against the public HTTPS origin: 7,028,336 bytes, SHA-256 `45CFEA744CE361383947BCF8F67D2E1CFD53C101622A026E98DE1A613EA5E3E2`.
+- Presentation APK `0.1.0-presentation` was compiled against the public HTTPS origin with the official NammaLink launcher and splash artwork: 8,040,050 bytes, SHA-256 `F2E3F4473E1143EBFCD45BB58D5CB711C5E6B528F24038D5EE8C4562CBEEC216`.
 - Physical Vivo V2513 acceptance passed with zero ADB reverse entries: service revision `896bbfc` rendered, Majestic autocomplete returned Kempegowda Bus Station and Nadaprabhu Kempegowda Station Metro, full-network journey planning rendered, and no presentation-app fatal exception or ANR was found.
 
 ## Dataset and ML limitations
@@ -167,6 +167,13 @@ Arbitrary place search/maps, coordinate-based access/egress, pedestrian-network 
 ## Deployment state
 
 Production is live at `https://nammalink.vercel.app`. The standalone build, `/api/health`, stop search, journey planning, presentation APK, public-HTTPS guard, and no-USB-tunnel physical-phone gate pass. A store-release-signed APK separately requires the owner-held signing key; the current presentation APK uses Android's debug certificate and is suitable for the MVP presentation.
+
+## Official product identity
+
+- The supplied NammaLink artwork is the canonical website, browser/PWA, and Android application logo.
+- The website includes a verified 1.65-second opening reveal that is non-blocking and disabled when reduced motion is preferred.
+- Android uses an adaptive launcher icon and native splash exit animation derived from the same artwork.
+- Presentation APK `0.1.0-presentation` was installed and launched on the connected Vivo V2513 without crash-buffer entries.
 
 ## Uncommitted work
 

@@ -7,7 +7,7 @@ export default function HomePage() {
     <main>
       <nav className="topbar" aria-label="Primary navigation">
         <a className="brand" href="#top" aria-label="NammaLink home">
-          <span className="brandMark" aria-hidden="true">ನ</span>
+          <img className="brandLogo" src="/assets/nammalink-logo.png" alt="" width="1254" height="1254" />
           <span>NammaLink</span>
         </a>
         <div className="topbarLinks">
@@ -52,10 +52,10 @@ export default function HomePage() {
             demonstration and connects to the verified public NammaLink backend over HTTPS. Android may ask you to allow installs
             from your browser or file manager.
           </p>
-          <p className="downloadHash"><strong>SHA-256</strong> 45CFEA744CE361383947BCF8F67D2E1CFD53C101622A026E98DE1A613EA5E3E2</p>
+          <p className="downloadHash"><strong>SHA-256</strong> F2E3F4473E1143EBFCD45BB58D5CB711C5E6B528F24038D5EE8C4562CBEEC216</p>
         </div>
         <div className="downloadActions">
-          <a className="primaryButton" href="/downloads/NammaLink-0.1.0.apk" download>Download APK · 7.0 MB</a>
+          <a className="primaryButton" href="/downloads/NammaLink-0.1.0.apk" download>Download APK · 7.7 MB</a>
           <span>Version 0.1.0-presentation · HTTPS backend · debug certificate · Android 8+</span>
         </div>
       </section>

@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="public/assets/nammalink-logo.png" alt="NammaLink logo" width="180" />
+
 # NammaLink
 
 ### Reach on time. Wait less.
@@ -62,7 +64,7 @@ The installable APK is compiled against the production HTTPS service and has bee
 - Minimum Android version: Android 8.0 / API 26
 - Package: `in.nammalink.app.presentation`
 - Size: 7,028,336 bytes
-- SHA-256: `45CFEA744CE361383947BCF8F67D2E1CFD53C101622A026E98DE1A613EA5E3E2`
+- SHA-256: `F2E3F4473E1143EBFCD45BB58D5CB711C5E6B528F24038D5EE8C4562CBEEC216`
 - Signing: Android debug certificate; suitable for evaluation and internal distribution, not an app-store release
 
 Build locally:
