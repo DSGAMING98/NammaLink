@@ -193,7 +193,7 @@ Google Maps, Moovit, Chennai One, and official BMTC systems already provide impo
 | Field | Detail |
 | --- | --- |
 | Team | MONOLIMO |
-| Team ID | Shastra26/CS-019 |
+| Team ID | Shastra26/CS-017 |
 | Event | Alliance University Alliance ONE 2026, CodeSangram 3.0 |
 | Problem | CS/26-002 — Smart Public Transport Optimization |
 | Theme | Solving for Bengaluru |
