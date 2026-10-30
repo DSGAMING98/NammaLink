@@ -2,229 +2,241 @@
 
 # NammaLink
 
-### Reach on Time. Wait Less.
+### Reach on time. Wait less.
 
-**A constraint-aware scheduled public-transport planner and journey-recovery prototype for Bengaluru**
+**Constraint-aware public transport planning for Bengaluru**
 
-[![Build](https://img.shields.io/badge/build-passing-16c784)](#verification)
-[![Tests](https://img.shields.io/badge/tests-47%20passing-16c784)](#verification)
-[![Android](https://img.shields.io/badge/Android-native%20APK-156b52)](#native-android-app)
+[![Live](https://img.shields.io/badge/service-live-156b52)](https://nammalink.vercel.app)
 [![CI](https://github.com/DSGAMING98/NammaLink/actions/workflows/ci.yml/badge.svg)](https://github.com/DSGAMING98/NammaLink/actions/workflows/ci.yml)
-[![Data](https://img.shields.io/badge/data-static%20GTFS-f0b429)](#data-and-honesty)
-[![Hackathon](https://img.shields.io/badge/CodeSangram%203.0-CS%2F26--002-07130f)](#hackathon)
+[![Tests](https://img.shields.io/badge/tests-53%20passing-16c784)](#verification)
+[![Android](https://img.shields.io/badge/Android-native%20app-156b52)](#android-application)
+[![Data](https://img.shields.io/badge/data-static%20GTFS-f0b429)](#data-sources-and-limitations)
+
+[Open NammaLink](https://nammalink.vercel.app) · [Download Android APK](https://nammalink.vercel.app/downloads/NammaLink-0.1.0.apk) · [API health](https://nammalink.vercel.app/api/health)
 
 </div>
 
-> [!IMPORTANT]
-> NammaLink is a runnable engineering prototype using unofficial static BMTC and BMRCL community GTFS feeds. Results are **scheduled**, not live. Transfer walks are straight-line estimates, and the recovery incident is explicitly simulated. No deployment URL, authorized realtime feed, or trained delay model is claimed.
+## Overview
 
-## What works
+NammaLink is a web and native Android journey planner for Bengaluru's bus and Metro networks. It searches calendar-aware static schedules, applies passenger constraints before ranking results, and explains why an itinerary was selected.
 
-- Arrive-by journey planning for the Jain University–Alliance University demonstration.
-- Maximum walking and transfer limits enforced before ranking.
-- Fastest, least-waiting, least-walking, direct-preferred, and direct-only choices.
-- Dataset-supported Jain Gate → Banashankari → Chikka Hagade Gate itinerary.
-- Source-labelled stop timeline, wait, walking, transfer, and deadline evidence.
-- Evidence states preventing unverified reports from becoming closures.
-- Simulated missed-connection recovery that preserves the completed first leg.
-- Connection status, saved last journey, local report queue, manifest, and service-worker shell cache.
-- Full-feed schedule-supply insights for operators, with exact counts and explicit evidence limits.
-- Responsive browser-verified interface.
-- Native Kotlin/Jetpack Compose Android app built, installed, and flow-tested on a physical Android 16 phone.
-- Reproducible 10,043-stop BMTC + BMRCL search index and provenance-labelled `/api/stops` selection.
-- Calendar-filtered Connection Scan covering 61,115 bus/Metro trips, 1,563,324 scheduled connections, and 670 explicit station-transfer footpaths.
-- City-scale depart-after and arrive-by contracts with enforced walking budgets and safest/fastest/direct behavior.
-- Physical-device verification of bus-only, Metro-only, and mixed BMTC–walk–BMRCL journeys.
-- On-demand Android location permission flow with distance-ranked nearby-stop lookup and a tested manual-search fallback when permission or feed coverage is unavailable.
-- Door-to-stop access walking integrated into departure time and the same hard walking budget when a nearby origin is selected.
-- Full-network Android results show timetable-derived total duration and scheduled waiting, plus contract-specific recommendation reasons that survive offline save/restore.
-- Feasible safest/fastest/direct results are compared using real door-to-arrival duration, scheduled waiting, changes, and walking; connection waits appear as explicit itinerary steps.
-- Comparison rows switch the complete itinerary immediately, and storage schema version 5 keeps every returned alternative usable offline.
-- Native geographic route fallback projected from real stop coordinates, with a bus/Metro/walk legend, session-only current-fix handling, explicit straight-line limits, and offline persistence.
+The routing network currently contains 10,043 searchable BMTC and BMRCL stops, 61,115 trips, 1,563,324 scheduled connections, and 670 explicit transfer footpaths. Results are derived from static community GTFS data and are labelled as scheduled information rather than live vehicle tracking.
 
-## Native Android app
+## Capabilities
 
-The `android/` project is a real Compose application—not a WebView. It includes debounced search across 10,043 bus and Metro stops, an on-demand current-location permission flow, distance-ranked nearby boarding stops, calendar-filtered full-network requests through an injectable API base URL, explicit bus/Metro/walking timeline cards, constraint controls, a real-coordinate geographic fallback, full-itinerary local save/restore, a clearly simulated recovery flow, and full-feed operator supply graphs. Location is requested only after the passenger taps the nearby-stop action; denial and out-of-coverage states preserve manual search. The fallback projects actual boarding, transfer, and alighting coordinates but honestly labels its lines as straight stop-to-stop estimates rather than street-following geometry. The operator view reports exact GTFS record counts and top-route scheduled trip counts while explicitly reporting zero trained ML models. The bounded journey demonstration remains an explicit offline option rather than a silent substitute for a failed network request.
+- Depart-after and arrive-by journey planning across BMTC and BMRCL services.
+- Hard limits for walking, transfers, deadlines, and direct-only travel.
+- Safest, fastest, and direct journey contracts with comparable duration, waiting, changes, and walking.
+- Calendar-filtered Connection Scan routing over the complete indexed network.
+- Text search and distance-ranked nearby-stop discovery.
+- Optional current-location access walking that consumes the same journey walking budget.
+- Bus, Metro, walking, waiting, and transfer steps with schedule provenance.
+- Complete itinerary save and restore, including alternative journey contracts.
+- Explicit offline journey access and a bounded offline fallback.
+- Evidence-aware disruption and recovery simulation without presenting synthetic incidents as live authority data.
+- Operator schedule-supply summaries with documented evidence boundaries.
+- Server-side Geocoding and Routes gateways with validation, timeouts, caching, rate limits, and normalized errors.
+- Health, revision, dataset-validity, and capability reporting through `/api/health`.
 
-Requirements: Android SDK 36, JDK 17+ (Android Studio's bundled JDK is recommended), and an authorized USB device or emulator.
+## Production service
+
+The production service is deployed at [nammalink.vercel.app](https://nammalink.vercel.app). The deployment is connected to this repository's `main` branch and exposes the web application and API over HTTPS.
+
+Verified production flows include:
+
+- Service health and deployed revision reporting.
+- Bus and Metro stop search.
+- Full-network schedule journey planning.
+- Google Geocoding and walking-route requests through server-only credentials.
+- Android service discovery, autocomplete, planning, and offline recovery without a USB network tunnel.
+
+Deployment requirements, smoke tests, and release procedures are documented in [Deployment](docs/DEPLOYMENT.md).
+
+## Android application
+
+The `android/` directory contains a native Kotlin and Jetpack Compose application; it is not a WebView. It provides stop autocomplete, nearby-stop discovery, journey-contract controls, full-network itinerary rendering, a geographic stop-to-stop route view, offline persistence, recovery handling, and operator schedule insights.
+
+The installable APK is compiled against the production HTTPS service and has been tested on a physical Android 16 device with no ADB reverse rule.
+
+- Download: [NammaLink Android APK](https://nammalink.vercel.app/downloads/NammaLink-0.1.0.apk)
+- Minimum Android version: Android 8.0 / API 26
+- Package: `in.nammalink.app.presentation`
+- Size: 7,028,336 bytes
+- SHA-256: `45CFEA744CE361383947BCF8F67D2E1CFD53C101622A026E98DE1A613EA5E3E2`
+- Signing: Android debug certificate; suitable for evaluation and internal distribution, not an app-store release
+
+Build locally:
 
 ```powershell
 Set-Location android
 $env:ANDROID_HOME = "$env:LOCALAPPDATA\Android\Sdk"
+$env:JAVA_HOME = 'C:\Path\To\JDK'
+
+# Local development build
 .\gradlew.bat :app:assembleDebug
-.\gradlew.bat :app:installDebug
+
+# Installable HTTPS build
+.\gradlew.bat :app:assemblePresentation `
+  -PNAMMALINK_API_BASE_URL=https://nammalink.vercel.app
 ```
 
-For local USB-connected backend testing, run the web server on port 3000 and forward the device port with `adb reverse tcp:3000 tcp:3000`. This is debug-only. A distributable presentation build must use `:app:assemblePresentation -PNAMMALINK_API_BASE_URL=https://your-host`; the build rejects loopback, cleartext, emulator-only, and placeholder endpoints, and Android disables cleartext traffic. At startup the app checks `/api/health`, shows the deployed version, disables network planning when the service is unavailable, and preserves saved/offline journeys.
-
-The repository website serves the physical-device-tested presentation APK connected to `https://nammalink.vercel.app`; its checksum is printed beside the download. Local build outputs and signing material remain excluded from Git. Store-release packaging fails closed until all external signing values are supplied; see [Android release signing](docs/ANDROID_RELEASE.md). See [ML training report](docs/ML_TRAINING_REPORT.md) for the evidence gate and [work checkpoint](docs/WORK_CHECKPOINT.md) for verified device details.
-
-## Central demonstration
-
-With a 10:05 arrival deadline, 800 m walking maximum, and one transfer maximum, the bounded schedule returns:
-
-| Metric | Result |
-| --- | --- |
-| Door departure | 06:39 |
-| First leg | `O EXP V-213VJ`, Jain University Gate 06:45 → Banashankari 08:00 |
-| Second leg | `600-CA`, Banashankari Platform 7 08:05 → Chikka Hagade Gate 09:54 |
-| Door arrival | approximately 09:58 |
-| Scheduled wait | 5 minutes |
-| Estimated walking | 757 m |
-| Transfers | 1 |
-
-Direct-only mode returns no result in the bounded fixture. A simulated incident removes the 08:05 second trip; the engine preserves the completed first leg and recommends boarding the next `600-CA` at 08:45, while clearly warning that the original deadline is no longer feasible.
+Debug builds may use `http://127.0.0.1:3000` with `adb reverse`. Presentation and release builds reject HTTP, loopback, emulator-only, private-network, and placeholder endpoints. Cleartext network traffic is disabled for distributable builds. Store signing requirements are documented in [Android Release](docs/ANDROID_RELEASE.md).
 
 ## Architecture
 
 ```mermaid
 flowchart LR
-    UI["Journey Contract UI"] --> API["Validated Next.js APIs"]
-    API --> ROUTER["Calendar-aware schedule router"]
-    DATA["ODbL BMTC + BMRCL static feeds"] --> ROUTER
-    ROUTER --> RANK["Hard constraints + Pareto ranking"]
-    RANK --> UI
-    API --> RECOVERY["Evidence-aware recovery"]
-    RECOVERY --> UI
-    DATA --> INSIGHTS["Schedule supply insights"]
-    UI --> LOCAL["Device-local journey/report storage"]
+    WEB["Next.js web client"] --> API["Validated API routes"]
+    ANDROID["Native Android client"] --> API
+    API --> HEALTH["Health and capability contract"]
+    API --> SEARCH["Unified stop index"]
+    API --> ROUTER["Calendar-aware Connection Scan"]
+    API --> MAPS["Server-side map gateway"]
+    GTFS["BMTC + BMRCL static GTFS"] --> SEARCH
+    GTFS --> ROUTER
+    ROUTER --> CONTRACTS["Hard constraints + journey ranking"]
+    MAPS --> GOOGLE["Google Geocoding + Routes"]
+    CONTRACTS --> WEB
+    CONTRACTS --> ANDROID
+    ANDROID --> LOCAL["Device-local saved journeys"]
 ```
 
-See [Architecture](docs/ARCHITECTURE.md) and [Algorithms](docs/ALGORITHMS.md).
+Core components:
 
-## Stack
+| Component | Responsibility |
+| --- | --- |
+| Next.js application | Web interface, API routes, health checks, and production deployment |
+| Transit index | Normalized stops, service calendars, connections, trips, and transfer footpaths |
+| Routing engine | Depart-after and arrive-by Connection Scan with walking and transfer contracts |
+| Map gateway | Server-only Geocoding and Routes access with operational safeguards |
+| Android client | Native planning, location access, itinerary display, and offline persistence |
+| Verification pipeline | Tests, type checking, production build, API smoke tests, and Android artifacts |
 
-- Next.js 16 App Router, React 19, strict TypeScript.
+See [Architecture](docs/ARCHITECTURE.md) and [Algorithms](docs/ALGORITHMS.md) for implementation details.
+
+## API
+
+| Endpoint | Purpose |
+| --- | --- |
+| `GET /api/health` | Service revision, dataset validity, record counts, and capability flags |
+| `GET /api/stops` | Text or nearby stop search |
+| `GET /api/network-journeys` | Full-network scheduled journey planning |
+| `POST /api/journeys` | Bounded journey-contract routing |
+| `POST /api/recovery` | Evidence-aware journey recovery |
+| `GET /api/maps/geocode` | Server-side address resolution |
+| `GET /api/maps/place` | Place-ID resolution |
+| `GET /api/maps/autocomplete` | Places autocomplete when an authorized key is configured |
+| `POST /api/maps/walking-route` | Walking distance, duration, and encoded geometry |
+
+Public API inputs are bounded and validated. Map endpoints include request IDs, per-client rate limiting, provider timeouts, stable error responses, and secret-safe logging.
+
+## Technology
+
+- Next.js 16 App Router, React 19, and strict TypeScript.
 - Kotlin, Jetpack Compose, Android Gradle Plugin 9.2.1, and Gradle 9.4.1.
 - Zod request validation.
 - Vitest unit and integration tests.
-- Pure TypeScript schedule routing and recovery.
-- Browser local storage plus a small service worker.
-- No database or paid service required for the core demo.
+- Vercel production hosting and Git deployment.
+- Multi-stage non-root container packaging for portable deployment.
 
-## Local setup
+## Local development
 
-Requirements: Node.js 20+ and npm (the verified development machine used Node 25.9.0).
+Requirements:
+
+- Node.js 20 or newer.
+- pnpm 11.25.0 through Corepack.
 
 ```powershell
 git clone https://github.com/DSGAMING98/NammaLink.git
 Set-Location NammaLink
-npm install
-npm run dev
+corepack enable
+pnpm install --frozen-lockfile
+pnpm dev
 ```
 
 Open `http://localhost:3000`.
 
-Useful commands:
+Verification commands:
 
 ```powershell
-npm run test:run
-npm run typecheck
-npm run build
-npm run secrets:check
-npm run verify:engineering
+pnpm secrets:check
+pnpm test:run
+pnpm typecheck
+pnpm build
+
+# Complete engineering verification
+pnpm verify:engineering
 ```
 
-To rebuild the committed fixture from a local BMTC feed:
+## Environment configuration
 
-```powershell
-$env:BMTC_GTFS_DIR = '..\bmtc'
-npm run data:build
-```
+Copy `.env.example` to `.env.local`. Every tracked environment-variable slot is blank; local credentials are ignored by Git.
 
-## Environment variables
-
-Copy `.env.example` to `.env.local` and fill only services you intend to enable. Every slot is blank in Git.
-
-| Variable | Scope | Current prototype use |
+| Variable | Scope | Purpose |
 | --- | --- | --- |
-| `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` | Browser | Planned map; not required for core |
-| `NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID` | Browser | Planned map style |
-| `GOOGLE_ROUTES_API_KEY` | Server | Secure walking-route gateway; live authorization probe passed |
-| `GOOGLE_PLACES_API_KEY` | Server | Secure autocomplete gateway; current key is blocked for server requests by referrer restrictions |
-| `GOOGLE_GEOCODING_API_KEY` | Server | Secure address/place resolution gateway; live authorization probe passed |
-| `OVERPASS_API_URL` | Server/tooling | Optional future pedestrian context |
-| `NEXT_PUBLIC_SUPABASE_URL` | Browser | Authentication not enabled |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Browser | Authentication not enabled |
-| `SUPABASE_SERVICE_ROLE_KEY` | Server only | Never expose to browser; backend unverified |
+| `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` | Browser | Google Maps browser rendering |
+| `NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID` | Browser | Optional Google cloud map style |
+| `GOOGLE_ROUTES_API_KEY` | Server | Walking-route gateway |
+| `GOOGLE_PLACES_API_KEY` | Server | Places autocomplete gateway |
+| `GOOGLE_GEOCODING_API_KEY` | Server | Address and place-ID resolution |
+| `OVERPASS_API_URL` | Server/tooling | Optional OpenStreetMap query endpoint |
+| `NEXT_PUBLIC_SUPABASE_URL` | Browser | Reserved authentication endpoint |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Browser | Reserved public authentication key |
+| `SUPABASE_SERVICE_ROLE_KEY` | Server | Reserved privileged backend access; never expose to clients |
 
-Never commit `.env.local` or credentials.
+Routes and Geocoding are enabled in production. Places Autocomplete remains disabled until its server-side API restriction is corrected. Core schedule search and routing do not depend on Google services.
 
-Production deployment, health checks, container packaging, environment boundaries, and post-deploy smoke commands are documented in [Deployment](docs/DEPLOYMENT.md).
+## Data sources and limitations
 
-## Data and honesty
+The routing indexes are reproducible derivatives of community BMTC and BMRCL GTFS feeds under ODbL 1.0. Dataset sources, versions, checksums, record counts, licences, and known limitations are recorded in [Dataset Inventory](docs/DATASET_INVENTORY.md).
 
-The committed `data/demo-network.json` is a reproducible 241 KB derivative of [Vonter's community BMTC GTFS](https://github.com/Vonter/bmtc-gtfs), feed version `20260907`, under ODbL 1.0. It contains 3 routes, 216 referenced stops, 53 trips, and 1,343 stop times. Attribution and checksum are documented in [Dataset Inventory](docs/DATASET_INVENTORY.md).
+Operational boundaries:
 
-Locally audited but not committed: full BMTC and BMRCL GTFS, historical BMRCL ridership workbooks, and supporting KML/CSV data. No KSRTC feed, authorized realtime transit feed, or labelled arrival-delay dataset was found.
-
-Consequences:
-
-- Scheduled times are not guaranteed arrivals.
-- Walking uses straight-line distance at 1.25 m/s, not a pedestrian graph.
-- No supervised ML accuracy is reported; see [ML Experiments](docs/ML_EXPERIMENTS.md).
-- Operator metrics describe schedule supply, not occupancy or real fleet utilization.
-- Google map/place integration is not part of the working core.
+- Transit times are scheduled and are not guaranteed vehicle arrivals.
+- No authorized realtime vehicle or disruption feed is currently integrated.
+- Walking access and transfer estimates use straight-line geometry unless a Google walking route is explicitly requested.
+- No labelled historical arrival-delay dataset has passed validation, so no ML delay-accuracy claim is made.
+- Operator metrics describe scheduled supply, not passenger demand, occupancy, punctuality, or revenue.
+- Synthetic disruption data is always labelled as simulated.
 
 ## Verification
 
-At the latest documented checkpoint:
+The current engineering baseline passes:
 
-- 47 tests across 15 files pass.
-- Strict TypeScript checking passes.
-- Production build passes.
-- Journey and recovery APIs are integration-tested.
-- Desktop and 390×844 mobile journey flows were browser-verified.
-- Saved-journey restore, local queue, connectivity indicator, recovery, and operator insights were browser-verified.
+- 53 automated tests across 17 files.
+- Strict TypeScript checking.
+- Tracked-file secret hygiene scanning.
+- Next.js production and standalone-service builds.
+- Public health, stop-search, journey, geocoding, walking-route, and APK checksum smoke tests.
+- Android debug and HTTPS presentation builds.
+- Physical-device service-ready, autocomplete, journey-planning, offline, and no-network-tunnel checks.
+- Fatal exception and ANR log scans.
 
-Detailed methodology and limitations: [Evaluation Results](docs/EVALUATION_RESULTS.md).
+Continuous verification runs through [GitHub Actions](https://github.com/DSGAMING98/NammaLink/actions/workflows/ci.yml).
 
-## Security, privacy, and offline behavior
+## Security and privacy
 
-- Server-only secrets remain outside client code and Git.
-- Public API inputs are bounded and validated.
-- Security headers block framing and MIME sniffing.
-- The service worker never caches `/api/` responses.
-- Saved journeys and queued reports stay on the current device.
-- No continuous GPS or account is required.
-- Live alerts, fresh routing, and online map tiles do not work without connectivity.
-- Authentication, moderator RBAC, RLS, retention, and upload controls remain planned until a backend is verified.
-
-## Competitive position
-
-Google Maps, Moovit, Chennai One, and official BMTC systems already provide important combinations of routing, realtime information, alerts, tracking, or ticketing. NammaLink's narrow focus is an explicit Journey Contract, minimum-waiting/direct preferences, evidence-aware reports, and recovery of the unfinished journey. See [Competitor Analysis](docs/COMPETITOR_ANALYSIS.md).
-
-## Hackathon
-
-| Field | Detail |
-| --- | --- |
-| Team | MONOLIMO |
-| Team ID | Shastra26/CS-017 |
-| Event | Alliance University Alliance ONE 2026, CodeSangram 3.0 |
-| Problem | CS/26-002 — Smart Public Transport Optimization |
-| Theme | Solving for Bengaluru |
-| Alignment | SDG 11 — Sustainable Cities and Communities |
-
-Demo instructions and judge Q&A: [Hackathon Demo](docs/HACKATHON_DEMO.md).
+- Server credentials remain outside Git and client bundles.
+- A CI secret-hygiene gate scans tracked files.
+- API inputs are schema-validated and numerically bounded.
+- Security headers restrict framing, MIME sniffing, referrer leakage, and unnecessary browser permissions.
+- Presentation and release Android builds require public HTTPS endpoints.
+- Location is requested only after explicit user action and remains session-local.
+- Saved journeys remain on the device.
+- API responses are excluded from service-worker caching.
 
 ## Documentation
 
-- [Project Audit](docs/PROJECT_AUDIT.md)
-- [Dataset Inventory](docs/DATASET_INVENTORY.md)
 - [Architecture](docs/ARCHITECTURE.md)
 - [Algorithms](docs/ALGORITHMS.md)
-- [ML Experiments](docs/ML_EXPERIMENTS.md)
+- [Dataset Inventory](docs/DATASET_INVENTORY.md)
+- [Deployment](docs/DEPLOYMENT.md)
+- [Android Release](docs/ANDROID_RELEASE.md)
 - [Evaluation Results](docs/EVALUATION_RESULTS.md)
-- [Competitor Analysis](docs/COMPETITOR_ANALYSIS.md)
 - [Implementation Status](docs/IMPLEMENTATION_STATUS.md)
-- [Production MVP Engineering Roadmap](docs/MVP_ENGINEERING_ROADMAP.md)
-- [Work Checkpoint](docs/WORK_CHECKPOINT.md)
-- [Hackathon Demo](docs/HACKATHON_DEMO.md)
-
-## Roadmap
-
-The engineering-first implementation is defined in the [Production MVP Engineering Roadmap](docs/MVP_ENGINEERING_ROADMAP.md): five production/reliability phases followed by six passenger-feature phases. The first non-negotiable gate removes the installed app's dependency on `127.0.0.1`, USB forwarding, and a developer laptop.
+- [ML Training Report](docs/ML_TRAINING_REPORT.md)
+- [Project Audit](docs/PROJECT_AUDIT.md)
 
 ## Licence
 
-No licence has been selected for NammaLink source code. Do not assume permission to redistribute it. Dataset licences are separate; the committed demonstration database remains subject to ODbL 1.0 and upstream/operator rights.
+No licence has been selected for the NammaLink source code. Dataset licences are separate; the committed GTFS derivatives remain subject to ODbL 1.0 and applicable upstream rights.

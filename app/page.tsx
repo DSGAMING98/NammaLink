@@ -51,7 +51,7 @@ export default function HomePage() {
           <p className="downloadHash"><strong>SHA-256</strong> 45CFEA744CE361383947BCF8F67D2E1CFD53C101622A026E98DE1A613EA5E3E2</p>
         </div>
         <div className="downloadActions">
-          <a className="primaryButton" href="/downloads/NammaLink-0.1.0-dev.apk" download>Download APK · 7.0 MB</a>
+          <a className="primaryButton" href="/downloads/NammaLink-0.1.0.apk" download>Download APK · 7.0 MB</a>
           <span>Version 0.1.0-presentation · HTTPS backend · debug certificate · Android 8+</span>
         </div>
       </section>
@@ -76,8 +76,8 @@ export default function HomePage() {
       </section>
 
       <footer>
-        <div><strong>MONOLIMO</strong><span>CodeSangram 3.0 · CS/26-002</span></div>
-        <p>Planning and engineering validation · Bengaluru</p>
+        <div><strong>NammaLink</strong><span>Bengaluru public transport planning</span></div>
+        <p>Scheduled journey planning with explicit evidence boundaries</p>
       </footer>
     </main>
   );

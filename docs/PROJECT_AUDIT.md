@@ -104,7 +104,7 @@ Build a single Next.js TypeScript application with:
 4. API routes for routing, dataset health, and disruption simulation.
 5. A mobile-first UI that works with schedule data even when Google APIs fail.
 
-Use a connection-scan-style timetable engine first because it is easier to make correct and test within the hackathon window. Add reverse arrive-by search and Pareto filtering before considering more complex RAPTOR variants.
+Use a connection-scan-style timetable engine first because it is straightforward to verify against deterministic schedules. Add reverse arrive-by search and Pareto filtering before considering more complex RAPTOR variants.
 
 ## Risks and blockers
 

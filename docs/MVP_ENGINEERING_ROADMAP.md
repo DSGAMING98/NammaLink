@@ -11,7 +11,7 @@ The remaining work is divided into **11 implementation phases**:
 
 Feature implementation does not begin until the Phase 27 connectivity gate passes on a physical phone with no `adb reverse`, no laptop server, and no local-network dependency.
 
-## Round 3 failure and non-negotiable fix
+## Production connectivity requirement
 
 The Android build currently defaults `NAMMALINK_API_BASE_URL` to `http://127.0.0.1:3000`. On an installed phone, `127.0.0.1` means the phone itself. It worked during development only because `adb reverse tcp:3000 tcp:3000` forwarded the phone's port to the laptop.
 
@@ -39,55 +39,16 @@ This was a release-blocking architecture defect. The permanent controls are:
 | **36. Ticket handoff and revenue instrumentation** | Feature | Authorized partner deep links, referral IDs, outbound-click analytics, return/callback handling where supported, conversion ledger, transparent hypothetical revenue calculator | Booking remains partner-managed; commissions are recorded only from verified eligible conversions | 1–2 days plus partner credentials/contracts |
 | **37. Low-connectivity and sensor assistance** | Feature | Satellite map layer, downloaded journey snapshot, last-known GPS, compass/bearing assistance, low-data UI, explicit no-signal limitations | Useful saved guidance remains available without claiming satellite communication or live tracking | 0.75–1.5 days |
 
-## Credible target for tomorrow's 50-mark MVP presentation
+## Delivery priorities
 
-The full 11-phase production end state is approximately **7–12 focused engineering days**, with deployment, signing, realtime, and ticketing-partner dependencies. The available window is only overnight, so implementation must use the following four-block critical path instead of completing every phase sequentially.
+1. Maintain public HTTPS connectivity and deterministic schedule-routing correctness.
+2. Complete Google place search and mapped access/egress geometry after the Places credential passes authorization.
+3. Add airport-mode data and passenger flows with source and freshness metadata.
+4. Complete Kannada localization, accessibility, and the product visual system.
+5. Add partner booking handoffs only where an authorized integration and contract exist.
+6. Extend offline guidance without presenting device sensors as satellite or network connectivity.
 
-### Overnight execution plan
-
-| Block | Maximum focus | Work included | Must-pass outcome |
-| --- | --- | --- | --- |
-| **A. Rescue engineering** | 1.5–2 hours | Phase 27 plus the essential parts of 28/29: public HTTPS backend, health endpoint, no-loopback presentation build, Google API probes, normalized connectivity/search errors | Search and route planning work on the physical phone with `adb reverse` removed and the laptop server stopped |
-| **B. Judge-visible core features** | 2.5–3.5 hours | Phase 32 core and Phase 33: Google place search/map/geometry if API access passes; To/From Airport mode; current-location airport options; validated KIA schedules/stops/routes | A physical-phone flow from current/place search to a mapped airport-bus journey works using sourced static data |
-| **C. Presentation features** | 1.5–2.5 hours | Phase 34 core, Phase 36 safe boundary, selected Phase 37 items: English/Kannada switch for primary screens, brand/UI polish, partner booking handoff, hypothetical revenue card, satellite toggle/saved guidance | The presentation visibly includes Kannada, airport planning, ticket handoff/revenue explanation, and low-connectivity value without false claims |
-| **D. Freeze and verification** | 1–1.5 hours | Phase 31 acceptance subset: tests, type-check, production build, Android build/install, no-USB device run, screenshots, demo reset, docs, commit/push, CI observation | One exact APK and one exact demo path are reproducible before presentation; no new feature work after freeze |
-
-Expected total: **6.5–9.5 focused hours**, provided deployment access and Google API enablement are available immediately.
-
-### Hard priority order
-
-1. **Installed search works without USB or localhost.** Nothing else outranks this.
-2. **Airport mode works with validated scheduled data.** This is the main new feature.
-3. **Google place search and mapped geometry work** if the configured APIs pass their probes.
-4. **Kannada primary flow and visual polish.** Translate planner, airport result, journey result, offline state, and common errors first.
-5. **Partner booking handoff and revenue explanation.** Deep link only; no payment ownership claim.
-6. **Satellite toggle and saved guidance** only after the previous gates pass.
-
-### Explicit overnight cuts
-
-These remain in the full roadmap but are not honest overnight commitments without external support:
-
-- production ONDC/Namma BMTC/Namma Metro purchase completion, refunds, or verified commission callbacks;
-- live bus positions or realtime arrivals without an authorized feed;
-- unverified fares;
-- full-app Kannada coverage beyond the primary passenger/demo flow;
-- production signing if the owner keystore is unavailable;
-- server-side authentication/moderation and notification delivery;
-- new ML training without labelled observed-arrival data;
-- any claim that phone sensors create satellite or internet connectivity.
-
-For the presentation, unavailable integrations must appear as clearly labelled partner handoffs or roadmap items—not simulated production success.
-
-### First 15-minute dependency gate
-
-Before coding, verify:
-
-1. a deployable public backend account/domain is accessible;
-2. Places API (New), Routes API, Geocoding API, and Maps SDK for Android return authorized responses under the configured restrictions;
-3. the Android package name and debug/release SHA fingerprints are allowed by the Android Maps key;
-4. the exact presentation phone has normal internet access without USB forwarding.
-
-If the public deployment account is unavailable, the user must connect one immediately; another laptop tunnel would repeat the Round 3 failure. If Google returns 403, fix service enablement/billing/restrictions before building map UI. A MapLibre/local-search fallback may remain available for resilience, but it must not be presented as completed Google Maps integration.
+Unavailable integrations remain explicitly disabled until their data, credentials, permissions, and acceptance tests are available. Realtime, fares, ticket fulfillment, commissions, and trained prediction models must not be inferred from static schedule data.
 
 ## Google Maps architecture
 

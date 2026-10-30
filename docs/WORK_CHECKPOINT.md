@@ -81,7 +81,7 @@ Arbitrary place search/maps, coordinate-based access/egress, pedestrian-network 
 - Updated Android `:app:assembleDebug`: passed with the stop-search and network-journey client.
 - `adb reverse tcp:3000 tcp:3000`: configured successfully; updated APK streamed install passed.
 - Production website APK check: HTTP 200, `application/vnd.android.package-archive`, 17,150,016-byte content length, visible debug-signing label.
-- Current Round 3 development APK SHA-256: `EBFA83535D5471B8BCB91EC484E7AFB8FC6574A14181C24307B09B735228EEB8` (17,150,016 bytes).
+- Archived development APK SHA-256: `EBFA83535D5471B8BCB91EC484E7AFB8FC6574A14181C24307B09B735228EEB8` (17,150,016 bytes).
 - Operator graph production HTML: passed for all full-feed totals, rejection count, and zero-model label.
 - Operator graph visual QA: passed in the in-app browser at desktop and 390×844 mobile viewport; cards, bars, disclaimers, and following download section rendered without observed overflow.
 - CI command parity check: frozen pnpm install, 36 tests, strict type-check, production web build, and native Android debug build passed locally before workflow push.
@@ -179,7 +179,7 @@ Begin Phase 32 feature work: Google place/map integration and airport mode. Befo
 ## Restore commands
 
 ```powershell
-Set-Location 'C:\Users\Prajwal\Desktop\Alliance Hackathon\NammaLink'
+Set-Location 'C:\path\to\NammaLink'
 git status --short --branch
 git pull --ff-only origin main
 npm run test:run
