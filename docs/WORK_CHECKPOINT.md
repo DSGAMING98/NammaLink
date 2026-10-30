@@ -12,7 +12,7 @@ Preserved real journey endpoint coordinates through Android parsing and versione
 
 ## Last verified working commit
 
-Permission-aware nearby-stop discovery milestone: `a02fdc3` on `main`, verified by GitHub Actions run `41049023651`. The Phase 21 geographic fallback is under verification and will replace this line after CI passes.
+Real-coordinate native geographic fallback milestone: `7bd5a45` on `main`, verified by GitHub Actions run `41049872986`.
 
 ## Current branch
 
@@ -111,6 +111,8 @@ Arbitrary place search/maps, coordinate-based access/egress, pedestrian-network 
 - GitHub Actions run [`41049023651`](https://github.com/DSGAMING98/NammaLink/actions/runs/41049023651): all 45 tests, strict type-check, production web build, native APK build, checksum recording, and artifact upload passed for `a02fdc3`.
 - CI Android artifact `NammaLink-android-debug-a02fdc3fb1801a767bb4368512a0f7292074c87c` (`12973302879`): 9,970,818-byte ZIP retained until 13 November 2026; GitHub artifact digest `sha256:110e0e34672b730282807126075a5d170dbbe6905e96aa0607a7bba8368b7617`.
 - Physical geographic fallback: real 08:00–08:50 route endpoints and transfer projected cleanly; coordinate-bearing storage version 2 restored the same map and both route legs after backend reverse removal plus force-stop/relaunch; fatal/ANR scan clean.
+- GitHub Actions run [`41049872986`](https://github.com/DSGAMING98/NammaLink/actions/runs/41049872986): all 45 tests, strict type-check, production web build, native APK build, checksum recording, and artifact upload passed for `7bd5a45`.
+- CI Android artifact `NammaLink-android-debug-7bd5a453f7156e68cf1edddf6acc4d78a37309d9` (`12974331673`): 9,975,891-byte ZIP retained until 13 November 2026; GitHub artifact digest `sha256:ceb2c95b3f984b057cce316f82390ae77c887169692afeb7a1866b08c95a4001`.
 
 ## Dataset and ML limitations
 
@@ -140,7 +142,7 @@ No public deployment is claimed. The production Next.js build and local producti
 
 ## Uncommitted work
 
-Phase 21 source, APK, documentation, and device evidence are being committed as one verified milestone. After CI closure, the working tree must be clean.
+None. Phase 21 source, APK, documentation, and device evidence are committed, remotely verified, and pushed; this closure is documentation-only.
 
 ## Exact next implementation step
 
