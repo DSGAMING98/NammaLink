@@ -4,11 +4,11 @@ Updated: 30 October 2026
 
 ## Current phase
 
-Phase 13 — Verified continuous integration and release hardening.
+Phase 14 — Connected full-network Android validation.
 
 ## Last completed task
 
-Verified the complete GitHub Actions pipeline on `main`: all web/data tests, strict type-check, production web build, native Android build, checksum step, and retained APK artifact passed against the pushed commit.
+Validated live stop autocomplete and full-network journey rendering on the physical Android 16 handset through USB-forwarded production backend, captured PNG/XML evidence, and completed a fatal/ANR log scan.
 
 ## Last verified working commit
 
@@ -37,6 +37,7 @@ Release-hardening milestone: `bdac2cc` on `main`, verified by GitHub Actions run
 - Full-feed operator supply graph with 9,960 stops, 57,836 trips, 4,416 route records, 1,477,697 admitted connections, and top-eight route trip bars.
 - GitHub Actions verification for tests, type-check, production web build, native Android build, APK checksum, and 14-day APK artifact retention.
 - Fail-closed Android release signing configuration: production packaging requires four external environment values and a readable keystore; signing files are ignored by Git.
+- Physical-device validation of live 9,960-stop autocomplete and full-network journey rendering over USB-forwarded backend.
 
 ## Incomplete features
 
@@ -75,6 +76,9 @@ Arbitrary place search/maps, spatial nearest-stop indexing, persistent server-si
 - Release-safety verification: `:app:assembleRelease` without credentials failed at `verifyReleaseSigning` with the expected four-variable message, including on a reused Gradle configuration cache; `:app:assembleDebug` still passed.
 - Release-hardening GitHub Actions run [`41007074104`](https://github.com/DSGAMING98/NammaLink/actions/runs/41007074104): web/data and native Android jobs both passed for commit `bdac2ccec2ea19fb5e16e1e4436ad7dbfb931989`.
 - Release-hardening CI artifact `NammaLink-android-debug-bdac2ccec2ea19fb5e16e1e4436ad7dbfb931989`: 9,947,922-byte ZIP retained until 2026-11-13; GitHub artifact digest `sha256:a561a0e3efa84800a0d2ecf8c21ae2e43f2655b41071d523e8155a176f8cea48`.
+- Physical Android autocomplete: `kempe` returned indexed Kempegowda Arch and Kempegowda Bus Station matches with real BMTC stop IDs; PNG/XML evidence saved under `research_outputs/device_evidence/`.
+- Physical Android full-network journey: 08:00 Kempegowda Bus Station → 08:50 Central Silk Board, one transfer, routes `316-B` and `G-3 SJSCBSE-CSB`, 175 ms measured server scan, and schedule-only disclosure rendered correctly.
+- Post-flow device log scan: no `FATAL EXCEPTION`, NammaLink ANR, or AndroidRuntime fatal match.
 
 ## Dataset and ML limitations
 
@@ -89,11 +93,11 @@ Arbitrary place search/maps, spatial nearest-stop indexing, persistent server-si
 - Google Places minimal probes returned HTTP 403; API enablement, billing, or key restrictions remain unresolved.
 - Supabase schema/access has not been verified.
 - Secure release signing is not configured. A clearly labelled debug-signed development APK is publicly available from the repository-backed website surface, but the network backend itself is not publicly deployed.
-- The connected Vivo handset is securely locked, so updated autocomplete/button UI validation requires the owner to unlock it; ADB authentication bypass was not attempted.
+- The connected Vercel context contains no team or linked project, so public deployment requires the owner to connect a Vercel account/team.
 
 ## Exact next implementation step
 
-After the handset is unlocked, validate autocomplete and full-network journey rendering over `adb reverse` and capture device evidence. Then replace the clearly labelled development APK with a securely release-signed artifact. Do not repeat the completed backend, Android integration, or download-surface work.
+Connect a Vercel team/project and securely provision an Android release keystore, then deploy and smoke-test the backend before rebuilding a release-signed APK against its HTTPS URL. Do not repeat the completed backend, Android integration, CI, or physical-device validation work.
 
 ## Restore commands
 

@@ -1,6 +1,6 @@
 # Implementation Status
 
-Last updated: 29 October 2026
+Last updated: 30 October 2026
 
 | Capability | Status | Evidence / limitation |
 | --- | --- | --- |
@@ -23,9 +23,9 @@ Last updated: 29 October 2026
 | Schedule-based ETA baseline | Implemented and tested | GTFS times plus explicit walking/waiting; every output labelled scheduled |
 | Full-network stop search | Implemented and tested | 9,960-stop normalized API with embedded feed provenance |
 | Full-network schedule routing | Implemented and benchmarked | 1,477,697-connection CSA index; three-minute transfers; static-feed validity gate |
-| Native Android client | Implemented; updated connected flow awaits unlocked-device QA | Compose APK, network autocomplete/journey client, explicit offline fallback |
+| Native Android client | Implemented and physical-device validated | Compose APK, live network autocomplete, full-network journey rendering, explicit offline fallback; evidence under `research_outputs/device_evidence/` |
 | APK distribution | Development preview available | Website serves a checksum-labelled debug-signed APK; production signing remains incomplete |
 | Low-connectivity mode | Partially implemented | Connection status, saved journey, local report queue, manifest, and service-worker shell cache implemented; full offline device test remains |
 | Operator insights | Implemented and tested | Bounded route trip counts, service spans, direction-aware median headways, and shared-stop analysis; explicitly not actual fleet utilization |
-| Deployment | Planned | Application builds locally; no deployment has been created or verified |
+| Deployment | Blocked on account connection | Application builds locally; connected Vercel context returned no team/project, so no deployment target is available |
 
