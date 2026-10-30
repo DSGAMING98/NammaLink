@@ -12,7 +12,7 @@ Added timetable-derived journey duration and scheduled waiting, contract-specifi
 
 ## Last verified working commit
 
-Door-to-stop access-contract milestone: `ff54502` on `main`, verified by GitHub Actions run `41051675350`.
+Timetable recommendation-evidence milestone: `a5998fc` on `main`, verified by GitHub Actions run `41052819731`.
 
 ## Current branch
 
@@ -121,6 +121,8 @@ Arbitrary place search/maps, coordinate-based access/egress, pedestrian-network 
 - CI Android artifact `NammaLink-android-debug-5469f7e0c4ffa6689cedbe86e6d59afa15e66090` (`12975130370`): 9,983,918-byte ZIP retained until 13 November 2026; GitHub artifact digest `sha256:6e20c4157a4c3764c248e40ac85c99a834cb274166d04c8e5b912b8808d486e2`.
 - GitHub Actions run [`41051675350`](https://github.com/DSGAMING98/NammaLink/actions/runs/41051675350): all 47 tests, strict type-check, production web build, native APK build, checksum recording, and artifact upload passed for `ff54502`.
 - CI Android artifact `NammaLink-android-debug-ff54502bce82a3b8c50d3f8dc488280b30393cac` (`12974733008`): 9,985,170-byte ZIP retained until 13 November 2026; GitHub artifact digest `sha256:9cf172d1c3d5f34ed1b6dc8addf1dea8b070c74fd27a0dae02bdff10c4a47419`.
+- GitHub Actions run [`41052819731`](https://github.com/DSGAMING98/NammaLink/actions/runs/41052819731): all 47 tests, strict type-check, production web build, native APK build, checksum recording, and artifact upload passed for `a5998fc`.
+- CI Android artifact `NammaLink-android-debug-a5998fce5f11d6be4c8b15c9c892a331bd2cbf62` (`12974219715`): 9,987,995-byte ZIP retained until 13 November 2026; GitHub artifact digest `sha256:1c728c7a10e9022563e8bbaf60d69812413f85b289f083520073ef69afb0a129`.
 - Access-contract API smoke: 116 m access under an 800 m maximum left 684 m, separated door/stop/boarding times, and a 2,447 m access under a 100 m maximum returned no journey with explicit evidence.
 - Physical manual-stop regression: unchanged `0/800 m walk`, no injected current-location leg, updated APK install successful, and fatal/ANR scan clean.
 - Recommendation API smoke: default safest journey returned 3,000 seconds total duration and 360 seconds scheduled waiting; a fastest Metro journey returned 4,800 seconds total duration and zero scheduled waiting.
@@ -154,7 +156,7 @@ No public deployment is claimed. The production Next.js build and local producti
 
 ## Uncommitted work
 
-Phase 24 source, APK, documentation, and device evidence are ready for commit and CI verification.
+None. Phase 24 source, APK, documentation, and device evidence are committed and its GitHub Actions verification is closed successfully.
 
 ## Exact next implementation step
 
