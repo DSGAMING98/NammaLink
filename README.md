@@ -28,7 +28,7 @@
 - Evidence states preventing unverified reports from becoming closures.
 - Simulated missed-connection recovery that preserves the completed first leg.
 - Connection status, saved last journey, local report queue, manifest, and service-worker shell cache.
-- Bounded schedule-supply insights for operators.
+- Full-feed schedule-supply insights for operators, with exact counts and explicit evidence limits.
 - Responsive browser-verified interface.
 - Native Kotlin/Jetpack Compose Android app built, installed, and flow-tested on a physical Android 16 phone.
 - Reproducible 10,043-stop BMTC + BMRCL search index and provenance-labelled `/api/stops` selection.
@@ -38,7 +38,7 @@
 
 ## Native Android app
 
-The `android/` project is a real Compose application—not a WebView. It includes debounced search across 10,043 bus and Metro stops, calendar-filtered full-network requests through an injectable API base URL, explicit bus/Metro/walking timeline cards, constraint controls, a native route schematic, full-itinerary local save/restore, a clearly simulated recovery flow, and honest operator insights. The bounded demonstration remains an explicit offline option rather than a silent substitute for a failed network request.
+The `android/` project is a real Compose application—not a WebView. It includes debounced search across 10,043 bus and Metro stops, calendar-filtered full-network requests through an injectable API base URL, explicit bus/Metro/walking timeline cards, constraint controls, a native route schematic, full-itinerary local save/restore, a clearly simulated recovery flow, and full-feed operator supply graphs. The operator view reports exact GTFS record counts and top-route scheduled trip counts while explicitly reporting zero trained ML models. The bounded journey demonstration remains an explicit offline option rather than a silent substitute for a failed network request.
 
 Requirements: Android SDK 36, JDK 17+ (Android Studio's bundled JDK is recommended), and an authorized USB device or emulator.
 
@@ -161,7 +161,7 @@ Consequences:
 
 At the latest documented checkpoint:
 
-- 22 tests across 9 files pass.
+- 40 tests across 14 files pass.
 - Strict TypeScript checking passes.
 - Production build passes.
 - Journey and recovery APIs are integration-tested.

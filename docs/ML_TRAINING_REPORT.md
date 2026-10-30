@@ -33,12 +33,10 @@ Every graph must be saved as PNG and SVG with labelled axes, units, sample sizes
 
 ## Current schedule baselines
 
-The current operator charts describe only the bounded GTFS fixture:
+The operator interfaces distinguish two static-GTFS views:
 
-- 3 selected demonstration routes;
-- 53 scheduled trips;
-- 216 covered stops;
-- relative scheduled trip supply by route.
+- the bounded correctness fixture: 3 selected routes, 53 scheduled trips, and 216 covered stops;
+- the combined BMTC/BMRCL index: 10,043 searchable stops, 61,115 trips, 4,419 route records, 1,563,324 admitted connections, 670 transfer footpaths, and top-eight route trip counts.
 
 These values are not punctuality, ridership, utilization, or prediction quality. They are computed schedule descriptors and are labelled that way in both the web and Android operator screens.
 
@@ -58,7 +56,7 @@ Until those criteria are met, NammaLink uses deterministic schedule planning and
 
 ## Dashboard integration
 
-The native operator dashboard displays `0 trained ML models` and explains why evaluation charts are absent. The web operator dashboard displays meaningful real-data schedule-supply graphs for the bounded demonstration and combined BMTC/BMRCL feeds, including 61,115 scheduled trips and top-route trip counts. These are explicitly labelled as supply—not ML evaluation, ridership, reliability, occupancy, or revenue. When a validated model run exists, only generated artifacts whose run identifiers and numerical metrics pass the above policy will be integrated.
+The web and native operator dashboards both display meaningful real-data schedule-supply graphs for the combined BMTC/BMRCL feeds, including 61,115 scheduled trips and top-route trip counts. Both also display `0 trained ML models` and explain why evaluation charts are absent. These graphs are explicitly labelled as supply—not ML evaluation, ridership, reliability, occupancy, or revenue. When a validated model run exists, only generated artifacts whose run identifiers and numerical metrics pass the above policy will be integrated.
 
 ## Device evidence
 
@@ -67,3 +65,6 @@ Physical-device screenshots from the first native milestone are stored under `re
 - `android-journey.png` — scheduled journey contract;
 - `android-recovery.png` — simulated recovery path and persisted saved state;
 - `android-operator.png` — schedule metrics and ML evidence gate.
+- `operator-full-feed-top.png` — native full-feed totals and zero-model evidence gate.
+- `operator-full-feed-bars.png` — exact trip-count-labelled route supply bars.
+- `operator-full-feed-disclosure.png` — complete graph and supply-only disclaimer.

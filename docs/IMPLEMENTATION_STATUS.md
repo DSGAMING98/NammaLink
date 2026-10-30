@@ -26,6 +26,6 @@ Last updated: 30 October 2026
 | Native Android client | Implemented and physical-device validated | Compose APK, live autocomplete, contract planning, full-network rendering, versioned full-itinerary local save/restore, explicit offline fallback; evidence under `research_outputs/device_evidence/` |
 | APK distribution | Development preview available | Website serves a checksum-labelled debug-signed APK; production signing remains incomplete |
 | Low-connectivity mode | Partially implemented | Android full-itinerary restoration passed with the backend tunnel removed; web connection status, local report queue, manifest, and service-worker shell cache remain, but web app-shell offline reload is not device-verified |
-| Operator insights | Implemented and tested | Bounded route trip counts, service spans, direction-aware median headways, and shared-stop analysis; explicitly not actual fleet utilization |
+| Operator insights | Implemented and tested | Web and native views report full-feed totals plus top-eight scheduled route trip counts; bounded-fixture headways remain separately labelled; explicitly not ridership, punctuality, occupancy, revenue, or actual utilization |
 | Deployment | Blocked on account connection | Application builds locally; connected Vercel context returned no team/project, so no deployment target is available |
 

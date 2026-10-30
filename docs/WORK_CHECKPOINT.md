@@ -4,15 +4,15 @@ Updated: 30 October 2026
 
 ## Current phase
 
-Phase 18 — Native full-itinerary offline restoration.
+Phase 19 — Native full-feed operator evidence.
 
 ## Last completed task
 
-Replaced the Android saved-state placeholder with versioned full-journey serialization and physically verified restoration after force-stop with the backend tunnel removed.
+Replaced the bounded native operator demonstration with combined BMTC/BMRCL totals and exact top-eight scheduled trip-count bars, then physically verified the full graph, zero-model evidence gate, and supply-only disclaimer.
 
 ## Last verified working commit
 
-Native full-itinerary offline restoration milestone: `e0bb4fe` on `main`, verified by GitHub Actions run `41047408362`.
+Native full-itinerary offline restoration milestone: `e0bb4fe` on `main`, verified by GitHub Actions run `41047408362`. The Phase 19 operator milestone is under verification and will replace this line after CI passes.
 
 ## Completed features
 
@@ -24,7 +24,7 @@ Native full-itinerary offline restoration milestone: `e0bb4fe` on `main`, verifi
 - Installable responsive web app with offline shell, saved journey, local report queue, and schedule-supply operator insights.
 - 40 passing web/router/API/operator/calendar/contract tests plus strict type-check and production build.
 - Native Kotlin/Jetpack Compose project using AGP 9.2.1, Gradle 9.4.1, compile/target SDK 36, and minimum SDK 26.
-- Native constraint planner, GTFS-derived demonstration itinerary, schematic route view, versioned full-itinerary local save/restore, explicit simulated disruption/recovery, and operator screen.
+- Native constraint planner, GTFS-derived demonstration itinerary, schematic route view, versioned full-itinerary local save/restore, explicit simulated disruption/recovery, and full-feed operator screen.
 - Physical Android 16 installation and UI-hierarchy validation on Vivo V2513.
 - Device screenshots under `research_outputs/device_evidence/`.
 - Machine-readable zero-model registry and professional ML artifact/evidence policy in `docs/ML_TRAINING_REPORT.md`.
@@ -62,7 +62,7 @@ Arbitrary place search/maps, coordinate-based access/egress, pedestrian-network 
 - Journey UI hierarchy: passed for deadline, static-GTFS evidence, timeline, native schematic, and recovery action.
 - Saved journey persistence: passed; `Saved ✓` remained after force-stop and clean relaunch.
 - Simulated recovery interaction: passed; route changed from 365 to 500-D and recovery path was visually distinguished.
-- Operator UI hierarchy: passed for 53 trips, 216 stops, 3 routes, zero trained models, and evidence-gate explanation.
+- Operator UI hierarchy: passed for 10,043 searchable stops, 61,115 trips, 4,419 route records, 1,563,324 connections, 670 footpaths, 5,153 rejected connections, zero trained models, and exact top-eight route trip counts.
 - Device log scan: passed; no NammaLink fatal exception or ANR found.
 - Verified debug APK SHA-256: `BF3640B973F1E89E922ED0ED92D288B482FDE3F97F57D358DC4CEFC007136378`.
 - Full-feed production query: Kempegowda Bus Station 08:00 → Central Silk Board 08:50 with one six-minute transfer; repeated warm scans measured 205–256 ms.
@@ -70,7 +70,7 @@ Arbitrary place search/maps, coordinate-based access/egress, pedestrian-network 
 - Updated Android `:app:assembleDebug`: passed with the stop-search and network-journey client.
 - `adb reverse tcp:3000 tcp:3000`: configured successfully; updated APK streamed install passed.
 - Production website APK check: HTTP 200, `application/vnd.android.package-archive`, 17,150,016-byte content length, visible debug-signing label.
-- Current offline-restore development APK SHA-256: `E858B95B3A6B0A76895462D7E3722F8FEAD1577D82E48B15BCC0BE549A11E9E6` (17,150,016 bytes).
+- Current full-feed-operator development APK SHA-256: `FABA022EBDBBF8821E83B2D711959838525EAE06FCB066C662855E72ECED17D6` (17,150,016 bytes).
 - Operator graph production HTML: passed for all full-feed totals, rejection count, and zero-model label.
 - Operator graph visual QA: passed in the in-app browser at desktop and 390×844 mobile viewport; cards, bars, disclaimers, and following download section rendered without observed overflow.
 - CI command parity check: frozen pnpm install, 36 tests, strict type-check, production web build, and native Android debug build passed locally before workflow push.
@@ -97,6 +97,7 @@ Arbitrary place search/maps, coordinate-based access/egress, pedestrian-network 
 - GitHub Actions run `41046438069`: all 40 tests, strict type-check, production web build, native APK build, checksum recording, and artifact upload passed for `be13ffd`; artifact `12972746779` is retained until 13 November 2026.
 - Physical offline restoration: versioned full-network journey payload stored, USB backend reverse removed, app force-stopped/relaunched, and the exact two-leg 08:00–08:50 itinerary restored with `Saved ✓`; fatal/ANR scan clean.
 - GitHub Actions run `41047408362`: all 40 tests, strict type-check, production web build, native APK build, checksum recording, and artifact upload passed for `e0bb4fe`; artifact `12972304582` is retained until 13 November 2026.
+- Physical native operator graph: full-feed totals, zero-model evidence gate, all eight count-labelled route bars, and the supply-only disclaimer rendered on the Vivo V2513; screenshot/UI hierarchy evidence captured and fatal/ANR scan clean.
 
 ## Dataset and ML limitations
 

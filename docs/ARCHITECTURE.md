@@ -42,7 +42,7 @@ flowchart LR
 | Data build | Extract selected routes and their dependencies from local BMTC GTFS | `scripts/build-demo-network.mjs` |
 | Stop search | Normalized, provenance-labelled search across 9,960 BMTC stops and 83 BMRCL stations | `app/api/stops/`, `data/transit-stops.json` |
 | Full-network routing | GTFS-calendar-filtered scan over 1,563,324 bus/Metro connections and 670 explicit transfer footpaths | `app/api/network-journeys/`, `lib/transit/connection-router.ts` |
-| Native Android | Compose planner, offline demonstration, recovery, versioned full-itinerary local restoration, and operator evidence | `android/`, physical-device QA |
+| Native Android | Compose planner, offline demonstration, recovery, versioned full-itinerary local restoration, and full-feed operator evidence | `android/`, physical-device QA |
 
 ## Request flow
 

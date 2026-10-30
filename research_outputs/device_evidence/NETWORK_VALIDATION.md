@@ -52,3 +52,11 @@ The post-flow device log scan matched no `FATAL EXCEPTION`, NammaLink ANR, or An
 - Removed the USB backend tunnel, force-stopped the app, relaunched it without a reachable server, and opened the Journey tab.
 - The native UI restored the same 08:00–08:50 itinerary, routes `316-B` and `G-3 SJSCBSE-CSB`, transfer count, contract, timeline, and `Saved ✓` state without a network request.
 - Evidence: `offline-save-saved.xml`, `offline-restore-result.png`, and `offline-restore-result.xml`; post-restore fatal/ANR scan was clean.
+
+## Full-feed operator evidence
+
+- Opened the native Operator tab on the updated APK and verified the combined BMTC/BMRCL totals: 10,043 searchable stops, 61,115 trips, 4,419 route records, 1,563,324 admitted connections, 670 transfer footpaths, and 5,153 rejected connections.
+- Verified the explicit `0 trained ML models` evidence gate and explanation that evaluation charts require labelled observed arrivals.
+- Verified exact scheduled trip-count labels for the top eight routes: Purple 1,265; Green 1,149; Yellow 865; `375-D` 398; `401-M` 328; `378` 318; `410-FA` 316; and `226-N` 310.
+- Verified the complete disclaimer stating that the bars are not ridership, punctuality, occupancy, revenue, or actual utilization.
+- Evidence: `operator-full-feed-top.png`/`.xml`, `operator-full-feed-bars.png`/`.xml`, and `operator-full-feed-disclosure.png`/`.xml`; the post-flow fatal/ANR scan was clean.

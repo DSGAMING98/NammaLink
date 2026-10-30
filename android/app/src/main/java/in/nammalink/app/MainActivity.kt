@@ -69,6 +69,10 @@ private val Mint = Color(0xFFD9EFE4)
 private val Amber = Color(0xFFFFC857)
 private val Coral = Color(0xFFD95D39)
 private val Muted = Color(0xFF617068)
+private val PurpleLine = Color(0xFF8C2877)
+private val YellowLine = Color(0xFFD6A900)
+
+private data class RouteSupply(val route: String, val agency: String, val trips: Int, val color: Color)
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -315,27 +319,40 @@ private fun ItineraryCard(time: String, title: String, detail: String, duration:
 
 @Composable
 private fun OperatorScreen() {
+    val routeSupply = listOf(
+        RouteSupply("Purple", "BMRCL", 1_265, PurpleLine),
+        RouteSupply("Green", "BMRCL", 1_149, Green),
+        RouteSupply("Yellow", "BMRCL", 865, YellowLine),
+        RouteSupply("375-D", "BMTC", 398, Green),
+        RouteSupply("401-M", "BMTC", 328, Green),
+        RouteSupply("378", "BMTC", 318, Green),
+        RouteSupply("410-FA", "BMTC", 316, Green),
+        RouteSupply("226-N", "BMTC", 310, Green),
+    )
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
-        ScreenHeader("Operator intelligence", "Schedule supply, honestly labelled.", "These figures describe the bounded static fixture—not live fleet performance.")
+        ScreenHeader("Operator intelligence", "City-scale schedule supply.", "Full BMTC + BMRCL static-feed evidence—not live fleet performance.")
         Column(Modifier.padding(horizontal = 20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                MetricCard("53", "scheduled trips", Modifier.weight(1f))
-                MetricCard("216", "covered stops", Modifier.weight(1f))
+                MetricCard("61,115", "scheduled trips", Modifier.weight(1f))
+                MetricCard("10,043", "searchable stops", Modifier.weight(1f))
             }
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                MetricCard("3", "demo routes", Modifier.weight(1f))
-                MetricCard("0", "trained ML models", Modifier.weight(1f))
+                MetricCard("4,419", "route records", Modifier.weight(1f))
+                MetricCard("1,563,324", "connections", Modifier.weight(1f))
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                MetricCard("670", "transfer footpaths", Modifier.weight(1f))
+                MetricCard("5,153", "connections filtered", Modifier.weight(1f))
             }
             Card(colors = CardDefaults.cardColors(containerColor = Mint), shape = RoundedCornerShape(16.dp)) {
                 Column(Modifier.padding(16.dp)) {
-                    Text("ML evidence gate", fontWeight = FontWeight.ExtraBold, color = Ink, fontSize = 18.sp)
+                    Text("0 trained ML models · evidence gate", fontWeight = FontWeight.ExtraBold, color = Ink, fontSize = 18.sp)
                     Text("No labelled historical arrival data has been validated, so no delay model or fabricated evaluation chart is shown. Schedule baselines remain the honest reference.", color = Muted, lineHeight = 20.sp)
                 }
             }
-            Bar("Route 365", .86f, Green)
-            Bar("Route 356-M", .63f, Green)
-            Bar("Route 500-D", .48f, Amber)
-            Text("Relative scheduled trip supply in the demonstration extract. This is not ridership, punctuality, or utilization.", color = Muted, fontSize = 12.sp)
+            Text("Top routes by scheduled trip count", color = Ink, fontWeight = FontWeight.ExtraBold, fontSize = 18.sp)
+            routeSupply.forEach { route -> SupplyBar(route, routeSupply.first().trips) }
+            Text("BMTC 20260907 + BMRCL 20260817 community GTFS · bars show scheduled trip counts only. They are not ridership, punctuality, occupancy, revenue, or actual utilization.", color = Muted, fontSize = 12.sp, lineHeight = 18.sp)
             Spacer(Modifier.height(16.dp))
         }
     }
@@ -345,22 +362,26 @@ private fun OperatorScreen() {
 private fun MetricCard(value: String, label: String, modifier: Modifier = Modifier) {
     Card(modifier, colors = CardDefaults.cardColors(containerColor = Color.White), shape = RoundedCornerShape(16.dp)) {
         Column(Modifier.padding(16.dp)) {
-            Text(value, color = Green, fontWeight = FontWeight.ExtraBold, fontSize = 28.sp)
+            Text(value, color = Green, fontWeight = FontWeight.ExtraBold, fontSize = if (value.length > 7) 20.sp else 28.sp)
             Text(label, color = Muted, fontSize = 12.sp)
         }
     }
 }
 
 @Composable
-private fun Bar(label: String, value: Float, color: Color) {
+private fun SupplyBar(route: RouteSupply, maximumTrips: Int) {
+    val value = route.trips.toFloat() / maximumTrips
     Column {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text(label, color = Ink, fontWeight = FontWeight.Bold)
-            Text("${(value * 100).toInt()} index", color = Muted, fontSize = 12.sp)
+            Column {
+                Text(route.route, color = Ink, fontWeight = FontWeight.Bold)
+                Text(route.agency, color = Muted, fontSize = 11.sp)
+            }
+            Text("${route.trips} trips", color = Muted, fontSize = 12.sp)
         }
         Spacer(Modifier.height(6.dp))
         Box(Modifier.fillMaxWidth().height(12.dp).background(Color(0xFFDEDCD2), RoundedCornerShape(8.dp))) {
-            Box(Modifier.fillMaxWidth(value).height(12.dp).background(color, RoundedCornerShape(8.dp)))
+            Box(Modifier.fillMaxWidth(value).height(12.dp).background(route.color, RoundedCornerShape(8.dp)))
         }
     }
 }

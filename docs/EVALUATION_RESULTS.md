@@ -75,7 +75,9 @@ The native Android client separately passed an offline-restoration test: a compl
 
 The bounded fixture contains 53 scheduled trips across 216 referenced stops and 3 selected routes. Direction-aware median scheduled headways are 48 minutes for `O EXP V-213VJ` (32 trips), 50 minutes for `600-CA` (17 trips), and 32 minutes for `365-BB BSK-BNP-ANK` (4 trips). The displayed service spans are 05:30–21:35, 07:20–16:30, and 17:13–20:00 respectively.
 
-These values describe the committed static fixture only. They do not measure occupancy, ridership, vehicles dispatched, on-time performance, or actual fleet utilization.
+The full-feed web and native dashboards separately report 10,043 searchable stops, 61,115 trips, 4,419 route records, 1,563,324 admitted connections, 670 transfer footpaths, and 5,153 rejected implausible connections. Their route bars show scheduled trip counts for Purple (1,265), Green (1,149), Yellow (865), `375-D` (398), `401-M` (328), `378` (318), `410-FA` (316), and `226-N` (310). Physical-device screenshots and UI hierarchies confirm that all counts and the supply-only disclaimer render on Android.
+
+These values describe static schedule records only. They do not measure occupancy, ridership, vehicles dispatched, on-time performance, revenue, or actual fleet utilization.
 
 ## Failure cases and limitations
 
