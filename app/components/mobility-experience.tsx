@@ -88,7 +88,7 @@ function PlaceField({ label, placeholder, value, onChange, onSelect, onLocation 
     const controller = new AbortController();
     const timer = setTimeout(async () => {
       try {
-        const google = await responseJson(await fetch(`/api/maps/autocomplete?q=${encodeURIComponent(value)}`, { signal: controller.signal }));
+        const google = await responseJson(await fetch(`/api/maps/autocomplete?input=${encodeURIComponent(value)}`, { signal: controller.signal }));
         setChoices(google.suggestions);
         setStatus("Google Places");
       } catch {
