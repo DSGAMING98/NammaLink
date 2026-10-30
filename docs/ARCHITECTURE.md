@@ -40,9 +40,9 @@ flowchart LR
 | Offline storage | Last itinerary and bounded, deduplicated report queue | `lib/offline/` |
 | Schedule insights | Route trip counts, spans, headways, and shared stops | `lib/insights/` |
 | Data build | Extract selected routes and their dependencies from local BMTC GTFS | `scripts/build-demo-network.mjs` |
-| Stop search | Normalized, provenance-labelled search across 9,960 BMTC stops and 83 BMRCL stations | `app/api/stops/`, `data/transit-stops.json` |
+| Stop discovery | Normalized text search plus bounded great-circle nearby lookup across 9,960 BMTC stops and 83 BMRCL stations | `app/api/stops/`, `lib/transit/stop-search.ts`, `data/transit-stops.json` |
 | Full-network routing | GTFS-calendar-filtered scan over 1,563,324 bus/Metro connections and 670 explicit transfer footpaths | `app/api/network-journeys/`, `lib/transit/connection-router.ts` |
-| Native Android | Compose planner, offline demonstration, recovery, versioned full-itinerary local restoration, and full-feed operator evidence | `android/`, physical-device QA |
+| Native Android | Compose planner, on-demand platform location permission and nearby-stop selection, offline demonstration, recovery, versioned full-itinerary local restoration, and full-feed operator evidence | `android/`, physical-device QA |
 
 ## Request flow
 

@@ -1,9 +1,12 @@
 package `in`.nammalink.app
 
+import android.Manifest
 import android.content.Context
 import android.os.Bundle
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -155,10 +158,19 @@ private fun PlannerScreen(onPlan: (NetworkJourney) -> Unit, onOfflineDemo: () ->
     var origin by remember { mutableStateOf(StopOption("20921", "Kempegowda Bus Station", 12.98, 77.57)) }
     var destination by remember { mutableStateOf(StopOption("20707", "Central Silk Board", 12.92, 77.62)) }
     var suggestions by remember { mutableStateOf(emptyList<StopOption>()) }
+    var nearby by remember { mutableStateOf(emptyList<StopOption>()) }
     var activeField by rememberSaveable { mutableStateOf("") }
     var planning by remember { mutableStateOf(false) }
+    var locating by remember { mutableStateOf(false) }
+    var locationRequestNonce by remember { mutableIntStateOf(0) }
+    var locationStatus by remember { mutableStateOf<String?>(null) }
     var error by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+    val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { grants ->
+        if (grants.values.any { it }) locationRequestNonce += 1
+        else locationStatus = "Location permission was not granted. You can still search for any stop manually."
+    }
 
     val activeQuery = if (activeField == "from") from else to
     LaunchedEffect(activeField, activeQuery) {
@@ -167,12 +179,45 @@ private fun PlannerScreen(onPlan: (NetworkJourney) -> Unit, onOfflineDemo: () ->
         suggestions = runCatching { withContext(Dispatchers.IO) { searchNetworkStops(activeQuery) } }.getOrElse { emptyList() }
     }
 
+    LaunchedEffect(locationRequestNonce) {
+        if (locationRequestNonce == 0) return@LaunchedEffect
+        locating = true
+        nearby = emptyList()
+        runCatching {
+            val fix = getCurrentDeviceLocation(context)
+            val stops = withContext(Dispatchers.IO) { findNearbyNetworkStops(fix.latitude, fix.longitude) }
+            fix to stops
+        }.onSuccess { (fix, stops) ->
+            nearby = stops
+            locationStatus = if (stops.isEmpty()) {
+                "Location found (±${fix.accuracyMeters.toInt()} m), but no indexed stop is within 5 km. Search manually instead."
+            } else {
+                "Location found (±${fix.accuracyMeters.toInt()} m). Choose a nearby verified stop as your origin."
+            }
+        }.onFailure { locationStatus = it.message ?: "Current location is unavailable." }
+        locating = false
+    }
+
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
         ScreenHeader("Bengaluru public transport", "Arrive with confidence.", "A journey contract that plans for your deadline—not just the shortest path.")
         Column(Modifier.padding(horizontal = 20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             StatusPill("● 10,043 searchable bus + Metro stops · static schedule", Green)
             OutlinedTextField(from, { from = it; origin = origin.copy(id = ""); activeField = "from" }, label = { Text("From") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
             if (activeField == "from") StopSuggestions(suggestions) { origin = it; from = it.name; activeField = "" }
+            OutlinedButton(
+                onClick = {
+                    locationStatus = null
+                    if (hasLocationPermission(context)) locationRequestNonce += 1
+                    else permissionLauncher.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION))
+                },
+                enabled = !locating,
+                modifier = Modifier.fillMaxWidth().semantics { contentDescription = "Find nearby boarding stops" },
+            ) { Text(if (locating) "Finding your location…" else "⌖ Find nearby boarding stops") }
+            locationStatus?.let { Text(it, color = if (nearby.isEmpty()) Muted else Green, fontWeight = FontWeight.Bold, fontSize = 12.sp) }
+            if (nearby.isNotEmpty()) {
+                Text("Nearby boarding stops", color = Ink, fontWeight = FontWeight.ExtraBold)
+                StopSuggestions(nearby) { origin = it; from = it.name; nearby = emptyList(); locationStatus = "Origin selected from your nearby stops." }
+            }
             OutlinedTextField(to, { to = it; destination = destination.copy(id = ""); activeField = "to" }, label = { Text("To") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
             if (activeField == "to") StopSuggestions(suggestions) { destination = it; to = it.name; activeField = "" }
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -225,7 +270,11 @@ private fun StopSuggestions(stops: List<StopOption>, onSelect: (StopOption) -> U
     Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
         stops.forEach { stop ->
             Card(Modifier.fillMaxWidth().clickable { onSelect(stop) }, colors = CardDefaults.cardColors(containerColor = Color.White)) {
-                Column(Modifier.padding(12.dp)) { Text(stop.name, fontWeight = FontWeight.Bold, color = Ink); Text("${stop.agency} ${stop.mode} stop ${stop.id.removePrefix("metro:")}", color = Muted, fontSize = 11.sp) }
+                Column(Modifier.padding(12.dp)) {
+                    Text(stop.name, fontWeight = FontWeight.Bold, color = Ink)
+                    val distance = stop.distanceMeters?.let { " · ${it} m away" } ?: ""
+                    Text("${stop.agency} ${stop.mode} stop ${stop.id.removePrefix("metro:")}$distance", color = Muted, fontSize = 11.sp)
+                }
             }
         }
     }

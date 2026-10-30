@@ -48,7 +48,7 @@ export default function HomePage() {
             demonstration; full-network search requires a reachable NammaLink backend. Android may ask you to allow installs
             from your browser or file manager.
           </p>
-          <p className="downloadHash"><strong>SHA-256</strong> FABA022EBDBBF8821E83B2D711959838525EAE06FCB066C662855E72ECED17D6</p>
+          <p className="downloadHash"><strong>SHA-256</strong> 4C256ABB4B19E37138B3BCC95055C6ABC34490101D1E7C889C7FDAC2BBCE05F0</p>
         </div>
         <div className="downloadActions">
           <a className="primaryButton" href="/downloads/NammaLink-0.1.0-dev.apk" download>Download APK · 17.2 MB</a>

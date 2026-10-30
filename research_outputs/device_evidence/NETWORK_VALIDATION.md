@@ -60,3 +60,11 @@ The post-flow device log scan matched no `FATAL EXCEPTION`, NammaLink ANR, or An
 - Verified exact scheduled trip-count labels for the top eight routes: Purple 1,265; Green 1,149; Yellow 865; `375-D` 398; `401-M` 328; `378` 318; `410-FA` 316; and `226-N` 310.
 - Verified the complete disclaimer stating that the bars are not ridership, punctuality, occupancy, revenue, or actual utilization.
 - Evidence: `operator-full-feed-top.png`/`.xml`, `operator-full-feed-bars.png`/`.xml`, and `operator-full-feed-disclosure.png`/`.xml`; the post-flow fatal/ANR scan was clean.
+
+## Current location and nearby-stop discovery
+
+- Installed the location-enabled APK with both location permissions initially revoked, then opened the planner and tapped `Find nearby boarding stops`.
+- Verified the native Android precise/approximate permission dialog. Selecting `Don't allow` returned to the planner with an explicit manual-search fallback and no blocked controls.
+- Granted the permissions for the positive platform-fix path. The app acquired a device location with 70 m reported accuracy and queried the indexed stop API.
+- The physical position was outside the five-kilometre feed radius, so the app honestly displayed the no-covered-stop fallback. A real-index API test separately verifies ordered, distance-labelled nearby results around Kempegowda Bus Station.
+- Evidence: `location-permission.png`/`.xml`, `location-denied.xml`, and `location-nearby-5km.png`/`.xml`; the post-flow fatal/ANR scan was clean.

@@ -7,7 +7,7 @@ import java.nio.charset.StandardCharsets
 import org.json.JSONArray
 import org.json.JSONObject
 
-data class StopOption(val id: String, val name: String, val lat: Double, val lon: Double, val agency: String = "BMTC", val mode: String = "bus")
+data class StopOption(val id: String, val name: String, val lat: Double, val lon: Double, val agency: String = "BMTC", val mode: String = "bus", val distanceMeters: Int? = null)
 data class NetworkRide(val route: String, val agency: String, val mode: String, val headsign: String, val from: String, val to: String, val departure: String, val arrival: String, val stopCount: Int, val distanceMeters: Int)
 data class NetworkJourney(val origin: String, val destination: String, val departure: String, val arrival: String, val transfers: Int, val walkingMeters: Int, val timeMode: String, val requestedTime: String, val latestStart: String, val deadlineMet: Boolean, val priority: String, val maximumWalkingMeters: Int, val rides: List<NetworkRide>, val queryMilliseconds: Double)
 
@@ -78,6 +78,17 @@ fun searchNetworkStops(query: String): List<StopOption> {
     return List(array.length()) { index ->
         val stop = array.getJSONObject(index)
         StopOption(stop.getString("id"), stop.getString("name"), stop.getDouble("lat"), stop.getDouble("lon"), stop.optString("agency", "BMTC"), stop.optString("mode", "bus"))
+    }
+}
+
+fun findNearbyNetworkStops(latitude: Double, longitude: Double): List<StopOption> {
+    val array = request("/api/stops?lat=$latitude&lon=$longitude&radiusMeters=5000&limit=8").getJSONArray("stops")
+    return List(array.length()) { index ->
+        val stop = array.getJSONObject(index)
+        StopOption(
+            stop.getString("id"), stop.getString("name"), stop.getDouble("lat"), stop.getDouble("lon"),
+            stop.optString("agency", "BMTC"), stop.optString("mode", "bus"), stop.optInt("distanceMeters"),
+        )
     }
 }
 

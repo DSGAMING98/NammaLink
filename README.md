@@ -7,7 +7,7 @@
 **A constraint-aware scheduled public-transport planner and journey-recovery prototype for Bengaluru**
 
 [![Build](https://img.shields.io/badge/build-passing-16c784)](#verification)
-[![Tests](https://img.shields.io/badge/tests-40%20passing-16c784)](#verification)
+[![Tests](https://img.shields.io/badge/tests-45%20passing-16c784)](#verification)
 [![Android](https://img.shields.io/badge/Android-native%20APK-156b52)](#native-android-app)
 [![CI](https://github.com/DSGAMING98/NammaLink/actions/workflows/ci.yml/badge.svg)](https://github.com/DSGAMING98/NammaLink/actions/workflows/ci.yml)
 [![Data](https://img.shields.io/badge/data-static%20GTFS-f0b429)](#data-and-honesty)
@@ -35,10 +35,11 @@
 - Calendar-filtered Connection Scan covering 61,115 bus/Metro trips, 1,563,324 scheduled connections, and 670 explicit station-transfer footpaths.
 - City-scale depart-after and arrive-by contracts with enforced walking budgets and safest/fastest/direct behavior.
 - Physical-device verification of bus-only, Metro-only, and mixed BMTC–walk–BMRCL journeys.
+- On-demand Android location permission flow with distance-ranked nearby-stop lookup and a tested manual-search fallback when permission or feed coverage is unavailable.
 
 ## Native Android app
 
-The `android/` project is a real Compose application—not a WebView. It includes debounced search across 10,043 bus and Metro stops, calendar-filtered full-network requests through an injectable API base URL, explicit bus/Metro/walking timeline cards, constraint controls, a native route schematic, full-itinerary local save/restore, a clearly simulated recovery flow, and full-feed operator supply graphs. The operator view reports exact GTFS record counts and top-route scheduled trip counts while explicitly reporting zero trained ML models. The bounded journey demonstration remains an explicit offline option rather than a silent substitute for a failed network request.
+The `android/` project is a real Compose application—not a WebView. It includes debounced search across 10,043 bus and Metro stops, an on-demand current-location permission flow, distance-ranked nearby boarding stops, calendar-filtered full-network requests through an injectable API base URL, explicit bus/Metro/walking timeline cards, constraint controls, a native route schematic, full-itinerary local save/restore, a clearly simulated recovery flow, and full-feed operator supply graphs. Location is requested only after the passenger taps the nearby-stop action; denial and out-of-coverage states preserve manual search. The operator view reports exact GTFS record counts and top-route scheduled trip counts while explicitly reporting zero trained ML models. The bounded journey demonstration remains an explicit offline option rather than a silent substitute for a failed network request.
 
 Requirements: Android SDK 36, JDK 17+ (Android Studio's bundled JDK is recommended), and an authorized USB device or emulator.
 
@@ -161,7 +162,7 @@ Consequences:
 
 At the latest documented checkpoint:
 
-- 40 tests across 14 files pass.
+- 45 tests across 15 files pass.
 - Strict TypeScript checking passes.
 - Production build passes.
 - Journey and recovery APIs are integration-tested.

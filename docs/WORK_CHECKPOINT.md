@@ -4,15 +4,19 @@ Updated: 30 October 2026
 
 ## Current phase
 
-Phase 19 — Native full-feed operator evidence.
+Phase 20 — Permission-aware nearby-stop discovery.
 
 ## Last completed task
 
-Replaced the bounded native operator demonstration with combined BMTC/BMRCL totals and exact top-eight scheduled trip-count bars, then physically verified the full graph, zero-model evidence gate, and supply-only disclaimer.
+Added validated geospatial stop lookup and a native on-demand location permission/fix flow, then physically verified the Android permission dialog, denial fallback, real device fix, outside-coverage response, and clean logs.
 
 ## Last verified working commit
 
-Native full-feed operator evidence milestone: `ee56602` on `main`, verified by GitHub Actions run `41048063190`.
+Native full-feed operator evidence milestone: `ee56602` on `main`, verified by GitHub Actions run `41048063190`. The Phase 20 location milestone is under verification and will replace this line after CI passes.
+
+## Current branch
+
+`main`, tracking `origin/main`.
 
 ## Completed features
 
@@ -22,10 +26,11 @@ Native full-feed operator evidence milestone: `ee56602` on `main`, verified by G
 - Calendar-aware schedule routing with hard arrive-by, walking, transfer, and directness constraints.
 - Multiple ranking strategies, source-labelled timeline, evidence-aware simulated incident, and recovery preserving the completed leg.
 - Installable responsive web app with offline shell, saved journey, local report queue, and schedule-supply operator insights.
-- 40 passing web/router/API/operator/calendar/contract tests plus strict type-check and production build.
+- 45 passing web/router/API/operator/calendar/contract/location tests plus strict type-check and production build.
 - Native Kotlin/Jetpack Compose project using AGP 9.2.1, Gradle 9.4.1, compile/target SDK 36, and minimum SDK 26.
 - Native constraint planner, GTFS-derived demonstration itinerary, schematic route view, versioned full-itinerary local save/restore, explicit simulated disruption/recovery, and full-feed operator screen.
 - Physical Android 16 installation and UI-hierarchy validation on Vivo V2513.
+- Android on-demand precise/approximate location permission, current-fix acquisition, distance-ranked nearby-stop lookup, denial-safe manual search, and outside-feed fallback.
 - Device screenshots under `research_outputs/device_evidence/`.
 - Machine-readable zero-model registry and professional ML artifact/evidence policy in `docs/ML_TRAINING_REPORT.md`.
 - Operator UI explicitly reports zero trained ML models instead of fabricating evaluation metrics.
@@ -70,7 +75,7 @@ Arbitrary place search/maps, coordinate-based access/egress, pedestrian-network 
 - Updated Android `:app:assembleDebug`: passed with the stop-search and network-journey client.
 - `adb reverse tcp:3000 tcp:3000`: configured successfully; updated APK streamed install passed.
 - Production website APK check: HTTP 200, `application/vnd.android.package-archive`, 17,150,016-byte content length, visible debug-signing label.
-- Current full-feed-operator development APK SHA-256: `FABA022EBDBBF8821E83B2D711959838525EAE06FCB066C662855E72ECED17D6` (17,150,016 bytes).
+- Current location-enabled development APK SHA-256: `4C256ABB4B19E37138B3BCC95055C6ABC34490101D1E7C889C7FDAC2BBCE05F0` (17,150,016 bytes).
 - Operator graph production HTML: passed for all full-feed totals, rejection count, and zero-model label.
 - Operator graph visual QA: passed in the in-app browser at desktop and 390×844 mobile viewport; cards, bars, disclaimers, and following download section rendered without observed overflow.
 - CI command parity check: frozen pnpm install, 36 tests, strict type-check, production web build, and native Android debug build passed locally before workflow push.
@@ -100,6 +105,8 @@ Arbitrary place search/maps, coordinate-based access/egress, pedestrian-network 
 - Physical native operator graph: full-feed totals, zero-model evidence gate, all eight count-labelled route bars, and the supply-only disclaimer rendered on the Vivo V2513; screenshot/UI hierarchy evidence captured and fatal/ANR scan clean.
 - GitHub Actions run [`41048063190`](https://github.com/DSGAMING98/NammaLink/actions/runs/41048063190): all 40 tests, strict type-check, production web build, native APK build, checksum recording, and artifact upload passed for `ee56602`.
 - CI Android artifact `NammaLink-android-debug-ee5660240adaa3a34f8391f6b7e85aad4aea0ebb` (`12972584369`): 9,958,927-byte ZIP retained until 13 November 2026; GitHub artifact digest `sha256:793ee327fd22dd239808b10a07a4be03fa0a23a44fd6927e2db7891d7051c0e6`.
+- Nearby-stop API verification: real-index positive query returned distance-ordered stops; incomplete/out-of-range coordinates returned HTTP 400; great-circle, radius, limit, and hidden-platform behavior passed unit coverage.
+- Physical Android location flow: system permission dialog rendered, denial retained manual search, permission grant produced a 70 m reported-accuracy fix, and the outside-five-kilometre state rendered without inventing stop coverage; fatal/ANR scan clean.
 
 ## Dataset and ML limitations
 
@@ -116,9 +123,24 @@ Arbitrary place search/maps, coordinate-based access/egress, pedestrian-network 
 - Secure release signing is not configured. A clearly labelled debug-signed development APK is publicly available from the repository-backed website surface, but the network backend itself is not publicly deployed.
 - The connected Vercel context contains no team or linked project, so public deployment requires the owner to connect a Vercel account/team.
 
+## Known bugs and coverage gaps
+
+- The native route graphic is a schematic, not yet a geographic map with real stop coordinates or pedestrian geometry.
+- Nearby discovery selects an indexed boarding stop but does not yet add the device-to-stop access distance to the journey contract's transfer-walking total.
+- The connected phone's physical location was outside the five-kilometre indexed-stop radius, so the positive nearby-result UI is API-tested but not physically exercised at an in-coverage location.
+- Full-network planning requires a reachable backend unless an already-saved journey or the explicit bounded offline demonstration is used.
+
+## Deployment state
+
+No public deployment is claimed. The production Next.js build and local production smoke tests pass; the downloadable debug-signed APK is committed and checksum-labelled. A public backend and release-signed APK remain blocked on account connection and owner-held signing credentials.
+
+## Uncommitted work
+
+Phase 20 source, tests, APK, documentation, and device evidence are being committed as one verified milestone. After the milestone commit and checkpoint closure, the working tree must be clean.
+
 ## Exact next implementation step
 
-Connect a Vercel team/project and securely provision an Android release keystore, then deploy and smoke-test the backend before rebuilding a release-signed APK against its HTTPS URL. Do not repeat the completed backend, Android integration, CI, or physical-device validation work.
+Implement a clearly labelled geographic route fallback from real stop coordinates—without claiming street-following geometry—then validate it on the physical device. Public deployment and release signing remain the next owner-dependent production steps once account and keystore access are available.
 
 ## Restore commands
 

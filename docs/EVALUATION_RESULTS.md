@@ -71,6 +71,12 @@ The production server exposes a manifest and service worker with explicit no-cac
 
 The native Android client separately passed an offline-restoration test: a complete real indexed itinerary was saved as a versioned private payload, the USB backend tunnel was removed, and the same timeline and contract were restored after force-stop/relaunch. This validates local itinerary recovery, not offline replanning or schedule freshness.
 
+## Current-location and nearby-stop verification
+
+The stop API now accepts validated latitude/longitude input and returns up to 25 searchable stops ordered by great-circle distance within a server-bounded 100–5,000 m radius. Tests cover distance calculation, ordering, radius filtering, hidden-platform exclusion, invalid coordinates, and a positive real-index query near Kempegowda Bus Station.
+
+On the physical Vivo V2513, the app displayed the Android precise/approximate permission dialog only after the nearby-stop action. Denial returned to a usable manual-search state. After permission was granted, the platform supplied a current fix with 70 m reported accuracy; no indexed stop was within five kilometres of that physical position, so the app displayed the supported-area fallback rather than fabricating a nearby result. This validates permission, fix acquisition, backend lookup, and the out-of-coverage state; it does not claim continuous tracking or broad geographic coverage.
+
 ## Operator schedule analysis
 
 The bounded fixture contains 53 scheduled trips across 216 referenced stops and 3 selected routes. Direction-aware median scheduled headways are 48 minutes for `O EXP V-213VJ` (32 trips), 50 minutes for `600-CA` (17 trips), and 32 minutes for `365-BB BSK-BNP-ANK` (4 trips). The displayed service spans are 05:30–21:35, 07:20–16:30, and 17:13–20:00 respectively.
