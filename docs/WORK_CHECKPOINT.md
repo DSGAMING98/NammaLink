@@ -12,7 +12,7 @@ Replaced the Android saved-state placeholder with versioned full-journey seriali
 
 ## Last verified working commit
 
-City-scale arrive-by milestone: `be13ffd` on `main`, verified by GitHub Actions run `41046438069`.
+Native full-itinerary offline restoration milestone: `e0bb4fe` on `main`, verified by GitHub Actions run `41047408362`.
 
 ## Completed features
 
@@ -96,6 +96,7 @@ Arbitrary place search/maps, coordinate-based access/egress, pedestrian-network 
 - Physical arrive-by journey: latest start 10:10 for an 11:00 Kempegowda Bus Station → Central Silk Board deadline, arrival 10:42, 0/400 m walking, 859 ms; screenshot/UI hierarchy captured and fatal/ANR scan clean.
 - GitHub Actions run `41046438069`: all 40 tests, strict type-check, production web build, native APK build, checksum recording, and artifact upload passed for `be13ffd`; artifact `12972746779` is retained until 13 November 2026.
 - Physical offline restoration: versioned full-network journey payload stored, USB backend reverse removed, app force-stopped/relaunched, and the exact two-leg 08:00–08:50 itinerary restored with `Saved ✓`; fatal/ANR scan clean.
+- GitHub Actions run `41047408362`: all 40 tests, strict type-check, production web build, native APK build, checksum recording, and artifact upload passed for `e0bb4fe`; artifact `12972304582` is retained until 13 November 2026.
 
 ## Dataset and ML limitations
 
