@@ -37,6 +37,18 @@ describe("multimodal network journey API", () => {
     expect(invalid.status).toBe(400);
   });
 
+  it("finds a latest departure that satisfies an arrive-by deadline", async () => {
+    const response = await GET(request({ origin: "metro:WHTM", destination: "metro:CLGA", date: "2026-10-30", arriveBy: "09:30", priority: "safest", maxWalkingMeters: "0" }));
+    const body = await response.json();
+    expect(response.status).toBe(200);
+    expect(body.journey).toMatchObject({ departure: "08:00", arrival: "09:20", contract: { timeMode: "arriveBy", requestedTime: "09:30", latestStart: "08:00", deadlineMet: true } });
+    expect(body.network.scanCount).toBeGreaterThan(1);
+    expect(body.network.scanStrategy).toBe("minute-precision monotone deadline search");
+
+    const bothModes = await GET(request({ origin: "metro:WHTM", destination: "metro:CLGA", date: "2026-10-30", departAfter: "08:00", arriveBy: "09:30" }));
+    expect(bothModes.status).toBe(400);
+  });
+
   it("rejects dates outside the shared feed window", async () => {
     const response = await GET(request({ origin: "metro:WHTM", destination: "metro:CLGA", date: "2027-09-01", departAfter: "08:00" }));
     expect(response.status).toBe(422);

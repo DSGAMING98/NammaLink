@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { earliestArrival, formatServiceTime, parseServiceTime } from "./connection-router";
+import { earliestArrival, formatServiceTime, latestDeparture, parseServiceTime } from "./connection-router";
 
 function fixture(records: number[][]) {
   const data = Buffer.alloc(records.length * 20);
@@ -52,5 +52,15 @@ describe("connection scan", () => {
     expect(earliestArrival(index, 0, 3, 90, 0, undefined, { maximumWalkingMeters: 100 })?.map((leg) => leg.trip)).toEqual([2]);
     expect(earliestArrival(index, 0, 3, 90, 0, undefined, { maximumWalkingMeters: 125 })?.map((leg) => leg.trip)).toEqual([0, -1, 1]);
     expect(earliestArrival(index, 0, 3, 90, 0, undefined, { directOnly: true })?.map((leg) => leg.trip)).toEqual([2]);
+  });
+
+  it("finds the latest feasible departure for an arrive-by deadline", () => {
+    const index = fixture([[100, 120, 0, 3, 0], [200, 220, 0, 3, 1], [300, 320, 0, 3, 2]]);
+    const result = latestDeparture(index, 0, 3, 250, 0, undefined, {}, 1);
+    expect(result.departAfter).toBe(200);
+    expect(result.legs?.[0]).toMatchObject({ departure: 200, arrival: 220, trip: 1 });
+    expect(result.scanCount).toBeGreaterThan(1);
+
+    expect(latestDeparture(index, 0, 3, 90, 0, undefined, {}, 1)).toMatchObject({ legs: null, departAfter: null });
   });
 });

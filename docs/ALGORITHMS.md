@@ -10,7 +10,9 @@ Preprocessing rejects non-positive travel durations and movements above 25 m/s f
 
 At query time the scan materializes the selected date's GTFS calendars and exceptions, then maintains earliest stop arrivals, cumulative transfer-walking distance, trip reachability, and connection-level predecessors. A passenger can remain aboard without a transfer penalty. `safest` requires 180 seconds before boarding a different trip, `fastest` removes that additional buffer, and `direct` forbids boarding after any transit ride. The index also contains 670 directed bus–Metro transfer footpaths between stops within 250 m. Walking uses 1.25 m/s and great-circle distance, is returned as an explicit estimated segment, participates in exact path reconstruction, and cannot exceed the request's 0–5,000 m budget.
 
-The production API is `GET /api/network-journeys` with stop IDs, service date, `departAfter=HH:MM`, `priority=safest|fastest|direct`, and `maxWalkingMeters`. Dates outside the shared static-feed window, 2026-09-07–2027-08-17, return HTTP 422. Results echo the applied contract and include both feed versions, active-trip count, index/filter/footpath statistics, query time, and `realtime: false`.
+The production API is `GET /api/network-journeys` with stop IDs, service date, exactly one of `departAfter=HH:MM` or `arriveBy=HH:MM`, `priority=safest|fastest|direct`, and `maxWalkingMeters`. Dates outside the shared static-feed window, 2026-09-07–2027-08-17, return HTTP 422. Results echo the applied contract and include both feed versions, active-trip count, index/filter/footpath statistics, scan count, query time, and `realtime: false`.
+
+Arrive-by uses a monotone binary search over minute-precision start times. Each candidate runs the same calendar- and contract-filtered forward Connection Scan; feasibility means the reconstructed final arrival is no later than the requested deadline. The API returns the latest feasible start, the number of scans, and an explicit `deadlineMet` flag. This is deterministic schedule search, not a punctuality prediction.
 
 Verified examples include Kempegowda Bus Station 08:00 → Central Silk Board 08:50 by bus; Whitefield Metro 08:00 → Challaghatta Metro 09:20 on the Purple Line; and 14th Main HSR Layout 08:02 → Whitefield Metro 09:15 using two buses, a 128 m estimated walk, and the Purple Line. Warm device-connected queries for the latter two measured 52 ms and 48 ms respectively; cold decompression is slower.
 
@@ -49,7 +51,7 @@ This verifies dataset-supported timetable connectivity, not real-world operation
 
 The bounded enumerator is appropriate for the 53-trip demonstration fixture and completes the current test suite in well under one second. It caps explored boardings and reports when truncation occurs. It is not intended to enumerate the entire 57,836-trip feed in a request path.
 
-The remaining scale steps are arbitrary-coordinate access/egress, pedestrian-network geometry, arrive-by/deadline search, multi-label Pareto rounds, and explicit scan budgets. The bounded router remains a correctness oracle for constraints not yet moved into the city-scale scan.
+The remaining scale steps are arbitrary-coordinate access/egress, pedestrian-network geometry, multi-label Pareto rounds, and explicit scan budgets. The bounded router remains a correctness oracle for constraints not yet moved into the city-scale scan.
 
 ## Evidence-aware disruption and recovery
 

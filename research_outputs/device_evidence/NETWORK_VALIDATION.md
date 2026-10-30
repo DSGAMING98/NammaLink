@@ -36,3 +36,11 @@ The post-flow device log scan matched no `FATAL EXCEPTION`, NammaLink ANR, or An
 - The native result displayed `Direct contract · 0/400 m walk`; screenshot and UI hierarchy are saved as `contract-direct-result.png` and `contract-direct-result.xml`.
 - A separate real-index API regression showed that tightening the HSR Layout → Whitefield Metro walking budget from 400 m to 100 m selected an alternate 83 m Kundalahalli transfer while preserving the 09:15 arrival.
 - The updated APK streamed installation passed, and the post-flow device log scan found no NammaLink fatal exception or ANR.
+
+## Arrive-by Journey Contract
+
+- Selected `Arrive by` with an 11:00 deadline, Safest priority, and a 400 m walking budget on the physical Vivo V2513.
+- The city-scale deadline search returned the latest 10:10 start and a 10:42 arrival via `O EXP-356KA` and `348-C`, with one transfer and 0 m walking.
+- The native result displayed `Deadline 11:00 met · latest start 10:10`; the measured search was 859 ms and used 10 minute-precision scans.
+- Evidence: `arrive-by-planner.xml`, `arrive-by-result.png`, and `arrive-by-result.xml`.
+- Streamed installation passed and the post-flow log scan found no NammaLink fatal exception or ANR.

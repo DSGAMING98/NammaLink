@@ -53,8 +53,11 @@ The committed index contains 61,115 scheduled trips, 1,563,324 admitted connecti
 | 14th Main HSR Layout → Whitefield Metro, after 08:00 | 08:02–09:15; two BMTC legs, 128 m estimated transfer walk, Purple Line; 2 transit transfers | 48 ms |
 | Same mixed query, 100 m walking budget | 08:02–09:15; alternate 83 m transfer from Kundalahalli Metro Station; contract satisfied | Production API regression check |
 | Kempegowda Bus Station → Central Silk Board, Direct, 400 m budget | 09:55–10:42; route `348-C`; 0 transfers; 0 m walking | 53 ms on physical device |
+| Kempegowda Bus Station → Central Silk Board, arrive by 11:00, Safest, 400 m budget | Latest start 10:10; arrival 10:42; routes `O EXP-356KA` + `348-C`; deadline met; 0 m walking | 859 ms / 10 scans on physical device |
 
 The mixed result demonstrates exact reconstruction of ride and walking segments. Transfer walking is great-circle distance at 1.25 m/s between stops no more than 250 m apart; it is not claimed as accessible or pedestrian-network-valid geometry.
+
+Arrive-by performance includes repeated forward scans rather than one scan. It is measured local prototype evidence, not a hosted latency objective or a claim about realtime punctuality.
 
 ## Simulated recovery result
 

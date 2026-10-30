@@ -7,7 +7,7 @@
 **A constraint-aware scheduled public-transport planner and journey-recovery prototype for Bengaluru**
 
 [![Build](https://img.shields.io/badge/build-passing-16c784)](#verification)
-[![Tests](https://img.shields.io/badge/tests-38%20passing-16c784)](#verification)
+[![Tests](https://img.shields.io/badge/tests-40%20passing-16c784)](#verification)
 [![Android](https://img.shields.io/badge/Android-native%20APK-156b52)](#native-android-app)
 [![CI](https://github.com/DSGAMING98/NammaLink/actions/workflows/ci.yml/badge.svg)](https://github.com/DSGAMING98/NammaLink/actions/workflows/ci.yml)
 [![Data](https://img.shields.io/badge/data-static%20GTFS-f0b429)](#data-and-honesty)
@@ -33,6 +33,7 @@
 - Native Kotlin/Jetpack Compose Android app built, installed, and flow-tested on a physical Android 16 phone.
 - Reproducible 10,043-stop BMTC + BMRCL search index and provenance-labelled `/api/stops` selection.
 - Calendar-filtered Connection Scan covering 61,115 bus/Metro trips, 1,563,324 scheduled connections, and 670 explicit station-transfer footpaths.
+- City-scale depart-after and arrive-by contracts with enforced walking budgets and safest/fastest/direct behavior.
 - Physical-device verification of bus-only, Metro-only, and mixed BMTC–walk–BMRCL journeys.
 
 ## Native Android app

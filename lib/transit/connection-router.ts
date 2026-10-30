@@ -10,6 +10,7 @@ export type ConnectionIndex = {
 export type Footpath = { from: number; to: number; distanceMeters: number; durationSeconds: number };
 export type ConnectionLeg = { from: number; to: number; departure: number; arrival: number; trip: number; distanceMeters?: number };
 export type ConnectionScanOptions = { maximumWalkingMeters?: number; directOnly?: boolean };
+export type LatestDepartureSearch = { legs: ConnectionLeg[] | null; departAfter: number | null; scanCount: number };
 
 const field = (index: number, recordBytes: number, fieldIndex: number) => index * recordBytes + fieldIndex * 4;
 
@@ -128,6 +129,41 @@ export function earliestArrival(index: ConnectionIndex, originInput: number | nu
   }
   const result = reversed.reverse();
   return result[0] && originSet.has(result[0].from) ? result : null;
+}
+
+export function latestDeparture(
+  index: ConnectionIndex,
+  originInput: number | number[],
+  destinationInput: number | number[],
+  arriveBy: number,
+  minimumTransferSeconds = 0,
+  activeTrips?: Uint8Array,
+  options: ConnectionScanOptions = {},
+  precisionSeconds = 60,
+): LatestDepartureSearch {
+  const precision = Math.max(1, Math.floor(precisionSeconds));
+  let scanCount = 1;
+  let bestLegs = earliestArrival(index, originInput, destinationInput, 0, minimumTransferSeconds, activeTrips, options);
+  const arrivalAt = (legs: ConnectionLeg[], departure: number) => legs.at(-1)?.arrival ?? departure;
+  if (!bestLegs || arrivalAt(bestLegs, 0) > arriveBy) return { legs: null, departAfter: null, scanCount };
+
+  let bestDeparture = 0;
+  let low = 1;
+  let high = Math.floor(arriveBy / precision);
+  while (low <= high) {
+    const middle = Math.floor((low + high) / 2);
+    const candidateDeparture = middle * precision;
+    const candidateLegs = earliestArrival(index, originInput, destinationInput, candidateDeparture, minimumTransferSeconds, activeTrips, options);
+    scanCount += 1;
+    if (candidateLegs && arrivalAt(candidateLegs, candidateDeparture) <= arriveBy) {
+      bestDeparture = candidateDeparture;
+      bestLegs = candidateLegs;
+      low = middle + 1;
+    } else {
+      high = middle - 1;
+    }
+  }
+  return { legs: bestLegs, departAfter: bestDeparture, scanCount };
 }
 
 export function parseServiceTime(value: string): number | null {

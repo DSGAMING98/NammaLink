@@ -138,7 +138,8 @@ private fun ScreenHeader(kicker: String, title: String, subtitle: String) {
 private fun PlannerScreen(onPlan: (NetworkJourney) -> Unit, onOfflineDemo: () -> Unit) {
     var from by rememberSaveable { mutableStateOf("Kempegowda Bus Station") }
     var to by rememberSaveable { mutableStateOf("Central Silk Board") }
-    var departAfter by rememberSaveable { mutableStateOf("08:00") }
+    var timeMode by rememberSaveable { mutableStateOf("Depart after") }
+    var requestedTime by rememberSaveable { mutableStateOf("08:00") }
     var ranking by rememberSaveable { mutableStateOf("Safest") }
     var maxWalk by rememberSaveable { mutableStateOf("800 m") }
     var origin by remember { mutableStateOf(StopOption("20921", "Kempegowda Bus Station", 12.98, 77.57)) }
@@ -164,7 +165,12 @@ private fun PlannerScreen(onPlan: (NetworkJourney) -> Unit, onOfflineDemo: () ->
             if (activeField == "from") StopSuggestions(suggestions) { origin = it; from = it.name; activeField = "" }
             OutlinedTextField(to, { to = it; destination = destination.copy(id = ""); activeField = "to" }, label = { Text("To") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
             if (activeField == "to") StopSuggestions(suggestions) { destination = it; to = it.name; activeField = "" }
-            OutlinedTextField(departAfter, { departAfter = it }, label = { Text("Depart after (HH:MM)") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                listOf("Depart after", "Arrive by").forEach { choice ->
+                    FilterChip(selected = timeMode == choice, onClick = { timeMode = choice }, label = { Text(choice) })
+                }
+            }
+            OutlinedTextField(requestedTime, { requestedTime = it }, label = { Text("$timeMode (HH:MM)") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
             Text("Priority", fontWeight = FontWeight.Bold, color = Ink)
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 listOf("Safest", "Fastest", "Direct").forEach { choice ->
@@ -184,7 +190,8 @@ private fun PlannerScreen(onPlan: (NetworkJourney) -> Unit, onOfflineDemo: () ->
                     scope.launch {
                         val maximumWalkingMeters = when (maxWalk) { "400 m" -> 400; "800 m" -> 800; else -> 1_500 }
                         val priorityValue = ranking.lowercase()
-                        runCatching { withContext(Dispatchers.IO) { planNetworkJourney(origin, destination, LocalDate.now().toString(), departAfter, priorityValue, maximumWalkingMeters) } }
+                        val timeModeValue = if (timeMode == "Arrive by") "arriveBy" else "departAfter"
+                        runCatching { withContext(Dispatchers.IO) { planNetworkJourney(origin, destination, LocalDate.now().toString(), timeModeValue, requestedTime, priorityValue, maximumWalkingMeters) } }
                             .onSuccess(onPlan)
                             .onFailure { error = it.message ?: "Network journey unavailable." }
                         planning = false
@@ -222,6 +229,9 @@ private fun JourneyScreen(networkJourney: NetworkJourney?, saved: Boolean, onSav
             ScreenHeader("Full-network schedule", "Arrive at ${networkJourney.arrival}.", "Depart ${networkJourney.departure} · ${networkJourney.transfers} transfer${if (networkJourney.transfers == 1) "" else "s"} · static BMTC + BMRCL feeds")
             Column(Modifier.padding(horizontal = 20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 StatusPill("${networkJourney.priority.replaceFirstChar { it.uppercase() }} contract · ${networkJourney.walkingMeters}/${networkJourney.maximumWalkingMeters} m walk · ${networkJourney.queryMilliseconds.toInt()} ms", Green)
+                if (networkJourney.timeMode == "arriveBy") {
+                    StatusPill("Deadline ${networkJourney.requestedTime} met · latest start ${networkJourney.latestStart}", Green)
+                }
                 RouteMap(false, networkJourney.origin, networkJourney.destination)
                 networkJourney.rides.forEach { ride ->
                     ItineraryCard(

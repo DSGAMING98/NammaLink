@@ -22,8 +22,8 @@ Last updated: 30 October 2026
 | ML delay prediction | Blocked | No labelled observed arrival/delay data found |
 | Schedule-based ETA baseline | Implemented and tested | GTFS times plus explicit walking/waiting; every output labelled scheduled |
 | Full-network stop search | Implemented and tested | 10,043 searchable BMTC stops/BMRCL stations with mode and feed provenance |
-| Full-network schedule routing | Implemented and benchmarked | 1,563,324-connection calendar-filtered CSA; bus, Metro, interchange, 670 transfer footpaths, hard walking budgets, and safest/fastest/direct behavior |
-| Native Android client | Implemented and physical-device validated | Compose APK, live autocomplete, contract-aware full-network planning/rendering, explicit offline fallback; evidence under `research_outputs/device_evidence/` |
+| Full-network schedule routing | Implemented and benchmarked | 1,563,324-connection calendar-filtered CSA; depart-after/arrive-by, bus, Metro, interchange, 670 transfer footpaths, hard walking budgets, and safest/fastest/direct behavior |
+| Native Android client | Implemented and physical-device validated | Compose APK, live autocomplete, depart-after/arrive-by contract planning, full-network rendering, explicit offline fallback; evidence under `research_outputs/device_evidence/` |
 | APK distribution | Development preview available | Website serves a checksum-labelled debug-signed APK; production signing remains incomplete |
 | Low-connectivity mode | Partially implemented | Connection status, saved journey, local report queue, manifest, and service-worker shell cache implemented; full offline device test remains |
 | Operator insights | Implemented and tested | Bounded route trip counts, service spans, direction-aware median headways, and shared-stop analysis; explicitly not actual fleet utilization |

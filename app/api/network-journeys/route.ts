@@ -1,6 +1,6 @@
 import metadata from "@/data/transit-connections.meta.json";
 import stopIndex from "@/data/transit-stops.json";
-import { earliestArrival, formatServiceTime, parseServiceTime } from "@/lib/transit/connection-router";
+import { earliestArrival, formatServiceTime, latestDeparture, parseServiceTime } from "@/lib/transit/connection-router";
 import { loadFullConnectionIndex } from "@/lib/transit/full-index";
 import { activeTripsForDate } from "@/lib/transit/service-calendar";
 
@@ -19,14 +19,18 @@ export async function GET(request: Request) {
   const originId = url.searchParams.get("origin") ?? "";
   const destinationId = url.searchParams.get("destination") ?? "";
   const date = url.searchParams.get("date") ?? "";
-  const departAfter = parseServiceTime(url.searchParams.get("departAfter") ?? "");
+  const departAfterInput = url.searchParams.get("departAfter");
+  const arriveByInput = url.searchParams.get("arriveBy");
+  const timeMode = arriveByInput !== null ? "arriveBy" : "departAfter";
+  const requestedTimeInput = arriveByInput ?? departAfterInput ?? "";
+  const requestedTime = parseServiceTime(requestedTimeInput);
   const priority = url.searchParams.get("priority") ?? "safest";
   const maximumWalkingMeters = Number(url.searchParams.get("maxWalkingMeters") ?? "5000");
   const selectedOrigin = stopIndex.stops.find((stop) => stop.id === originId);
   const selectedDestination = stopIndex.stops.find((stop) => stop.id === destinationId);
 
-  if (!selectedOrigin || !selectedDestination || departAfter === null || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
-    return Response.json({ error: "Provide valid origin, destination, date, and departAfter=HH:MM." }, { status: 400 });
+  if (!selectedOrigin || !selectedDestination || (departAfterInput === null) === (arriveByInput === null) || requestedTime === null || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    return Response.json({ error: "Provide valid origin, destination, date, and exactly one of departAfter=HH:MM or arriveBy=HH:MM." }, { status: 400 });
   }
   if (!["safest", "fastest", "direct"].includes(priority) || !Number.isInteger(maximumWalkingMeters) || maximumWalkingMeters < 0 || maximumWalkingMeters > 5_000) {
     return Response.json({ error: "Provide priority=safest|fastest|direct and maxWalkingMeters from 0 to 5000." }, { status: 400 });
@@ -39,10 +43,17 @@ export async function GET(request: Request) {
   const index = await loadFullConnectionIndex();
   const activeTrips = activeTripsForDate(metadata.trips, metadata.services, date);
   const minimumTransferSeconds = priority === "safest" ? 180 : 0;
-  const legs = earliestArrival(index, routableStops(selectedOrigin), routableStops(selectedDestination), departAfter, minimumTransferSeconds, activeTrips, { maximumWalkingMeters, directOnly: priority === "direct" });
+  const originStops = routableStops(selectedOrigin);
+  const destinationStops = routableStops(selectedDestination);
+  const scanOptions = { maximumWalkingMeters, directOnly: priority === "direct" };
+  const arriveByResult = timeMode === "arriveBy" ? latestDeparture(index, originStops, destinationStops, requestedTime, minimumTransferSeconds, activeTrips, scanOptions) : null;
+  const legs = arriveByResult?.legs ?? (timeMode === "departAfter" ? earliestArrival(index, originStops, destinationStops, requestedTime, minimumTransferSeconds, activeTrips, scanOptions) : null);
+  const scanCount = arriveByResult?.scanCount ?? 1;
+  const latestStart = arriveByResult?.departAfter ?? (timeMode === "departAfter" ? requestedTime : null);
+  const contract = { timeMode, requestedTime: requestedTimeInput, latestStart: latestStart === null ? null : formatServiceTime(latestStart), deadlineMet: timeMode === "arriveBy" ? legs !== null : null, priority, maximumWalkingMeters, minimumTransferSeconds, directOnly: priority === "direct" };
   const queryMilliseconds = Math.round((performance.now() - started) * 10) / 10;
   if (!legs) {
-    return Response.json({ journey: null, queryMilliseconds, contract: { priority, maximumWalkingMeters, minimumTransferSeconds, directOnly: priority === "direct" }, evidence: "No scheduled path found that satisfies this journey contract in the indexed static feed." });
+    return Response.json({ journey: null, queryMilliseconds, contract, scanCount, evidence: "No scheduled path found that satisfies this journey contract in the indexed static feed." });
   }
 
   const rides: Array<{ tripId: string; route: string; routeColor: string | null; agency: string; mode: string; headsign: string; from: typeof stopIndex.stops[number]; to: typeof stopIndex.stops[number]; departure: string; arrival: string; stopCount: number; distanceMeters?: number }> = [];
@@ -64,8 +75,8 @@ export async function GET(request: Request) {
   }
 
   return Response.json({
-    journey: { origin: selectedOrigin, destination: selectedDestination, departure: rides[0]?.departure, arrival: rides.at(-1)?.arrival, transfers: Math.max(0, rides.filter((ride) => ride.mode !== "walk").length - 1), walkingMeters: rides.reduce((sum, ride) => sum + (ride.distanceMeters ?? 0), 0), modes: [...new Set(rides.filter((ride) => ride.mode !== "walk").map((ride) => ride.mode))], contract: { priority, maximumWalkingMeters, minimumTransferSeconds, directOnly: priority === "direct" }, rides },
+    journey: { origin: selectedOrigin, destination: selectedDestination, departure: rides[0]?.departure, arrival: rides.at(-1)?.arrival, transfers: Math.max(0, rides.filter((ride) => ride.mode !== "walk").length - 1), walkingMeters: rides.reduce((sum, ride) => sum + (ride.distanceMeters ?? 0), 0), modes: [...new Set(rides.filter((ride) => ride.mode !== "walk").map((ride) => ride.mode))], contract, rides },
     queryMilliseconds,
-    network: { feedVersions: metadata.feedVersions, validFrom: metadata.validFrom, validUntil: metadata.validUntil, stops: metadata.searchableStopCount, routingNodes: metadata.stopCount, trips: metadata.tripCount, activeTrips: activeTrips.reduce((sum, value) => sum + value, 0), connections: metadata.connectionCount, transferFootpaths: metadata.footpaths.length, footpathPolicy: metadata.footpathPolicy, plausibilityGate: metadata.plausibilityGate, sources: metadata.sources, license: metadata.license, realtime: false },
+    network: { feedVersions: metadata.feedVersions, validFrom: metadata.validFrom, validUntil: metadata.validUntil, stops: metadata.searchableStopCount, routingNodes: metadata.stopCount, trips: metadata.tripCount, activeTrips: activeTrips.reduce((sum, value) => sum + value, 0), connections: metadata.connectionCount, transferFootpaths: metadata.footpaths.length, scanCount, scanStrategy: timeMode === "arriveBy" ? "minute-precision monotone deadline search" : "single forward scan", footpathPolicy: metadata.footpathPolicy, plausibilityGate: metadata.plausibilityGate, sources: metadata.sources, license: metadata.license, realtime: false },
   });
 }

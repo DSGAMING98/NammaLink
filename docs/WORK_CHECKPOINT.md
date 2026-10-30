@@ -4,11 +4,11 @@ Updated: 30 October 2026
 
 ## Current phase
 
-Phase 16 — City-scale Journey Contract enforcement.
+Phase 17 — City-scale arrive-by deadline planning.
 
 ## Last completed task
 
-Enforced safest/fastest/direct behavior and hard transfer-walking budgets in the city-scale API, wired the controls into Android, and physically validated a direct zero-transfer result.
+Added minute-precision latest-departure search for city-scale arrive-by contracts, wired the mode into Android, and physically validated a deadline-met journey.
 
 ## Last verified working commit
 
@@ -22,7 +22,7 @@ City-scale Journey Contract milestone: `480a030` on `main`, verified by GitHub A
 - Calendar-aware schedule routing with hard arrive-by, walking, transfer, and directness constraints.
 - Multiple ranking strategies, source-labelled timeline, evidence-aware simulated incident, and recovery preserving the completed leg.
 - Installable responsive web app with offline shell, saved journey, local report queue, and schedule-supply operator insights.
-- 38 passing web/router/API/operator/calendar/contract tests plus strict type-check and production build.
+- 40 passing web/router/API/operator/calendar/contract tests plus strict type-check and production build.
 - Native Kotlin/Jetpack Compose project using AGP 9.2.1, Gradle 9.4.1, compile/target SDK 36, and minimum SDK 26.
 - Native constraint planner, GTFS-derived demonstration itinerary, schematic route view, locally persisted saved journey, explicit simulated disruption/recovery, and operator screen.
 - Physical Android 16 installation and UI-hierarchy validation on Vivo V2513.
@@ -31,17 +31,17 @@ City-scale Journey Contract milestone: `480a030` on `main`, verified by GitHub A
 - Operator UI explicitly reports zero trained ML models instead of fabricating evaluation metrics.
 - Reproducible 10,043-stop BMTC + BMRCL search index with station/platform normalization, mode labels, result limits, and embedded provenance.
 - Calendar-filtered 61,115-trip multimodal Connection Scan index with 1,563,324 admitted connections, 670 explicit transfer footpaths, 5,153 recorded plausibility rejections, three-minute inter-trip buffer, and exact ride/walk reconstruction.
-- `/api/network-journeys` date/stop/time/contract validation, hard walking budgets, safest/fastest/direct behavior, feed-window enforcement, provenance, schedule-only flag, and measured query latency.
-- Android debounced stop autocomplete, injectable backend URL, enforced priority/walking controls, city-scale journey parsing/rendering, explicit request errors, and separately selected offline fallback.
+- `/api/network-journeys` date/stop/time/contract validation, depart-after and arrive-by search, hard walking budgets, safest/fastest/direct behavior, feed-window enforcement, provenance, schedule-only flag, and measured query latency.
+- Android debounced stop autocomplete, injectable backend URL, depart-after/arrive-by selection, enforced priority/walking controls, city-scale journey parsing/rendering, explicit request errors, and separately selected offline fallback.
 - Website Android download section and repository-hosted 17.15 MB development APK, explicitly labelled debug-signed with SHA-256.
 - Full-feed operator supply graph with 10,043 searchable stops, 61,115 trips, 4,419 route records, 1,563,324 admitted connections, and top-eight route trip bars.
 - GitHub Actions verification for tests, type-check, production web build, native Android build, APK checksum, and 14-day APK artifact retention.
 - Fail-closed Android release signing configuration: production packaging requires four external environment values and a readable keystore; signing files are ignored by Git.
-- Physical-device validation of live bus/Metro autocomplete, bus-only routing, Metro-only routing, mixed BMTC–walk–BMRCL routing, and a direct hard-contract journey over the USB-forwarded backend.
+- Physical-device validation of live bus/Metro autocomplete, bus-only routing, Metro-only routing, mixed BMTC–walk–BMRCL routing, direct routing, and arrive-by deadline planning over the USB-forwarded backend.
 
 ## Incomplete features
 
-Arbitrary place search/maps, coordinate-based access/egress, pedestrian-network geometry, city-scale arrive-by/deadline routing and multi-label Pareto alternatives, persistent server-side disruption reporting/moderation, authentication, notifications, legitimately trained ML, secure release signing, and public backend deployment remain incomplete.
+Arbitrary place search/maps, coordinate-based access/egress, pedestrian-network geometry, city-scale multi-label Pareto alternatives, persistent server-side disruption reporting/moderation, authentication, notifications, legitimately trained ML, secure release signing, and public backend deployment remain incomplete.
 
 ## Verification evidence
 
@@ -51,6 +51,7 @@ Arbitrary place search/maps, coordinate-based access/egress, pedestrian-network 
 - Full-feed operator graph milestone: passed, 28 tests across 12 files.
 - Multimodal/calendar milestone: passed, 36 tests across 14 files, including real indexed Metro and mixed-mode API queries.
 - City-scale contract milestone: passed, 38 tests across 14 files, including walking-budget adaptation, direct-only routing, invalid-contract rejection, and physical-device UI evidence.
+- City-scale arrive-by milestone: passed, 40 tests across 14 files, including latest-feasible-departure search, mutually exclusive time-mode validation, and real indexed deadline queries.
 - `npm run typecheck`: passed.
 - `pnpm build`: passed with the static web app and all journey, recovery, stop-search, and full-network API routes.
 - Browser desktop/mobile journey, recovery, low-connectivity, and operator flows: passed in prior milestones.
@@ -69,7 +70,7 @@ Arbitrary place search/maps, coordinate-based access/egress, pedestrian-network 
 - Updated Android `:app:assembleDebug`: passed with the stop-search and network-journey client.
 - `adb reverse tcp:3000 tcp:3000`: configured successfully; updated APK streamed install passed.
 - Production website APK check: HTTP 200, `application/vnd.android.package-archive`, 17,150,016-byte content length, visible debug-signing label.
-- Current contract-aware development APK SHA-256: `229CDC4FB10F28FEBF151461820D0B44D3A943D94F87DBC5ABE8908788B7BC81` (17,150,016 bytes).
+- Current arrive-by development APK SHA-256: `3159FA306A2C7AD04A336617FAF39DC30EBFE1F8A1B2CAD59B071139DF1943A6` (17,150,016 bytes).
 - Operator graph production HTML: passed for all full-feed totals, rejection count, and zero-model label.
 - Operator graph visual QA: passed in the in-app browser at desktop and 390×844 mobile viewport; cards, bars, disclaimers, and following download section rendered without observed overflow.
 - CI command parity check: frozen pnpm install, 36 tests, strict type-check, production web build, and native Android debug build passed locally before workflow push.
@@ -91,6 +92,8 @@ Arbitrary place search/maps, coordinate-based access/egress, pedestrian-network 
 - Real-index walking-budget adaptation: the 400 m HSR Layout → Whitefield result used a 128 m SAP Labs transfer; a 100 m contract selected an alternate 83 m Kundalahalli Metro Station transfer and still arrived at 09:15.
 - Physical direct-contract journey: Kempegowda Bus Station 09:55 → Central Silk Board 10:42 on `348-C`, 0 transfers, 0/400 m walking, 53 ms; screenshot/UI hierarchy captured and fatal/ANR scan clean.
 - GitHub Actions run `41037654792`: all 38 tests, strict type-check, production web build, native APK build, checksum recording, and artifact upload passed for `480a030`; artifact `12969365276` is retained until 13 November 2026.
+- Real-index Metro arrive-by query: Whitefield 08:00 → Challaghatta 09:20 for a 09:30 deadline; latest start 08:00, 11 scans, 598 ms measured locally.
+- Physical arrive-by journey: latest start 10:10 for an 11:00 Kempegowda Bus Station → Central Silk Board deadline, arrival 10:42, 0/400 m walking, 859 ms; screenshot/UI hierarchy captured and fatal/ANR scan clean.
 
 ## Dataset and ML limitations
 
