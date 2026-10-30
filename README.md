@@ -9,6 +9,7 @@
 [![Build](https://img.shields.io/badge/build-passing-16c784)](#verification)
 [![Tests](https://img.shields.io/badge/tests-22%20passing-16c784)](#verification)
 [![Android](https://img.shields.io/badge/Android-native%20APK-156b52)](#native-android-app)
+[![CI](https://github.com/DSGAMING98/NammaLink/actions/workflows/ci.yml/badge.svg)](https://github.com/DSGAMING98/NammaLink/actions/workflows/ci.yml)
 [![Data](https://img.shields.io/badge/data-static%20GTFS-f0b429)](#data-and-honesty)
 [![Hackathon](https://img.shields.io/badge/CodeSangram%203.0-CS%2F26--002-07130f)](#hackathon)
 

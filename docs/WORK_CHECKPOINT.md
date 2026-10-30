@@ -35,6 +35,7 @@ Verified full-network routing milestone: `6425d24` on `main`. The Android networ
 - Android debounced stop autocomplete, injectable backend URL, city-scale journey parsing/rendering, explicit request errors, and separately selected offline fallback.
 - Website Android download section and repository-hosted 17.15 MB development APK, explicitly labelled debug-signed with SHA-256.
 - Full-feed operator supply graph with 9,960 stops, 57,836 trips, 4,416 route records, 1,477,697 admitted connections, and top-eight route trip bars.
+- GitHub Actions verification for tests, type-check, production web build, native Android build, APK checksum, and 14-day APK artifact retention.
 
 ## Incomplete features
 
@@ -67,6 +68,7 @@ Arbitrary place search/maps, full-feed preprocessing/spatial indexing, Android b
 - Current development APK SHA-256: `1F4DBCE3A07E69EF9719B268EF9EDEEEBDCE2E99FE17895D7ABD3197DE501356`.
 - Operator graph production HTML: passed for all full-feed totals, rejection count, and zero-model label.
 - Operator graph visual QA: passed in the in-app browser at desktop and 390×844 mobile viewport; cards, bars, disclaimers, and following download section rendered without observed overflow.
+- CI command parity check: frozen pnpm install, 28 tests, strict type-check, and production build passed locally before workflow push.
 
 ## Dataset and ML limitations
 
