@@ -26,7 +26,7 @@ export async function GET(request: Request) {
   const requestedTimeInput = arriveByInput ?? departAfterInput ?? "";
   const requestedTime = parseServiceTime(requestedTimeInput);
   const priority = url.searchParams.get("priority") ?? "safest";
-  const maximumWalkingMeters = Number(url.searchParams.get("maxWalkingMeters") ?? "5000");
+  const maximumWalkingMeters = Number(url.searchParams.get("maxWalkingMeters") ?? "100000");
   const accessLatitudeInput = url.searchParams.get("accessLat");
   const accessLongitudeInput = url.searchParams.get("accessLon");
   const hasAccessLocation = accessLatitudeInput !== null || accessLongitudeInput !== null;
@@ -38,8 +38,8 @@ export async function GET(request: Request) {
   if (!selectedOrigin || !selectedDestination || (departAfterInput === null) === (arriveByInput === null) || requestedTime === null || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
     return Response.json({ error: "Provide valid origin, destination, date, and exactly one of departAfter=HH:MM or arriveBy=HH:MM." }, { status: 400 });
   }
-  if (!["safest", "fastest", "direct"].includes(priority) || !Number.isInteger(maximumWalkingMeters) || maximumWalkingMeters < 0 || maximumWalkingMeters > 5_000) {
-    return Response.json({ error: "Provide priority=safest|fastest|direct and maxWalkingMeters from 0 to 5000." }, { status: 400 });
+  if (!["safest", "fastest", "direct"].includes(priority) || !Number.isInteger(maximumWalkingMeters) || maximumWalkingMeters < 0 || maximumWalkingMeters > 100_000) {
+    return Response.json({ error: "Provide priority=safest|fastest|direct and an optional walking preference from 0 to 100000 metres." }, { status: 400 });
   }
   if (hasAccessLocation && (
     accessLatitudeInput === null || accessLongitudeInput === null

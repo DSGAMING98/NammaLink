@@ -1,6 +1,6 @@
 # Implementation Status
 
-Last updated: 30 October 2026
+Last updated: 31 October 2026
 
 | Capability | Status | Evidence / limitation |
 | --- | --- | --- |
@@ -20,6 +20,12 @@ Last updated: 30 October 2026
 | Journey API | Implemented and tested | Zod-validated POST endpoint returns source-labelled schedule results; API tests cover valid and invalid requests |
 | Mobile-first journey UI | Implemented and tested | Interactive Journey Contract and itinerary timeline verified in desktop and 390×844 browser views |
 | Google Maps service gateway | Implemented and contract-tested; Places degraded | Server-only autocomplete, geocoding, place resolution, and walking-route endpoints have validation, Bengaluru bounds, rate limits, timeouts, request IDs, and normalized errors. Routes/Geocoding probes pass; Places key restrictions return HTTP 403 |
+| Phase 32 place/map planning | Implemented and browser-tested | Arbitrary place autocomplete with verified-stop fallback; nearest supported stop resolution; walking guidance without mandatory cutoff; real OSM/satellite tiles, GTFS route polylines, stop/transfer markers, framing, and layer toggle |
+| Phase 33 Bengaluru Airport Mode | Implemented and browser/API-tested; Android compiled | Reproducible 44-direction Vayu Vajra derivative, To/From Airport, corridor/location ranking, 1,101 scheduled departures, complete stop sequences, map, provenance, offline save, fare evidence, and error states; no live claim |
+| Phase 34 Kannada/accessibility | Core passenger flow implemented | Persistent web English/Kannada switch and Android Airport language switch; responsive layouts, labelled controls, touch targets, and reduced-motion support. Verified stop names remain source-native where no Kannada alias exists |
+| Phase 35 time/fare/service state | Implemented with evidence boundaries | Schedule labels, Asia/Kolkata queries, feed validity, static/live distinction, GTFS fare ranges, missing-fare state, and 2025 PDF historical warning; no simulated live arrival |
+| Phase 36 ticket/revenue | Transparent handoff prototype implemented | Official Namma BMTC 2.0 external handoff; device-local outbound-click ledger, zero verified conversions without callbacks, and explicitly hypothetical commission calculator; no payment collection or partnership claim |
+| Phase 37 low-connectivity/sensors | Implemented for saved guidance | City/airport snapshots, last-sync timestamp, last-known GPS context, retry/fallback behavior, web/Android compass guidance, low-data views, and explicit satellite/GPS limitations |
 | Journey disruption evidence | Partially implemented | Typed report states and transparent scoring are tested; submission, persistence, and moderation UI remain |
 | Recovery simulation | Simulated for demonstration | Verified-labelled synthetic incident preserves the completed leg and returns the next feasible continuation with a deadline violation |
 | Authentication / moderation | Planned | Supabase variables present; backend state unverified |

@@ -181,7 +181,7 @@ None. Engineering phases 27–31 are committed and pushed. Device evidence is sa
 
 ## Exact next implementation step
 
-Begin Phase 32 feature work: Google place/map integration and airport mode. Before enabling Places Autocomplete in production, correct the supplied Places key's server restriction and add the server-only Google variables to the new Vercel project.
+Deploy and smoke-test the completed Phase 32–37 feature set, install the rebuilt presentation APK on the Vivo device, and validate Airport Mode plus saved/offline recovery over the public HTTPS backend. Places remains safely degraded to verified-stop search until the supplied server key restriction is corrected.
 
 ## Restore commands
 

@@ -10,6 +10,7 @@
     "data:build": "node scripts/build-demo-network.mjs",
     "data:build-stops": "node scripts/build-stop-index.mjs",
     "data:build-connections": "node --max-old-space-size=2048 scripts/build-connection-index.mjs",
+    "data:build-airport": "node scripts/build-airport-data.mjs",
     "start": "node .next/standalone/server.js",
     "secrets:check": "node scripts/check-secret-hygiene.mjs",
     "verify:engineering": "pnpm secrets:check && pnpm test:run && pnpm typecheck && pnpm build",
@@ -18,12 +19,14 @@
     "test:run": "vitest run"
   },
   "dependencies": {
+    "leaflet": "^1.9.4",
     "next": "16.4.3",
     "react": "19.3.1",
     "react-dom": "19.3.1",
     "zod": "^4.1.12"
   },
   "devDependencies": {
+    "@types/leaflet": "^1.9.22",
     "@types/node": "^24.10.0",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
@@ -31,4 +34,3 @@
     "vitest": "^4.0.18"
   }
 }
-

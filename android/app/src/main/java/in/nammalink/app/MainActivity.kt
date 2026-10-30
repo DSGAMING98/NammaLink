@@ -2,6 +2,8 @@ package `in`.nammalink.app
 
 import android.Manifest
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.ComponentActivity
@@ -107,17 +109,19 @@ private fun NammaLinkApp() {
     var networkJourney by remember { mutableStateOf(restoredJourney) }
     var restoredOffline by remember { mutableStateOf(restoredJourney != null) }
     var deviceLocation by remember { mutableStateOf<DeviceLocation?>(null) }
+    var isKannada by rememberSaveable { mutableStateOf(journeyPreferences.getBoolean("language_kannada", false)) }
 
     MaterialTheme {
         Scaffold(
             containerColor = Paper,
             bottomBar = {
                 NavigationBar(containerColor = Color.White) {
-                    listOf("Plan", "Journey", "Operator").forEachIndexed { index, label ->
+                    val labels = if (isKannada) listOf("ಯೋಜನೆ", "ವಿಮಾನ", "ಪ್ರಯಾಣ", "ಆಪರೇಟರ್") else listOf("Plan", "Airport", "Journey", "Operator")
+                    labels.forEachIndexed { index, label ->
                         NavigationBarItem(
                             selected = tab == index,
                             onClick = { tab = index },
-                            icon = { Text(listOf("⌖", "⇢", "▥")[index], fontSize = 20.sp) },
+                            icon = { Text(listOf("⌖", "✈", "⇢", "▥")[index], fontSize = 20.sp) },
                             label = { Text(label) }
                         )
                     }
@@ -128,11 +132,16 @@ private fun NammaLinkApp() {
                 key(tab) {
                     when (tab) {
                         0 -> PlannerScreen(
-                            onPlan = { journey -> networkJourney = journey; saved = false; restoredOffline = false; tab = 1 },
-                            onOfflineDemo = { networkJourney = null; saved = journeyPreferences.getBoolean("demo_saved", false); restoredOffline = false; tab = 1 },
+                            onPlan = { journey -> networkJourney = journey; saved = false; restoredOffline = false; tab = 2 },
+                            onOfflineDemo = { networkJourney = null; saved = journeyPreferences.getBoolean("demo_saved", false); restoredOffline = false; tab = 2 },
                             onLocationUpdated = { deviceLocation = it },
                         )
-                        1 -> JourneyScreen(
+                        1 -> AirportScreen(
+                            isKannada = isKannada,
+                            onLanguageChange = { value -> isKannada = value; journeyPreferences.edit().putBoolean("language_kannada", value).apply() },
+                            deviceLocation = deviceLocation,
+                        )
+                        2 -> JourneyScreen(
                             networkJourney = networkJourney,
                             deviceLocation = deviceLocation,
                             saved = saved,
@@ -157,6 +166,72 @@ private fun NammaLinkApp() {
 }
 
 @Composable
+private fun AirportScreen(isKannada: Boolean, onLanguageChange: (Boolean) -> Unit, deviceLocation: DeviceLocation?) {
+    var mode by rememberSaveable { mutableStateOf("to_airport") }
+    var query by rememberSaveable { mutableStateOf("") }
+    var requestedTime by rememberSaveable { mutableStateOf("08:00") }
+    var routes by remember { mutableStateOf(emptyList<AirportRoute>()) }
+    var selected by remember { mutableStateOf<AirportRoute?>(null) }
+    var loading by remember { mutableStateOf(false) }
+    var error by remember { mutableStateOf<String?>(null) }
+    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+    val preferences = remember(context) { context.getSharedPreferences("journeys", Context.MODE_PRIVATE) }
+    val tr: (String, String) -> String = { en, kn -> if (isKannada) kn else en }
+    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
+        ScreenHeader(tr("Airport Mode", "ವಿಮಾನ ನಿಲ್ದಾಣ ಮೋಡ್"), tr("Kempegowda, connected.", "ಕೆಂಪೇಗೌಡಕ್ಕೆ ಸಂಪರ್ಕ."), tr("Direction-correct Vayu Vajra schedules from the dated static BMTC feed.", "ದಿನಾಂಕಿತ BMTC ಸ್ಥಿರ ವೇಳಾಪಟ್ಟಿಯಿಂದ ಸರಿಯಾದ ದಿಕ್ಕಿನ ವಾಯು ವಜ್ರ ಸೇವೆಗಳು."))
+        Column(Modifier.padding(horizontal = 20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                FilterChip(selected = !isKannada, onClick = { onLanguageChange(false) }, label = { Text("English") })
+                FilterChip(selected = isKannada, onClick = { onLanguageChange(true) }, label = { Text("ಕನ್ನಡ") })
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                FilterChip(selected = mode == "to_airport", onClick = { mode = "to_airport" }, label = { Text(tr("To airport", "ವಿಮಾನ ನಿಲ್ದಾಣಕ್ಕೆ")) })
+                FilterChip(selected = mode == "from_airport", onClick = { mode = "from_airport" }, label = { Text(tr("From airport", "ವಿಮಾನ ನಿಲ್ದಾಣದಿಂದ")) })
+            }
+            OutlinedTextField(query, { query = it }, label = { Text(tr("Corridor or landmark", "ಮಾರ್ಗ ಅಥವಾ ಸ್ಥಳ")) }, placeholder = { Text("Silk Board, HSR, Whitefield…") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+            OutlinedTextField(requestedTime, { requestedTime = it }, label = { Text(tr("Depart after (HH:MM)", "ನಂತರ ಹೊರಡಿ (HH:MM)")) }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+            Button(
+                onClick = {
+                    loading = true; error = null
+                    scope.launch {
+                        runCatching { withContext(Dispatchers.IO) { searchAirportRoutes(mode, LocalDate.now().toString(), requestedTime, query, deviceLocation) } }
+                            .onSuccess { routes = it; selected = it.firstOrNull(); if (it.isEmpty()) error = tr("No scheduled service matched this corridor and time.", "ಈ ಮಾರ್ಗ ಮತ್ತು ಸಮಯಕ್ಕೆ ವೇಳಾಪಟ್ಟಿಯ ಸೇವೆ ಸಿಗಲಿಲ್ಲ.") }
+                            .onFailure { error = it.userMessage() }
+                        loading = false
+                    }
+                },
+                enabled = !loading,
+                modifier = Modifier.fillMaxWidth().height(54.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Green),
+            ) { Text(if (loading) tr("Checking schedules…", "ವೇಳಾಪಟ್ಟಿ ಪರಿಶೀಲಿಸಲಾಗುತ್ತಿದೆ…") else tr("Find airport buses", "ವಿಮಾನ ನಿಲ್ದಾಣ ಬಸ್ ಹುಡುಕಿ"), fontWeight = FontWeight.Bold) }
+            StatusPill(tr("Static schedule · feed 20260907 · not live", "ಸ್ಥಿರ ವೇಳಾಪಟ್ಟಿ · ಫೀಡ್ 20260907 · ಲೈವ್ ಅಲ್ಲ"), Amber)
+            error?.let { Text(it, color = Coral, fontWeight = FontWeight.Bold, fontSize = 13.sp) }
+            routes.take(10).forEach { route ->
+                Card(Modifier.fillMaxWidth().clickable { selected = route }, colors = CardDefaults.cardColors(containerColor = if (selected?.id == route.id) Mint else Color.White), shape = RoundedCornerShape(14.dp)) {
+                    Column(Modifier.padding(12.dp)) {
+                        Text(route.route, fontWeight = FontWeight.ExtraBold, color = Ink)
+                        Text(if (route.direction == "to_airport") route.origin.name else route.destination.name, color = Muted, fontSize = 12.sp)
+                        Text(route.upcoming.take(4).joinToString(" · ") { "${it.departure} (${it.waitMinutes} min)" }.ifBlank { tr("No later departure today", "ಇಂದು ನಂತರದ ಪ್ರಯಾಣ ಇಲ್ಲ") }, color = Green, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                    }
+                }
+            }
+            selected?.let { route ->
+                val mapRides = route.stops.zipWithNext().map { (from, to) -> NetworkRide(route.route, "BMTC", "bus", route.destination.name, from.name, to.name, from.departure, to.departure, 1, 0, from.lat, from.lon, to.lat, to.lon) }
+                RouteMap(false, route.origin.name, route.destination.name, mapRides, deviceLocation)
+                Text("${route.stops.size} ${tr("verified stops", "ಪರಿಶೀಲಿಸಿದ ನಿಲ್ದಾಣಗಳು")}", color = Ink, fontWeight = FontWeight.ExtraBold)
+                route.stops.forEach { stop -> ItineraryCard(stop.departure, stop.name, tr("Scheduled stop time", "ವೇಳಾಪಟ್ಟಿಯ ನಿಲ್ದಾಣ ಸಮಯ"), "", Green) }
+                Text(route.minimumFare?.let { minimum -> tr("GTFS published fare range ₹$minimum–₹${route.maximumFare}. Confirm the applicable current fare in the official app.", "GTFS ಪ್ರಕಟಿತ ದರ ₹$minimum–₹${route.maximumFare}. ಪ್ರಸ್ತುತ ದರವನ್ನು ಅಧಿಕೃತ ಆಪ್‌ನಲ್ಲಿ ದೃಢೀಕರಿಸಿ.") } ?: tr("Current fare unavailable. The 2025 PDF is historical and is not presented as current.", "ಪ್ರಸ್ತುತ ದರ ಲಭ್ಯವಿಲ್ಲ. 2025ರ PDF ಐತಿಹಾಸಿಕವಾಗಿದೆ."), color = Muted, fontSize = 12.sp)
+                OutlinedButton(onClick = { preferences.edit().putString("saved_airport_route", route.id).putLong("saved_airport_at", System.currentTimeMillis()).apply() }, modifier = Modifier.fillMaxWidth()) { Text(tr("Save airport route offline", "ವಿಮಾನ ಮಾರ್ಗವನ್ನು ಆಫ್‌ಲೈನ್ ಉಳಿಸಿ")) }
+                Button(onClick = { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=com.bmtc.bmtcavls.two"))) }, modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.buttonColors(containerColor = Green)) { Text(tr("Open official Namma BMTC", "ಅಧಿಕೃತ ನಮ್ಮ BMTC ತೆರೆಯಿರಿ")) }
+                Text(tr("Official external handoff. BMTC manages payment and tickets; NammaLink records no conversion.", "ಅಧಿಕೃತ ಹೊರಗಿನ ಸಂಪರ್ಕ. ಪಾವತಿ ಮತ್ತು ಟಿಕೆಟ್‌ಗಳನ್ನು BMTC ನಿರ್ವಹಿಸುತ್ತದೆ; ನಮ್ಮಲಿಂಕ್ ಪರಿವರ್ತನೆಯನ್ನು ದಾಖಲಿಸುವುದಿಲ್ಲ."), color = Muted, fontSize = 11.sp)
+            }
+            Spacer(Modifier.height(18.dp))
+        }
+    }
+}
+
+@Composable
 private fun ScreenHeader(kicker: String, title: String, subtitle: String) {
     Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 18.dp)) {
         Text(kicker.uppercase(), color = Green, fontWeight = FontWeight.Bold, fontSize = 12.sp, letterSpacing = 1.sp)
@@ -173,7 +248,7 @@ private fun PlannerScreen(onPlan: (NetworkJourney) -> Unit, onOfflineDemo: () ->
     var timeMode by rememberSaveable { mutableStateOf("Depart after") }
     var requestedTime by rememberSaveable { mutableStateOf("08:00") }
     var ranking by rememberSaveable { mutableStateOf("Safest") }
-    var maxWalk by rememberSaveable { mutableStateOf("800 m") }
+    var maxWalk by rememberSaveable { mutableStateOf("Flexible") }
     var origin by remember { mutableStateOf(StopOption("20921", "Kempegowda Bus Station", 12.98, 77.57)) }
     var destination by remember { mutableStateOf(StopOption("20707", "Central Silk Board", 12.92, 77.62)) }
     var suggestions by remember { mutableStateOf(emptyList<StopOption>()) }
@@ -278,9 +353,9 @@ private fun PlannerScreen(onPlan: (NetworkJourney) -> Unit, onOfflineDemo: () ->
                     FilterChip(selected = ranking == choice, onClick = { ranking = choice }, label = { Text(choice) })
                 }
             }
-            Text("Maximum walking", fontWeight = FontWeight.Bold, color = Ink)
+            Text("Walking preference", fontWeight = FontWeight.Bold, color = Ink)
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                listOf("400 m", "800 m", "1.5 km").forEach { choice ->
+                listOf("Flexible", "800 m", "1.5 km").forEach { choice ->
                     FilterChip(selected = maxWalk == choice, onClick = { maxWalk = choice }, label = { Text(choice) })
                 }
             }
@@ -289,7 +364,7 @@ private fun PlannerScreen(onPlan: (NetworkJourney) -> Unit, onOfflineDemo: () ->
                     if (origin.id.isBlank() || destination.id.isBlank()) { error = "Select both stops from the verified suggestions."; return@Button }
                     planning = true; error = null
                     scope.launch {
-                        val maximumWalkingMeters = when (maxWalk) { "400 m" -> 400; "800 m" -> 800; else -> 1_500 }
+                        val maximumWalkingMeters = when (maxWalk) { "800 m" -> 800; "1.5 km" -> 1_500; else -> 100_000 }
                         val priorityValue = ranking.lowercase()
                         val timeModeValue = if (timeMode == "Arrive by") "arriveBy" else "departAfter"
                         val accessLocation = currentFix.takeIf { origin.distanceMeters != null }
@@ -306,7 +381,7 @@ private fun PlannerScreen(onPlan: (NetworkJourney) -> Unit, onOfflineDemo: () ->
             ) { Text(if (planning) "Scanning the schedule…" else "Plan across bus + Metro", fontWeight = FontWeight.Bold) }
             error?.let { Text(it, color = Coral, fontWeight = FontWeight.Bold, fontSize = 13.sp) }
             OutlinedButton(onClick = onOfflineDemo, modifier = Modifier.fillMaxWidth()) { Text("Open bounded offline demonstration") }
-            Text("Safest applies a three-minute interchange buffer, Fastest removes that extra buffer, and Direct permits one transit ride. The selected transfer-walking budget is enforced by the city-scale scan. The offline demonstration remains available explicitly.", color = Muted, fontSize = 12.sp)
+            Text("Walking is guidance, not a mandatory rejection rule. Choose a preference only when you want a stricter limit. Safest applies a three-minute interchange buffer; Fastest removes that extra buffer; Direct permits one transit ride.", color = Muted, fontSize = 12.sp)
             Spacer(Modifier.height(16.dp))
         }
     }
@@ -330,6 +405,7 @@ private fun StopSuggestions(stops: List<StopOption>, onSelect: (StopOption) -> U
 @Composable
 private fun JourneyScreen(networkJourney: NetworkJourney?, deviceLocation: DeviceLocation?, saved: Boolean, restoredOffline: Boolean, onSelectAlternative: (NetworkJourney) -> Unit, onSave: () -> Unit) {
     var disrupted by rememberSaveable { mutableStateOf(false) }
+    val compassHeading = rememberCompassHeading()
     if (networkJourney != null) {
         Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
             ScreenHeader("Full-network schedule", "Arrive at ${networkJourney.arrival}.", "Depart ${networkJourney.departure} · ${networkJourney.transfers} transfer${if (networkJourney.transfers == 1) "" else "s"} · static BMTC + BMRCL feeds")
@@ -386,7 +462,9 @@ private fun JourneyScreen(networkJourney: NetworkJourney?, deviceLocation: Devic
                     )
                 }
                 OutlinedButton(onClick = onSave, modifier = Modifier.fillMaxWidth()) { Text(if (saved) "Saved ✓" else "Save offline") }
+                StatusPill(compassHeading?.let { "Compass $it° · sensor guidance only" } ?: "Compass unavailable · continue with the saved itinerary", LocationBlue)
                 Text(if (restoredOffline) "Saved schedule snapshot restored locally. Replan online before travel to check for a newer schedule." else "Schedule-only result. It does not use live vehicle positions, observed delay, or a trained prediction model.", color = Muted, fontSize = 12.sp)
+                Text("Last-known GPS is not live tracking. Satellite map tiles require network unless separately licensed and downloaded; this app does not claim satellite communication.", color = Muted, fontSize = 11.sp)
                 Spacer(Modifier.height(16.dp))
             }
         }

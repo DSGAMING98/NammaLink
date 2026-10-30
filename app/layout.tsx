@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import "leaflet/dist/leaflet.css";
 import { BrandSplash } from "@/app/components/brand-splash";
 import { ConnectivityStatus } from "@/app/components/connectivity-status";
 

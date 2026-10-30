@@ -1,6 +1,7 @@
 import { capabilityStatus, statusLabel } from "@/lib/status";
 import { JourneyPlanner } from "@/app/components/journey-planner";
 import { OperatorInsights } from "@/app/components/operator-insights";
+import { MobilityExperience } from "@/app/components/mobility-experience";
 
 export default function HomePage() {
   return (
@@ -37,9 +38,11 @@ export default function HomePage() {
 
       <section className="principleStrip" aria-label="Product principles">
         <div><span>01</span><strong>Deadline aware</strong><p>Arrive-by search, not just leave-now directions.</p></div>
-        <div><span>02</span><strong>Constraint safe</strong><p>Walking, budget and transfers are hard limits.</p></div>
+        <div><span>02</span><strong>Passenger choice</strong><p>Walking is guidance; optional limits stay under your control.</p></div>
         <div><span>03</span><strong>Recovery ready</strong><p>Replan the unfinished journey when conditions change.</p></div>
       </section>
+
+      <MobilityExperience />
 
       <OperatorInsights />
 
@@ -52,7 +55,7 @@ export default function HomePage() {
             demonstration and connects to the verified public NammaLink backend over HTTPS. Android may ask you to allow installs
             from your browser or file manager.
           </p>
-          <p className="downloadHash"><strong>SHA-256</strong> F2E3F4473E1143EBFCD45BB58D5CB711C5E6B528F24038D5EE8C4562CBEEC216</p>
+          <p className="downloadHash"><strong>SHA-256</strong> 3D2364081AAF309A54E0A380D21467688CA4F39CA5DAA746773A0EE8CAC368B1</p>
         </div>
         <div className="downloadActions">
           <a className="primaryButton" href="/downloads/NammaLink-0.1.0.apk" download>Download APK · 7.7 MB</a>

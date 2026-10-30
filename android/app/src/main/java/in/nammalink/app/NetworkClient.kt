@@ -22,6 +22,13 @@ data class NetworkJourney(val origin: String, val destination: String, val depar
 enum class NetworkFailure { CONFIGURATION, OFFLINE, TIMEOUT, SERVER, RESPONSE }
 class NammaLinkNetworkException(val failure: NetworkFailure, message: String, val requestId: String? = null) : Exception(message)
 data class BackendHealth(val service: String, val version: String, val revision: String)
+data class AirportStop(val id: String, val name: String, val lat: Double, val lon: Double, val departure: String)
+data class AirportDeparture(val departure: String, val waitMinutes: Int)
+data class AirportRoute(
+    val id: String, val route: String, val longName: String, val direction: String,
+    val origin: AirportStop, val destination: AirportStop, val stops: List<AirportStop>,
+    val upcoming: List<AirportDeparture>, val proximityMeters: Int?, val minimumFare: Int?, val maximumFare: Int?,
+)
 
 fun Throwable.userMessage(): String = when (this) {
     is NammaLinkNetworkException -> message.orEmpty() + (requestId?.let { " (reference $it)" } ?: "")
@@ -202,12 +209,32 @@ fun searchNetworkStops(query: String): List<StopOption> {
 }
 
 fun findNearbyNetworkStops(latitude: Double, longitude: Double): List<StopOption> {
-    val array = request("/api/stops?lat=$latitude&lon=$longitude&radiusMeters=5000&limit=8").getJSONArray("stops")
+    val array = request("/api/stops?lat=$latitude&lon=$longitude&radiusMeters=100000&limit=8").getJSONArray("stops")
     return List(array.length()) { index ->
         val stop = array.getJSONObject(index)
         StopOption(
             stop.getString("id"), stop.getString("name"), stop.getDouble("lat"), stop.getDouble("lon"),
             stop.optString("agency", "BMTC"), stop.optString("mode", "bus"), stop.optInt("distanceMeters"),
+        )
+    }
+}
+
+fun searchAirportRoutes(mode: String, serviceDate: String, after: String, query: String = "", location: DeviceLocation? = null): List<AirportRoute> {
+    val encodedQuery = URLEncoder.encode(query.trim(), StandardCharsets.UTF_8)
+    val locationParameters = location?.let { "&lat=${it.latitude}&lon=${it.longitude}" } ?: ""
+    val response = request("/api/airport?mode=$mode&date=$serviceDate&after=${URLEncoder.encode(after, StandardCharsets.UTF_8)}&q=$encodedQuery$locationParameters")
+    val array = response.getJSONArray("routes")
+    fun stop(json: JSONObject) = AirportStop(json.getString("id"), json.getString("name"), json.getDouble("lat"), json.getDouble("lon"), json.optString("departure"))
+    return List(array.length()) { index ->
+        val route = array.getJSONObject(index)
+        val stops = route.getJSONArray("stops").let { values -> List(values.length()) { stop(values.getJSONObject(it)) } }
+        val upcoming = route.getJSONArray("upcoming").let { values -> List(values.length()) { item -> values.getJSONObject(item).let { AirportDeparture(it.getString("departure"), it.getInt("waitMinutes")) } } }
+        val fare = route.optJSONObject("fareRange")
+        AirportRoute(
+            id = route.getString("id"), route = route.getString("route"), longName = route.getString("longName"), direction = route.getString("direction"),
+            origin = stop(route.getJSONObject("origin")), destination = stop(route.getJSONObject("destination")), stops = stops, upcoming = upcoming,
+            proximityMeters = if (route.isNull("proximityMeters")) null else route.getInt("proximityMeters"),
+            minimumFare = fare?.optInt("minimum"), maximumFare = fare?.optInt("maximum"),
         )
     }
 }

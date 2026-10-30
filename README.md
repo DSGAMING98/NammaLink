@@ -10,7 +10,7 @@
 
 [![Live](https://img.shields.io/badge/service-live-156b52)](https://nammalink.vercel.app)
 [![CI](https://github.com/DSGAMING98/NammaLink/actions/workflows/ci.yml/badge.svg)](https://github.com/DSGAMING98/NammaLink/actions/workflows/ci.yml)
-[![Tests](https://img.shields.io/badge/tests-53%20passing-16c784)](#verification)
+[![Tests](https://img.shields.io/badge/tests-57%20passing-16c784)](#verification)
 [![Android](https://img.shields.io/badge/Android-native%20app-156b52)](#android-application)
 [![Data](https://img.shields.io/badge/data-static%20GTFS-f0b429)](#data-sources-and-limitations)
 
@@ -27,7 +27,7 @@ The routing network currently contains 10,043 searchable BMTC and BMRCL stops, 6
 ## Capabilities
 
 - Depart-after and arrive-by journey planning across BMTC and BMRCL services.
-- Hard limits for walking, transfers, deadlines, and direct-only travel.
+- Optional walking preferences, transfer/deadline contracts, and direct-only travel without an arbitrary mandatory walking cutoff.
 - Safest, fastest, and direct journey contracts with comparable duration, waiting, changes, and walking.
 - Calendar-filtered Connection Scan routing over the complete indexed network.
 - Text search and distance-ranked nearby-stop discovery.
@@ -39,6 +39,11 @@ The routing network currently contains 10,043 searchable BMTC and BMRCL stops, 6
 - Operator schedule-supply summaries with documented evidence boundaries.
 - Server-side Geocoding and Routes gateways with validation, timeouts, caching, rate limits, and normalized errors.
 - Health, revision, dataset-validity, and capability reporting through `/api/health`.
+- Arbitrary place discovery with Google Places when authorized and automatic verified-stop fallback.
+- Real interactive map and satellite layers with GTFS route polylines, stop markers, and transfer context.
+- Integrated Vayu Vajra Airport Mode with 44 direction-correct route variants, 1,101 scheduled origin departures, intermediate stops, and dated provenance.
+- Working English/Kannada switch, device-local language persistence, saved city/airport snapshots, and compass limitations.
+- Official Namma BMTC 2.0 ticket handoff with outbound-click evidence kept separate from conversions and hypothetical revenue.
 
 ## Production service
 
@@ -56,15 +61,15 @@ Deployment requirements, smoke tests, and release procedures are documented in [
 
 ## Android application
 
-The `android/` directory contains a native Kotlin and Jetpack Compose application; it is not a WebView. It provides stop autocomplete, nearby-stop discovery, journey-contract controls, full-network itinerary rendering, a geographic stop-to-stop route view, offline persistence, recovery handling, and operator schedule insights.
+The `android/` directory contains a native Kotlin and Jetpack Compose application; it is not a WebView. It provides stop autocomplete, nearby-stop discovery, journey-contract controls, full-network itinerary rendering, integrated Airport Mode, English/Kannada controls, offline city/airport persistence, compass assistance, recovery handling, and operator schedule insights.
 
 The installable APK is compiled against the production HTTPS service and has been tested on a physical Android 16 device with no ADB reverse rule.
 
 - Download: [NammaLink Android APK](https://nammalink.vercel.app/downloads/NammaLink-0.1.0.apk)
 - Minimum Android version: Android 8.0 / API 26
 - Package: `in.nammalink.app.presentation`
-- Size: 7,028,336 bytes
-- SHA-256: `F2E3F4473E1143EBFCD45BB58D5CB711C5E6B528F24038D5EE8C4562CBEEC216`
+- Size: 8,056,434 bytes
+- SHA-256: `3D2364081AAF309A54E0A380D21467688CA4F39CA5DAA746773A0EE8CAC368B1`
 - Signing: Android debug certificate; suitable for evaluation and internal distribution, not an app-store release
 
 Build locally:
@@ -123,6 +128,7 @@ See [Architecture](docs/ARCHITECTURE.md) and [Algorithms](docs/ALGORITHMS.md) fo
 | `GET /api/health` | Service revision, dataset validity, record counts, and capability flags |
 | `GET /api/stops` | Text or nearby stop search |
 | `GET /api/network-journeys` | Full-network scheduled journey planning |
+| `GET /api/airport` | Direction-correct KIA route, departure, stop, proximity, and fare evidence |
 | `POST /api/journeys` | Bounded journey-contract routing |
 | `POST /api/recovery` | Evidence-aware journey recovery |
 | `GET /api/maps/geocode` | Server-side address resolution |
@@ -186,7 +192,7 @@ Copy `.env.example` to `.env.local`. Every tracked environment-variable slot is 
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Browser | Reserved public authentication key |
 | `SUPABASE_SERVICE_ROLE_KEY` | Server | Reserved privileged backend access; never expose to clients |
 
-Routes and Geocoding are enabled in production. Places Autocomplete remains disabled until its server-side API restriction is corrected. Core schedule search and routing do not depend on Google services.
+Routes and Geocoding are enabled in production. If Places Autocomplete is blocked by key restrictions, the UI automatically uses the verified 10,043-stop index instead of exposing a broken control. Core schedule search, Airport Mode, maps, and routing do not depend on Places availability.
 
 ## Data sources and limitations
 
@@ -196,7 +202,9 @@ Operational boundaries:
 
 - Transit times are scheduled and are not guaranteed vehicle arrivals.
 - No authorized realtime vehicle or disruption feed is currently integrated.
-- Walking access and transfer estimates use straight-line geometry unless a Google walking route is explicitly requested.
+- Interactive web maps use OpenStreetMap or Esri satellite tiles; GTFS stop sequences are not mislabelled as verified street geometry.
+- Walking access and transfer estimates use straight-line guidance unless a Google walking route is explicitly requested.
+- Airport schedules and GTFS fare ranges come from the 20260907 community feed. The 2025 airport fare PDF remains historical evidence and is not labelled current.
 - No labelled historical arrival-delay dataset has passed validation, so no ML delay-accuracy claim is made.
 - Operator metrics describe scheduled supply, not passenger demand, occupancy, punctuality, or revenue.
 - Synthetic disruption data is always labelled as simulated.
@@ -205,7 +213,7 @@ Operational boundaries:
 
 The current engineering baseline passes:
 
-- 53 automated tests across 17 files.
+- 57 automated tests across 19 files.
 - Strict TypeScript checking.
 - Tracked-file secret hygiene scanning.
 - Next.js production and standalone-service builds.
@@ -223,7 +231,7 @@ Continuous verification runs through [GitHub Actions](https://github.com/DSGAMIN
 - API inputs are schema-validated and numerically bounded.
 - Security headers restrict framing, MIME sniffing, referrer leakage, and unnecessary browser permissions.
 - Presentation and release Android builds require public HTTPS endpoints.
-- Location is requested only after explicit user action and remains session-local.
+- Location is requested only after explicit user action and remains session-local; no location is sent to a ticketing partner.
 - Saved journeys remain on the device.
 - API responses are excluded from service-worker caching.
 
