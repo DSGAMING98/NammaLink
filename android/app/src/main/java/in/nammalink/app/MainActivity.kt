@@ -42,6 +42,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
@@ -203,7 +204,7 @@ private fun AirportScreen(isKannada: Boolean, onLanguageChange: (Boolean) -> Uni
                 modifier = Modifier.fillMaxWidth().height(54.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Green),
             ) { Text(if (loading) tr("Checking schedules…", "ವೇಳಾಪಟ್ಟಿ ಪರಿಶೀಲಿಸಲಾಗುತ್ತಿದೆ…") else tr("Find airport buses", "ವಿಮಾನ ನಿಲ್ದಾಣ ಬಸ್ ಹುಡುಕಿ"), fontWeight = FontWeight.Bold) }
-            StatusPill(tr("Static schedule · feed 20260907 · not live", "ಸ್ಥಿರ ವೇಳಾಪಟ್ಟಿ · ಫೀಡ್ 20260907 · ಲೈವ್ ಅಲ್ಲ"), Amber)
+            StatusPill(tr("Location-ranked KIA schedules · not live vehicle tracking", "ಸ್ಥಳ ಆಧಾರಿತ KIA ವೇಳಾಪಟ್ಟಿ · ಲೈವ್ ವಾಹನ ಟ್ರ್ಯಾಕಿಂಗ್ ಅಲ್ಲ"), Amber)
             restoredAirport?.let { snapshot ->
                 OutlinedButton(
                     onClick = { selected = snapshot.route; routes = listOf(snapshot.route) },
@@ -211,18 +212,21 @@ private fun AirportScreen(isKannada: Boolean, onLanguageChange: (Boolean) -> Uni
                 ) { Text(tr("Open saved ${snapshot.route.route} snapshot", "ಉಳಿಸಿದ ${snapshot.route.route} ಸ್ನ್ಯಾಪ್‌ಶಾಟ್ ತೆರೆಯಿರಿ")) }
             }
             error?.let { Text(it, color = Coral, fontWeight = FontWeight.Bold, fontSize = 13.sp) }
+            selected?.let { route ->
+                val mapRides = route.stops.zipWithNext().map { (from, to) -> NetworkRide(route.route, "BMTC", "bus", route.destination.name, from.name, to.name, from.departure, to.departure, 1, 0, from.lat, from.lon, to.lat, to.lon) }
+                InteractiveRouteMap(route.origin.name, route.destination.name, mapRides, deviceLocation, mapHeight = 360.dp, showDescription = false)
+            }
             routes.take(10).forEach { route ->
                 Card(Modifier.fillMaxWidth().clickable { selected = route }, colors = CardDefaults.cardColors(containerColor = if (selected?.id == route.id) Mint else Color.White), shape = RoundedCornerShape(14.dp)) {
                     Column(Modifier.padding(12.dp)) {
                         Text(route.route, fontWeight = FontWeight.ExtraBold, color = Ink)
                         Text(if (route.direction == "to_airport") route.origin.name else route.destination.name, color = Muted, fontSize = 12.sp)
+                        route.proximityMeters?.let { Text(tr("${it / 1000.0} km from your location", "ನಿಮ್ಮ ಸ್ಥಳದಿಂದ ${it / 1000.0} ಕಿಮೀ"), color = Muted, fontSize = 11.sp) }
                         Text(route.upcoming.take(4).joinToString(" · ") { "${it.departure} (${it.waitMinutes} min)" }.ifBlank { tr("No later departure today", "ಇಂದು ನಂತರದ ಪ್ರಯಾಣ ಇಲ್ಲ") }, color = Green, fontSize = 11.sp, fontWeight = FontWeight.Bold)
                     }
                 }
             }
             selected?.let { route ->
-                val mapRides = route.stops.zipWithNext().map { (from, to) -> NetworkRide(route.route, "BMTC", "bus", route.destination.name, from.name, to.name, from.departure, to.departure, 1, 0, from.lat, from.lon, to.lat, to.lon) }
-                InteractiveRouteMap(route.origin.name, route.destination.name, mapRides, deviceLocation)
                 Text("${route.stops.size} ${tr("verified stops", "ಪರಿಶೀಲಿಸಿದ ನಿಲ್ದಾಣಗಳು")}", color = Ink, fontWeight = FontWeight.ExtraBold)
                 route.stops.forEach { stop -> ItineraryCard(stop.departure, stop.name, tr("Scheduled stop time", "ವೇಳಾಪಟ್ಟಿಯ ನಿಲ್ದಾಣ ಸಮಯ"), "", Green) }
                 Text(route.minimumFare?.let { minimum -> tr("GTFS published fare range ₹$minimum–₹${route.maximumFare}. Confirm the applicable current fare in the official app.", "GTFS ಪ್ರಕಟಿತ ದರ ₹$minimum–₹${route.maximumFare}. ಪ್ರಸ್ತುತ ದರವನ್ನು ಅಧಿಕೃತ ಆಪ್‌ನಲ್ಲಿ ದೃಢೀಕರಿಸಿ.") } ?: tr("Current fare unavailable. The 2025 PDF is historical and is not presented as current.", "ಪ್ರಸ್ತುತ ದರ ಲಭ್ಯವಿಲ್ಲ. 2025ರ PDF ಐತಿಹಾಸಿಕವಾಗಿದೆ."), color = Muted, fontSize = 12.sp)
@@ -260,6 +264,7 @@ private fun PlannerScreen(onPlan: (NetworkJourney) -> Unit, onLocationUpdated: (
     var activeField by rememberSaveable { mutableStateOf("") }
     var planning by remember { mutableStateOf(false) }
     var locating by remember { mutableStateOf(false) }
+    var liveTracking by remember { mutableStateOf(false) }
     var locationRequestNonce by remember { mutableIntStateOf(0) }
     var locationStatus by remember { mutableStateOf<String?>(null) }
     var error by remember { mutableStateOf<String?>(null) }
@@ -269,8 +274,21 @@ private fun PlannerScreen(onPlan: (NetworkJourney) -> Unit, onLocationUpdated: (
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { grants ->
-        if (grants.values.any { it }) locationRequestNonce += 1
+        if (grants.values.any { it }) { liveTracking = true; locationRequestNonce += 1 }
         else locationStatus = "Location permission was not granted. You can still search for any stop manually."
+    }
+
+    LaunchedEffect(Unit) {
+        if (hasLocationPermission(context)) { liveTracking = true; locationRequestNonce += 1 }
+        else permissionLauncher.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION))
+    }
+
+    DisposableEffect(liveTracking) {
+        val stopTracking = if (liveTracking) startLiveLocationTracking(context) { fix ->
+            currentFix = fix
+            onLocationUpdated(fix)
+        } else ({})
+        onDispose(stopTracking)
     }
 
     LaunchedEffect(healthRetry) {
@@ -314,6 +332,10 @@ private fun PlannerScreen(onPlan: (NetworkJourney) -> Unit, onLocationUpdated: (
             onLocationUpdated(fix)
             currentFix = fix
             nearby = stops
+            stops.firstOrNull()?.let { closest ->
+                origin = closest
+                from = "My location · ${closest.name}"
+            }
             locationStatus = if (stops.isEmpty()) {
                 "Location found (±${fix.accuracyMeters.toInt()} m), but no indexed stop is within 5 km. Search manually instead."
             } else {
@@ -323,42 +345,52 @@ private fun PlannerScreen(onPlan: (NetworkJourney) -> Unit, onLocationUpdated: (
         locating = false
     }
 
-    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
-        ScreenHeader("Bengaluru public transport", "Arrive with confidence.", "A journey contract that plans for your deadline—not just the shortest path.")
-        Column(Modifier.padding(horizontal = 20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            StatusPill("● 10,043 searchable bus + Metro stops · static schedule", Green)
-            StatusPill(backendDetail, if (backendState == "ready") Green else if (backendState == "checking") Amber else Coral)
+    Box(Modifier.fillMaxSize()) {
+        InteractiveRouteMap(
+            origin = origin.name,
+            destination = destination.name,
+            rides = emptyList(),
+            deviceLocation = currentFix,
+            mapHeight = 650.dp,
+            showDescription = false,
+            showControls = false,
+        )
+        Card(
+            Modifier.align(Alignment.TopStart).padding(14.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = .94f)),
+            shape = RoundedCornerShape(18.dp),
+        ) {
+            Column(Modifier.padding(horizontal = 14.dp, vertical = 10.dp)) {
+                Text("NammaLink", color = Ink, fontWeight = FontWeight.ExtraBold, fontSize = 20.sp)
+                Text(currentFix?.let { "Live location · ±${it.accuracyMeters.toInt()} m" } ?: "Locating you in Bengaluru…", color = if (currentFix != null) Green else Amber, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+            }
+        }
+        Card(
+            Modifier.align(Alignment.BottomCenter).fillMaxWidth().height(405.dp).padding(horizontal = 12.dp, vertical = 10.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = .97f)),
+            shape = RoundedCornerShape(26.dp),
+        ) {
+        Column(Modifier.padding(horizontal = 16.dp, vertical = 12.dp).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Text("Where are you going?", color = Ink, fontWeight = FontWeight.ExtraBold, fontSize = 22.sp)
+            if (backendState != "ready") {
+                Text(backendDetail, color = if (backendState == "checking") Amber else Coral, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+            }
             if (backendState == "unavailable") {
                 OutlinedButton(onClick = { healthRetry += 1 }, modifier = Modifier.fillMaxWidth()) { Text("Retry service connection") }
             }
             OutlinedTextField(from, { from = it; origin = origin.copy(id = "", distanceMeters = null); activeField = "from" }, label = { Text("From") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
             if (activeField == "from") StopSuggestions(suggestions) { origin = it; from = it.name; activeField = "" }
-            OutlinedButton(
-                onClick = {
-                    locationStatus = null
-                    if (hasLocationPermission(context)) locationRequestNonce += 1
-                    else permissionLauncher.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION))
-                },
-                enabled = !locating,
-                modifier = Modifier.fillMaxWidth().semantics { contentDescription = "Find nearby boarding stops" },
-            ) { Text(if (locating) "Finding your location…" else "⌖ Find nearby boarding stops") }
-            locationStatus?.let { Text(it, color = if (nearby.isEmpty()) Muted else Green, fontWeight = FontWeight.Bold, fontSize = 12.sp) }
-            if (nearby.isNotEmpty()) {
-                Text("Nearby boarding stops", color = Ink, fontWeight = FontWeight.ExtraBold)
-                StopSuggestions(nearby) { origin = it; from = it.name; nearby = emptyList(); locationStatus = "Origin selected from your nearby stops." }
-            }
             OutlinedTextField(to, { to = it; destination = destination.copy(id = ""); activeField = "to" }, label = { Text("To") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
             if (activeField == "to") StopSuggestions(suggestions) { destination = it; to = it.name; activeField = "" }
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
                 listOf("Depart after", "Arrive by").forEach { choice ->
                     FilterChip(selected = timeMode == choice, onClick = { timeMode = choice }, label = { Text(choice) })
                 }
+                OutlinedTextField(requestedTime, { requestedTime = it }, label = { Text("Time") }, modifier = Modifier.weight(1f), singleLine = true)
             }
-            OutlinedTextField(requestedTime, { requestedTime = it }, label = { Text("$timeMode (HH:MM)") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
-            Text("Priority", fontWeight = FontWeight.Bold, color = Ink)
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 listOf("Safest", "Fastest", "Direct").forEach { choice ->
-                    FilterChip(selected = ranking == choice, onClick = { ranking = choice }, label = { Text(choice) })
+                    FilterChip(selected = ranking == choice, onClick = { ranking = choice }, label = { Text(choice) }, modifier = Modifier.weight(1f))
                 }
             }
             Button(
@@ -382,8 +414,8 @@ private fun PlannerScreen(onPlan: (NetworkJourney) -> Unit, onLocationUpdated: (
                 shape = RoundedCornerShape(14.dp)
             ) { Text(if (planning) "Scanning the schedule…" else "Plan across bus + Metro", fontWeight = FontWeight.Bold) }
             error?.let { Text(it, color = Coral, fontWeight = FontWeight.Bold, fontSize = 13.sp) }
-            Text("Walking is guidance, not a mandatory rejection rule. Safest applies a three-minute interchange buffer; Fastest removes that extra buffer; Direct permits one transit ride.", color = Muted, fontSize = 12.sp)
             Spacer(Modifier.height(16.dp))
+        }
         }
     }
 }

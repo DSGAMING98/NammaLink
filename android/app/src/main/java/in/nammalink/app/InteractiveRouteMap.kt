@@ -24,6 +24,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -52,7 +53,15 @@ private val SatelliteTiles = object : OnlineTileSourceBase(
 }
 
 @Composable
-fun InteractiveRouteMap(origin: String, destination: String, rides: List<NetworkRide>, deviceLocation: DeviceLocation?) {
+fun InteractiveRouteMap(
+    origin: String,
+    destination: String,
+    rides: List<NetworkRide>,
+    deviceLocation: DeviceLocation?,
+    mapHeight: Dp = 330.dp,
+    showDescription: Boolean = true,
+    showControls: Boolean = true,
+) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     var satellite by remember { mutableStateOf(false) }
@@ -86,23 +95,23 @@ fun InteractiveRouteMap(origin: String, destination: String, rides: List<Network
 
     Card(colors = CardDefaults.cardColors(containerColor = Color.White)) {
         Column {
-            Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                FilterChip(selected = !satellite, onClick = { satellite = false }, label = { Text("Street") })
-                FilterChip(selected = satellite, onClick = { satellite = true }, label = { Text("Satellite") })
-                OutlinedButton(onClick = { recenterNonce += 1 }) { Text("Recenter") }
+            if (showControls) {
+                Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    FilterChip(selected = !satellite, onClick = { satellite = false }, label = { Text("Street") })
+                    FilterChip(selected = satellite, onClick = { satellite = true }, label = { Text("Satellite") })
+                    OutlinedButton(onClick = { recenterNonce += 1 }) { Text("Recenter") }
+                }
             }
-            if (geographicRides.isEmpty()) {
-                Text("Map geometry is unavailable for this result.", Modifier.padding(16.dp), fontSize = 12.sp)
-            } else {
-                AndroidView(
-                    modifier = Modifier.fillMaxWidth().height(330.dp),
+            AndroidView(
+                    modifier = Modifier.fillMaxWidth().height(mapHeight),
                     factory = { viewContext ->
                         Configuration.getInstance().apply {
                             load(viewContext, viewContext.getSharedPreferences("osmdroid", android.content.Context.MODE_PRIVATE))
                             userAgentValue = "NammaLink/0.1 (native Android passenger app)"
                         }
                         MapView(viewContext).apply {
-                            setMultiTouchControls(true); minZoomLevel = 4.0; maxZoomLevel = 20.0; controller.setZoom(13.0); mapView = this
+                            setMultiTouchControls(true); minZoomLevel = 4.0; maxZoomLevel = 20.0
+                            controller.setZoom(13.0); controller.setCenter(GeoPoint(12.9716, 77.5946)); mapView = this
                         }
                     },
                     update = { view ->
@@ -141,11 +150,13 @@ fun InteractiveRouteMap(origin: String, destination: String, rides: List<Network
                             val current = GeoPoint(fix.latitude, fix.longitude); points += current
                             view.overlays += Marker(view).apply { position = current; title = "Current location"; subDescription = "Last fix ±${fix.accuracyMeters.toInt()} m"; setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM) }
                         }
-                        if (points.isNotEmpty()) view.post { runCatching { view.zoomToBoundingBox(BoundingBox.fromGeoPoints(points), true, 70) } }
+                        if (points.size == 1) view.post { view.controller.setZoom(15.5); view.controller.animateTo(points.first()) }
+                        else if (points.size > 1) view.post { runCatching { view.zoomToBoundingBox(BoundingBox.fromGeoPoints(points), true, 70) } }
                         rendered["route"] = routeSignature
                         view.invalidate()
                     },
-                )
+            )
+            if (showDescription) {
                 Text("Interactive map · pan and pinch to zoom. Walking lines use the Routes API when available; transit lines connect verified scheduled stops and are not street-level vehicle traces.", Modifier.padding(12.dp), fontSize = 11.sp, color = Color(0xFF617068))
             }
         }
@@ -154,6 +165,7 @@ fun InteractiveRouteMap(origin: String, destination: String, rides: List<Network
         if (recenterNonce > 0) {
             val points = geographicRides.flatMap { listOf(GeoPoint(it.fromLat, it.fromLon), GeoPoint(it.toLat, it.toLon)) }
             if (points.isNotEmpty()) mapView?.zoomToBoundingBox(BoundingBox.fromGeoPoints(points), true, 70)
+            else deviceLocation?.let { mapView?.controller?.animateTo(GeoPoint(it.latitude, it.longitude)) }
         }
     }
 }
