@@ -8,7 +8,21 @@ import java.nio.charset.StandardCharsets
 import org.json.JSONArray
 import org.json.JSONObject
 
-data class StopOption(val id: String, val name: String, val lat: Double, val lon: Double, val agency: String = "BMTC", val mode: String = "bus", val distanceMeters: Int? = null)
+data class StopOption(
+    val id: String,
+    val name: String,
+    val lat: Double,
+    val lon: Double,
+    val agency: String = "BMTC",
+    val mode: String = "bus",
+    val distanceMeters: Int? = null,
+    val accessLatitude: Double? = null,
+    val accessLongitude: Double? = null,
+    val placeLabel: String? = null,
+)
+data class MapPoint(val latitude: Double, val longitude: Double)
+data class PlaceResult(val placeId: String, val text: String, val location: MapPoint)
+data class WalkingRoute(val distanceMeters: Int, val durationSeconds: Int, val geometry: List<MapPoint>)
 data class NetworkRide(
     val route: String, val agency: String, val mode: String, val headsign: String,
     val from: String, val to: String, val departure: String, val arrival: String,
@@ -21,7 +35,16 @@ data class NetworkJourney(val origin: String, val destination: String, val depar
 
 enum class NetworkFailure { CONFIGURATION, OFFLINE, TIMEOUT, SERVER, RESPONSE }
 class NammaLinkNetworkException(val failure: NetworkFailure, message: String, val requestId: String? = null) : Exception(message)
-data class BackendHealth(val service: String, val version: String, val revision: String)
+data class BackendHealth(
+    val service: String,
+    val version: String,
+    val revision: String,
+    val stopSearch: Boolean,
+    val scheduleRouting: Boolean,
+    val geocoding: Boolean,
+    val walkingRoutes: Boolean,
+    val autocomplete: Boolean,
+)
 data class AirportStop(val id: String, val name: String, val lat: Double, val lon: Double, val departure: String)
 data class AirportDeparture(val departure: String, val waitMinutes: Int)
 data class AirportRoute(
@@ -29,6 +52,40 @@ data class AirportRoute(
     val origin: AirportStop, val destination: AirportStop, val stops: List<AirportStop>,
     val upcoming: List<AirportDeparture>, val proximityMeters: Int?, val minimumFare: Int?, val maximumFare: Int?,
 )
+
+fun AirportRoute.encodeForStorage(savedAt: Long = System.currentTimeMillis()): String = JSONObject().apply {
+    put("version", 1); put("savedAt", savedAt); put("id", id); put("route", route); put("longName", longName); put("direction", direction)
+    fun encodeStop(stop: AirportStop) = JSONObject().apply {
+        put("id", stop.id); put("name", stop.name); put("lat", stop.lat); put("lon", stop.lon); put("departure", stop.departure)
+    }
+    put("origin", encodeStop(origin)); put("destination", encodeStop(destination))
+    put("stops", JSONArray().apply { stops.forEach { put(encodeStop(it)) } })
+    put("upcoming", JSONArray().apply { upcoming.forEach { put(JSONObject().put("departure", it.departure).put("waitMinutes", it.waitMinutes)) } })
+    proximityMeters?.let { put("proximityMeters", it) }
+    minimumFare?.let { put("minimumFare", it) }; maximumFare?.let { put("maximumFare", it) }
+}.toString()
+
+data class SavedAirportRoute(val route: AirportRoute, val savedAt: Long)
+
+fun decodeStoredAirportRoute(value: String?): SavedAirportRoute? = runCatching {
+    val json = JSONObject(value ?: error("Missing airport route"))
+    if (json.getInt("version") != 1) error("Unsupported airport snapshot")
+    fun stop(item: JSONObject) = AirportStop(item.getString("id"), item.getString("name"), item.getDouble("lat"), item.getDouble("lon"), item.optString("departure"))
+    val stops = json.getJSONArray("stops").let { values -> List(values.length()) { stop(values.getJSONObject(it)) } }
+    val upcoming = json.getJSONArray("upcoming").let { values -> List(values.length()) { index ->
+        values.getJSONObject(index).let { AirportDeparture(it.getString("departure"), it.getInt("waitMinutes")) }
+    } }
+    SavedAirportRoute(
+        AirportRoute(
+            json.getString("id"), json.getString("route"), json.getString("longName"), json.getString("direction"),
+            stop(json.getJSONObject("origin")), stop(json.getJSONObject("destination")), stops, upcoming,
+            if (json.has("proximityMeters")) json.getInt("proximityMeters") else null,
+            if (json.has("minimumFare")) json.getInt("minimumFare") else null,
+            if (json.has("maximumFare")) json.getInt("maximumFare") else null,
+        ),
+        json.getLong("savedAt"),
+    )
+}.getOrNull()
 
 fun Throwable.userMessage(): String = when (this) {
     is NammaLinkNetworkException -> message.orEmpty() + (requestId?.let { " (reference $it)" } ?: "")
@@ -152,7 +209,7 @@ fun decodeStoredJourney(value: String?): NetworkJourney? = runCatching {
     )
 }.getOrNull()
 
-private fun request(path: String): JSONObject {
+private fun request(path: String, method: String = "GET", payload: JSONObject? = null): JSONObject {
     val baseUri = runCatching { URI.create(BuildConfig.API_BASE_URL) }.getOrElse {
         throw NammaLinkNetworkException(NetworkFailure.CONFIGURATION, "The app backend address is invalid.")
     }
@@ -162,8 +219,13 @@ private fun request(path: String): JSONObject {
     val connection = baseUri.resolve(path).toURL().openConnection() as HttpURLConnection
     connection.connectTimeout = 4_000
     connection.readTimeout = 8_000
-    connection.requestMethod = "GET"
+    connection.requestMethod = method
     connection.setRequestProperty("Accept", "application/json")
+    if (payload != null) {
+        connection.doOutput = true
+        connection.setRequestProperty("Content-Type", "application/json")
+        connection.outputStream.bufferedWriter(StandardCharsets.UTF_8).use { it.write(payload.toString()) }
+    }
     return connection.run {
         try {
             val stream = if (responseCode in 200..299) inputStream else errorStream
@@ -195,7 +257,12 @@ private fun request(path: String): JSONObject {
 fun checkBackendHealth(): BackendHealth {
     val response = request("/api/health")
     if (response.optString("status") != "ok") throw NammaLinkNetworkException(NetworkFailure.SERVER, "NammaLink is not ready yet.")
-    return BackendHealth(response.optString("service", "nammalink-api"), response.optString("version", "unknown"), response.optString("revision", "unknown"))
+    val capabilities = response.optJSONObject("capabilities") ?: JSONObject()
+    return BackendHealth(
+        response.optString("service", "nammalink-api"), response.optString("version", "unknown"), response.optString("revision", "unknown"),
+        capabilities.optBoolean("stopSearch"), capabilities.optBoolean("scheduleRouting"), capabilities.optBoolean("geocoding"),
+        capabilities.optBoolean("walkingRoutes"), capabilities.optBoolean("autocomplete"),
+    )
 }
 
 fun searchNetworkStops(query: String): List<StopOption> {
@@ -209,7 +276,7 @@ fun searchNetworkStops(query: String): List<StopOption> {
 }
 
 fun findNearbyNetworkStops(latitude: Double, longitude: Double): List<StopOption> {
-    val array = request("/api/stops?lat=$latitude&lon=$longitude&radiusMeters=100000&limit=8").getJSONArray("stops")
+    val array = request("/api/stops?lat=$latitude&lon=$longitude&radiusMeters=5000&limit=8").getJSONArray("stops")
     return List(array.length()) { index ->
         val stop = array.getJSONObject(index)
         StopOption(
@@ -217,6 +284,83 @@ fun findNearbyNetworkStops(latitude: Double, longitude: Double): List<StopOption
             stop.optString("agency", "BMTC"), stop.optString("mode", "bus"), stop.optInt("distanceMeters"),
         )
     }
+}
+
+fun geocodePassengerPlace(query: String): List<PlaceResult> {
+    if (query.trim().length < 2) return emptyList()
+    val encoded = URLEncoder.encode(query.trim(), StandardCharsets.UTF_8)
+    val results = request("/api/maps/geocode?q=$encoded").getJSONArray("results")
+    return List(results.length()) { index ->
+        val item = results.getJSONObject(index)
+        val location = item.getJSONObject("location")
+        PlaceResult(item.optString("placeId"), item.getString("text"), MapPoint(location.getDouble("latitude"), location.getDouble("longitude")))
+    }
+}
+
+fun resolvePassengerPlace(placeId: String): PlaceResult? {
+    if (placeId.isBlank()) return null
+    val encoded = URLEncoder.encode(placeId, StandardCharsets.UTF_8)
+    val place = request("/api/maps/place?placeId=$encoded").optJSONObject("place") ?: return null
+    val location = place.getJSONObject("location")
+    return PlaceResult(place.optString("placeId", placeId), place.getString("text"), MapPoint(location.getDouble("latitude"), location.getDouble("longitude")))
+}
+
+fun searchPassengerLocations(query: String): List<StopOption> {
+    val stops = searchNetworkStops(query)
+    if (stops.size >= 3) return stops
+    val places = runCatching { geocodePassengerPlace(query) }.getOrDefault(emptyList()).take(2).map { place ->
+        runCatching { resolvePassengerPlace(place.placeId) }.getOrNull() ?: place
+    }
+    val placeStops = places.flatMap { place ->
+        findNearbyNetworkStops(place.location.latitude, place.location.longitude).take(2).map { stop ->
+            stop.copy(
+                accessLatitude = place.location.latitude,
+                accessLongitude = place.location.longitude,
+                placeLabel = place.text,
+            )
+        }
+    }
+    return (stops + placeStops).distinctBy { it.id }.take(6)
+}
+
+fun decodeGooglePolyline(encoded: String): List<MapPoint> {
+    val points = mutableListOf<MapPoint>()
+    var index = 0
+    var latitude = 0
+    var longitude = 0
+    while (index < encoded.length) {
+        fun component(): Int {
+            var result = 0
+            var shift = 0
+            var value: Int
+            do {
+                if (index >= encoded.length) throw IllegalArgumentException("Truncated encoded polyline")
+                value = encoded[index++].code - 63
+                result = result or ((value and 0x1f) shl shift)
+                shift += 5
+            } while (value >= 0x20)
+            return if (result and 1 != 0) (result shr 1).inv() else result shr 1
+        }
+        latitude += component()
+        longitude += component()
+        points += MapPoint(latitude / 100000.0, longitude / 100000.0)
+    }
+    return points
+}
+
+fun fetchWalkingRoute(origin: MapPoint, destination: MapPoint): WalkingRoute? {
+    val payload = JSONObject().apply {
+        put("origin", JSONObject().put("latitude", origin.latitude).put("longitude", origin.longitude))
+        put("destination", JSONObject().put("latitude", destination.latitude).put("longitude", destination.longitude))
+    }
+    val routes = request("/api/maps/walking-route", "POST", payload).getJSONArray("routes")
+    if (routes.length() == 0) return null
+    val route = routes.getJSONObject(0)
+    return WalkingRoute(
+        route.optInt("distanceMeters"),
+        route.optString("duration", "0s").removeSuffix("s").toDoubleOrNull()?.toInt() ?: 0,
+        decodeGooglePolyline(route.optString("encodedPolyline")),
+    )
 }
 
 fun searchAirportRoutes(mode: String, serviceDate: String, after: String, query: String = "", location: DeviceLocation? = null): List<AirportRoute> {
@@ -244,7 +388,8 @@ private fun planSingleNetworkJourney(origin: StopOption, destination: StopOption
     val encodedDestination = URLEncoder.encode(destination.id, StandardCharsets.UTF_8)
     val encodedTime = URLEncoder.encode(requestedTime, StandardCharsets.UTF_8)
     val timeParameter = if (timeMode == "arriveBy") "arriveBy" else "departAfter"
-    val accessParameters = accessLocation?.let { "&accessLat=${it.latitude}&accessLon=${it.longitude}" } ?: ""
+    val selectedAccess = accessLocation ?: origin.accessLatitude?.let { latitude -> origin.accessLongitude?.let { longitude -> DeviceLocation(latitude, longitude, 0f) } }
+    val accessParameters = selectedAccess?.let { "&accessLat=${it.latitude}&accessLon=${it.longitude}" } ?: ""
     val path = "/api/network-journeys?origin=$encodedOrigin&destination=$encodedDestination&date=$serviceDate&$timeParameter=$encodedTime&priority=$priority&maxWalkingMeters=$maximumWalkingMeters$accessParameters"
     val response = request(path)
     val journey = response.optJSONObject("journey") ?: error(response.optString("evidence", "No scheduled path found for these stops and time."))

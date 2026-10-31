@@ -133,7 +133,6 @@ private fun NammaLinkApp() {
                     when (tab) {
                         0 -> PlannerScreen(
                             onPlan = { journey -> networkJourney = journey; saved = false; restoredOffline = false; tab = 2 },
-                            onOfflineDemo = { networkJourney = null; saved = journeyPreferences.getBoolean("demo_saved", false); restoredOffline = false; tab = 2 },
                             onLocationUpdated = { deviceLocation = it },
                         )
                         1 -> AirportScreen(
@@ -151,10 +150,8 @@ private fun NammaLinkApp() {
                                 if (networkJourney != null) {
                                     if (saved) journeyPreferences.edit().remove("saved_network_journey").apply()
                                     else journeyPreferences.edit().putString("saved_network_journey", networkJourney!!.encodeForStorage()).apply()
-                                } else {
-                                    journeyPreferences.edit().putBoolean("demo_saved", !saved).apply()
                                 }
-                                saved = !saved
+                                if (networkJourney != null) saved = !saved
                             }
                         )
                         else -> OperatorScreen()
@@ -177,6 +174,7 @@ private fun AirportScreen(isKannada: Boolean, onLanguageChange: (Boolean) -> Uni
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val preferences = remember(context) { context.getSharedPreferences("journeys", Context.MODE_PRIVATE) }
+    val restoredAirport = remember { decodeStoredAirportRoute(preferences.getString("saved_airport_snapshot", null)) }
     val tr: (String, String) -> String = { en, kn -> if (isKannada) kn else en }
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
         ScreenHeader(tr("Airport Mode", "ವಿಮಾನ ನಿಲ್ದಾಣ ಮೋಡ್"), tr("Kempegowda, connected.", "ಕೆಂಪೇಗೌಡಕ್ಕೆ ಸಂಪರ್ಕ."), tr("Direction-correct Vayu Vajra schedules from the dated static BMTC feed.", "ದಿನಾಂಕಿತ BMTC ಸ್ಥಿರ ವೇಳಾಪಟ್ಟಿಯಿಂದ ಸರಿಯಾದ ದಿಕ್ಕಿನ ವಾಯು ವಜ್ರ ಸೇವೆಗಳು."))
@@ -206,6 +204,12 @@ private fun AirportScreen(isKannada: Boolean, onLanguageChange: (Boolean) -> Uni
                 colors = ButtonDefaults.buttonColors(containerColor = Green),
             ) { Text(if (loading) tr("Checking schedules…", "ವೇಳಾಪಟ್ಟಿ ಪರಿಶೀಲಿಸಲಾಗುತ್ತಿದೆ…") else tr("Find airport buses", "ವಿಮಾನ ನಿಲ್ದಾಣ ಬಸ್ ಹುಡುಕಿ"), fontWeight = FontWeight.Bold) }
             StatusPill(tr("Static schedule · feed 20260907 · not live", "ಸ್ಥಿರ ವೇಳಾಪಟ್ಟಿ · ಫೀಡ್ 20260907 · ಲೈವ್ ಅಲ್ಲ"), Amber)
+            restoredAirport?.let { snapshot ->
+                OutlinedButton(
+                    onClick = { selected = snapshot.route; routes = listOf(snapshot.route) },
+                    modifier = Modifier.fillMaxWidth(),
+                ) { Text(tr("Open saved ${snapshot.route.route} snapshot", "ಉಳಿಸಿದ ${snapshot.route.route} ಸ್ನ್ಯಾಪ್‌ಶಾಟ್ ತೆರೆಯಿರಿ")) }
+            }
             error?.let { Text(it, color = Coral, fontWeight = FontWeight.Bold, fontSize = 13.sp) }
             routes.take(10).forEach { route ->
                 Card(Modifier.fillMaxWidth().clickable { selected = route }, colors = CardDefaults.cardColors(containerColor = if (selected?.id == route.id) Mint else Color.White), shape = RoundedCornerShape(14.dp)) {
@@ -218,11 +222,11 @@ private fun AirportScreen(isKannada: Boolean, onLanguageChange: (Boolean) -> Uni
             }
             selected?.let { route ->
                 val mapRides = route.stops.zipWithNext().map { (from, to) -> NetworkRide(route.route, "BMTC", "bus", route.destination.name, from.name, to.name, from.departure, to.departure, 1, 0, from.lat, from.lon, to.lat, to.lon) }
-                RouteMap(false, route.origin.name, route.destination.name, mapRides, deviceLocation)
+                InteractiveRouteMap(route.origin.name, route.destination.name, mapRides, deviceLocation)
                 Text("${route.stops.size} ${tr("verified stops", "ಪರಿಶೀಲಿಸಿದ ನಿಲ್ದಾಣಗಳು")}", color = Ink, fontWeight = FontWeight.ExtraBold)
                 route.stops.forEach { stop -> ItineraryCard(stop.departure, stop.name, tr("Scheduled stop time", "ವೇಳಾಪಟ್ಟಿಯ ನಿಲ್ದಾಣ ಸಮಯ"), "", Green) }
                 Text(route.minimumFare?.let { minimum -> tr("GTFS published fare range ₹$minimum–₹${route.maximumFare}. Confirm the applicable current fare in the official app.", "GTFS ಪ್ರಕಟಿತ ದರ ₹$minimum–₹${route.maximumFare}. ಪ್ರಸ್ತುತ ದರವನ್ನು ಅಧಿಕೃತ ಆಪ್‌ನಲ್ಲಿ ದೃಢೀಕರಿಸಿ.") } ?: tr("Current fare unavailable. The 2025 PDF is historical and is not presented as current.", "ಪ್ರಸ್ತುತ ದರ ಲಭ್ಯವಿಲ್ಲ. 2025ರ PDF ಐತಿಹಾಸಿಕವಾಗಿದೆ."), color = Muted, fontSize = 12.sp)
-                OutlinedButton(onClick = { preferences.edit().putString("saved_airport_route", route.id).putLong("saved_airport_at", System.currentTimeMillis()).apply() }, modifier = Modifier.fillMaxWidth()) { Text(tr("Save airport route offline", "ವಿಮಾನ ಮಾರ್ಗವನ್ನು ಆಫ್‌ಲೈನ್ ಉಳಿಸಿ")) }
+                OutlinedButton(onClick = { preferences.edit().putString("saved_airport_snapshot", route.encodeForStorage()).apply() }, modifier = Modifier.fillMaxWidth()) { Text(tr("Save complete route snapshot", "ಸಂಪೂರ್ಣ ಮಾರ್ಗ ಸ್ನ್ಯಾಪ್‌ಶಾಟ್ ಉಳಿಸಿ")) }
                 Button(onClick = { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=com.bmtc.bmtcavls.two"))) }, modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.buttonColors(containerColor = Green)) { Text(tr("Open official Namma BMTC", "ಅಧಿಕೃತ ನಮ್ಮ BMTC ತೆರೆಯಿರಿ")) }
                 Text(tr("Official external handoff. BMTC manages payment and tickets; NammaLink records no conversion.", "ಅಧಿಕೃತ ಹೊರಗಿನ ಸಂಪರ್ಕ. ಪಾವತಿ ಮತ್ತು ಟಿಕೆಟ್‌ಗಳನ್ನು BMTC ನಿರ್ವಹಿಸುತ್ತದೆ; ನಮ್ಮಲಿಂಕ್ ಪರಿವರ್ತನೆಯನ್ನು ದಾಖಲಿಸುವುದಿಲ್ಲ."), color = Muted, fontSize = 11.sp)
             }
@@ -242,15 +246,14 @@ private fun ScreenHeader(kicker: String, title: String, subtitle: String) {
 }
 
 @Composable
-private fun PlannerScreen(onPlan: (NetworkJourney) -> Unit, onOfflineDemo: () -> Unit, onLocationUpdated: (DeviceLocation) -> Unit) {
+private fun PlannerScreen(onPlan: (NetworkJourney) -> Unit, onLocationUpdated: (DeviceLocation) -> Unit) {
     var from by rememberSaveable { mutableStateOf("Kempegowda Bus Station") }
     var to by rememberSaveable { mutableStateOf("Central Silk Board") }
     var timeMode by rememberSaveable { mutableStateOf("Depart after") }
     var requestedTime by rememberSaveable { mutableStateOf("08:00") }
     var ranking by rememberSaveable { mutableStateOf("Safest") }
-    var maxWalk by rememberSaveable { mutableStateOf("Flexible") }
-    var origin by remember { mutableStateOf(StopOption("20921", "Kempegowda Bus Station", 12.98, 77.57)) }
-    var destination by remember { mutableStateOf(StopOption("20707", "Central Silk Board", 12.92, 77.62)) }
+    var origin by remember { mutableStateOf(StopOption("35931", "Kempegowda Bus Station (Majestic/KBS)", 12.97793, 77.57389)) }
+    var destination by remember { mutableStateOf(StopOption("20707", "Central Silk Board", 12.91803, 77.62355)) }
     var suggestions by remember { mutableStateOf(emptyList<StopOption>()) }
     var nearby by remember { mutableStateOf(emptyList<StopOption>()) }
     var currentFix by remember { mutableStateOf<DeviceLocation?>(null) }
@@ -276,7 +279,12 @@ private fun PlannerScreen(onPlan: (NetworkJourney) -> Unit, onOfflineDemo: () ->
         runCatching { withContext(Dispatchers.IO) { checkBackendHealth() } }
             .onSuccess { health ->
                 backendState = "ready"
-                backendDetail = "Service ready · API ${health.version} · ${health.revision.take(7)}"
+                val maps = listOfNotNull(
+                    "geocoding".takeIf { health.geocoding },
+                    "walking routes".takeIf { health.walkingRoutes },
+                    "Places".takeIf { health.autocomplete },
+                ).joinToString(" + ").ifBlank { "stop search" }
+                backendDetail = "Service ready · API ${health.version} · ${health.revision.take(7)} · $maps"
             }
             .onFailure { failure ->
                 backendState = "unavailable"
@@ -289,7 +297,7 @@ private fun PlannerScreen(onPlan: (NetworkJourney) -> Unit, onOfflineDemo: () ->
         if (activeField.isBlank() || activeQuery.length < 2) { suggestions = emptyList(); return@LaunchedEffect }
         delay(300)
         if (backendState != "ready") { suggestions = emptyList(); return@LaunchedEffect }
-        suggestions = runCatching { withContext(Dispatchers.IO) { searchNetworkStops(activeQuery) } }
+        suggestions = runCatching { withContext(Dispatchers.IO) { searchPassengerLocations(activeQuery) } }
             .onFailure { error = it.userMessage() }
             .getOrElse { emptyList() }
     }
@@ -353,18 +361,12 @@ private fun PlannerScreen(onPlan: (NetworkJourney) -> Unit, onOfflineDemo: () ->
                     FilterChip(selected = ranking == choice, onClick = { ranking = choice }, label = { Text(choice) })
                 }
             }
-            Text("Walking preference", fontWeight = FontWeight.Bold, color = Ink)
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                listOf("Flexible", "800 m", "1.5 km").forEach { choice ->
-                    FilterChip(selected = maxWalk == choice, onClick = { maxWalk = choice }, label = { Text(choice) })
-                }
-            }
             Button(
                 onClick = {
                     if (origin.id.isBlank() || destination.id.isBlank()) { error = "Select both stops from the verified suggestions."; return@Button }
                     planning = true; error = null
                     scope.launch {
-                        val maximumWalkingMeters = when (maxWalk) { "800 m" -> 800; "1.5 km" -> 1_500; else -> 100_000 }
+                        val maximumWalkingMeters = 100_000
                         val priorityValue = ranking.lowercase()
                         val timeModeValue = if (timeMode == "Arrive by") "arriveBy" else "departAfter"
                         val accessLocation = currentFix.takeIf { origin.distanceMeters != null }
@@ -380,8 +382,7 @@ private fun PlannerScreen(onPlan: (NetworkJourney) -> Unit, onOfflineDemo: () ->
                 shape = RoundedCornerShape(14.dp)
             ) { Text(if (planning) "Scanning the schedule…" else "Plan across bus + Metro", fontWeight = FontWeight.Bold) }
             error?.let { Text(it, color = Coral, fontWeight = FontWeight.Bold, fontSize = 13.sp) }
-            OutlinedButton(onClick = onOfflineDemo, modifier = Modifier.fillMaxWidth()) { Text("Open bounded offline demonstration") }
-            Text("Walking is guidance, not a mandatory rejection rule. Choose a preference only when you want a stricter limit. Safest applies a three-minute interchange buffer; Fastest removes that extra buffer; Direct permits one transit ride.", color = Muted, fontSize = 12.sp)
+            Text("Walking is guidance, not a mandatory rejection rule. Safest applies a three-minute interchange buffer; Fastest removes that extra buffer; Direct permits one transit ride.", color = Muted, fontSize = 12.sp)
             Spacer(Modifier.height(16.dp))
         }
     }
@@ -396,6 +397,7 @@ private fun StopSuggestions(stops: List<StopOption>, onSelect: (StopOption) -> U
                     Text(stop.name, fontWeight = FontWeight.Bold, color = Ink)
                     val distance = stop.distanceMeters?.let { " · ${it} m away" } ?: ""
                     Text("${stop.agency} ${stop.mode} stop ${stop.id.removePrefix("metro:")}$distance", color = Muted, fontSize = 11.sp)
+                    stop.placeLabel?.let { Text("Access from $it", color = Green, fontSize = 11.sp) }
                 }
             }
         }
@@ -410,7 +412,7 @@ private fun JourneyScreen(networkJourney: NetworkJourney?, deviceLocation: Devic
         Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
             ScreenHeader("Full-network schedule", "Arrive at ${networkJourney.arrival}.", "Depart ${networkJourney.departure} · ${networkJourney.transfers} transfer${if (networkJourney.transfers == 1) "" else "s"} · static BMTC + BMRCL feeds")
             Column(Modifier.padding(horizontal = 20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                StatusPill("${networkJourney.priority.replaceFirstChar { it.uppercase() }} contract · ${networkJourney.walkingMeters}/${networkJourney.maximumWalkingMeters} m walk · ${if (restoredOffline) "restored offline" else "${networkJourney.queryMilliseconds.toInt()} ms"}", Green)
+                StatusPill("${networkJourney.priority.replaceFirstChar { it.uppercase() }} · ${networkJourney.walkingMeters} m walking · ${if (restoredOffline) "restored offline" else "${networkJourney.queryMilliseconds.toInt()} ms"}", Green)
                 if (networkJourney.timeMode == "arriveBy") {
                     StatusPill("Deadline ${networkJourney.requestedTime} met · latest start ${networkJourney.latestStart}", Green)
                 }
@@ -418,7 +420,10 @@ private fun JourneyScreen(networkJourney: NetworkJourney?, deviceLocation: Devic
                 Card(colors = CardDefaults.cardColors(containerColor = Color.White), shape = RoundedCornerShape(18.dp)) {
                     Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                         Text(networkJourney.recommendationTitle, fontWeight = FontWeight.Bold, color = Ink)
-                        networkJourney.recommendationReasons.forEach { reason -> Text("• $reason", color = Muted, fontSize = 12.sp) }
+                        networkJourney.recommendationReasons.forEach { reason ->
+                            val passengerReason = if (reason.contains("walking stays within", ignoreCase = true)) "${networkJourney.walkingMeters} m total walking is included across this journey." else reason
+                            Text("• $passengerReason", color = Muted, fontSize = 12.sp)
+                        }
                         Text("Reasoning uses the indexed static timetable and selected journey contract; it is not a live-delay prediction.", color = Muted, fontSize = 11.sp)
                     }
                 }
@@ -437,11 +442,11 @@ private fun JourneyScreen(networkJourney: NetworkJourney?, deviceLocation: Devic
                                     Text("${alternative.departure}–${alternative.arrival} · ${alternative.durationMinutes} min · ${alternative.scheduledWaitingMinutes} min wait · ${alternative.transfers} change${if (alternative.transfers == 1) "" else "s"} · ${alternative.walkingMeters} m walk", color = Muted, fontSize = 12.sp)
                                 }
                             }
-                            Text("Tap a returned contract to show its complete itinerary. Every row uses the same indexed timetable and walking limit.", color = Muted, fontSize = 11.sp)
+                            Text("Tap a returned option to show its complete itinerary. Every row uses the same indexed timetable.", color = Muted, fontSize = 11.sp)
                         }
                     }
                 }
-                RouteMap(false, networkJourney.origin, networkJourney.destination, networkJourney.rides, deviceLocation)
+                InteractiveRouteMap(networkJourney.origin, networkJourney.destination, networkJourney.rides, deviceLocation)
                 networkJourney.rides.forEachIndexed { index, ride ->
                     val waitingMinutes = networkJourney.waitBeforeRideMinutes(index)
                     if (waitingMinutes > 0) {
@@ -471,20 +476,10 @@ private fun JourneyScreen(networkJourney: NetworkJourney?, deviceLocation: Devic
         return
     }
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
-        ScreenHeader("Journey contract", if (disrupted) "Recovery is ready." else "You can make 09:35.", if (disrupted) "Your completed leg is preserved; only the remaining journey changed." else "Scheduled arrival 09:18 · 17-minute safety margin")
+        ScreenHeader("Your journey", "No saved journey yet.", "Plan a real bus or Metro journey, then save its schedule and instructions for low-connectivity access.")
         Column(Modifier.padding(horizontal = 20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            StatusPill(if (disrupted) "Deadline at risk · arrive 09:42" else "Verified against static GTFS schedule", if (disrupted) Coral else Green)
-            RouteMap(disrupted, "Majestic", "Silk Board")
-            ItineraryCard("08:20", "Majestic", "Walk 240 m to Kempegowda Bus Station", "6 min", Green)
-            ItineraryCard("08:28", if (disrupted) "Take route 500-D" else "Take route 365", if (disrupted) "Board from platform 12 · recovery option" else "Kempegowda Bus Station → Corporation", "24 min", if (disrupted) Coral else Green)
-            ItineraryCard("08:55", "Transfer at Corporation", "8-minute protected connection · platform evidence unavailable", "8 min", Amber)
-            ItineraryCard("09:03", "Take route 356-M", "Corporation → Silk Board", "15 min", Green)
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                OutlinedButton(onClick = onSave, modifier = Modifier.weight(1f)) { Text(if (saved) "Saved ✓" else "Save offline") }
-                OutlinedButton(onClick = { disrupted = !disrupted }, modifier = Modifier.weight(1f)) { Text(if (disrupted) "Clear demo" else "Simulate disruption") }
-            }
-            Text("Demonstration incident data is explicitly simulated. It never masquerades as a live authority alert.", color = Muted, fontSize = 12.sp)
-            Spacer(Modifier.height(16.dp))
+            StatusPill("No mock journey is shown", Amber)
+            Text("Use the Plan tab to request current production schedule data.", color = Muted, fontSize = 13.sp)
         }
     }
 }
