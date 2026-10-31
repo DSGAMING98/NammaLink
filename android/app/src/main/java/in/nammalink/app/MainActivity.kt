@@ -204,7 +204,7 @@ private fun AirportScreen(isKannada: Boolean, onLanguageChange: (Boolean) -> Uni
                 modifier = Modifier.fillMaxWidth().height(54.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Green),
             ) { Text(if (loading) tr("Checking schedules…", "ವೇಳಾಪಟ್ಟಿ ಪರಿಶೀಲಿಸಲಾಗುತ್ತಿದೆ…") else tr("Find airport buses", "ವಿಮಾನ ನಿಲ್ದಾಣ ಬಸ್ ಹುಡುಕಿ"), fontWeight = FontWeight.Bold) }
-            StatusPill(tr("Location-ranked KIA schedules · not live vehicle tracking", "ಸ್ಥಳ ಆಧಾರಿತ KIA ವೇಳಾಪಟ್ಟಿ · ಲೈವ್ ವಾಹನ ಟ್ರ್ಯಾಕಿಂಗ್ ಅಲ್ಲ"), Amber)
+            StatusPill(tr("Scheduled KIA services · ranked by distance", "ನಿಗದಿತ KIA ಸೇವೆಗಳು · ದೂರದ ಆಧಾರದ ಮೇಲೆ"), Amber)
             restoredAirport?.let { snapshot ->
                 OutlinedButton(
                     onClick = { selected = snapshot.route; routes = listOf(snapshot.route) },
@@ -463,7 +463,7 @@ private fun JourneyScreen(networkJourney: NetworkJourney?, deviceLocation: Devic
                             val passengerReason = if (reason.contains("walking stays within", ignoreCase = true)) "${networkJourney.walkingMeters} m total walking is included across this journey." else reason
                             Text("• $passengerReason", color = Muted, fontSize = 12.sp)
                         }
-                        Text("Reasoning uses the indexed static timetable and selected journey contract; it is not a live-delay prediction.", color = Muted, fontSize = 11.sp)
+                        Text("Based on published schedules and your selected journey preferences.", color = Muted, fontSize = 11.sp)
                     }
                 }
                 if (networkJourney.alternatives.isNotEmpty()) {
@@ -507,8 +507,8 @@ private fun JourneyScreen(networkJourney: NetworkJourney?, deviceLocation: Devic
                 }
                 OutlinedButton(onClick = onSave, modifier = Modifier.fillMaxWidth()) { Text(if (saved) "Saved ✓" else "Save offline") }
                 StatusPill(compassHeading?.let { "Compass $it° · sensor guidance only" } ?: "Compass unavailable · continue with the saved itinerary", LocationBlue)
-                Text(if (restoredOffline) "Saved schedule snapshot restored locally. Replan online before travel to check for a newer schedule." else "Schedule-only result. It does not use live vehicle positions, observed delay, or a trained prediction model.", color = Muted, fontSize = 12.sp)
-                Text("Last-known GPS is not live tracking. Satellite map tiles require network unless separately licensed and downloaded; this app does not claim satellite communication.", color = Muted, fontSize = 11.sp)
+                Text(if (restoredOffline) "Saved itinerary restored. Replan online before travel for the latest schedule." else "Scheduled service information. Check the operator app for live service updates.", color = Muted, fontSize = 12.sp)
+                Text("Map and location guidance may require an internet connection.", color = Muted, fontSize = 11.sp)
                 Spacer(Modifier.height(16.dp))
             }
         }
@@ -517,8 +517,8 @@ private fun JourneyScreen(networkJourney: NetworkJourney?, deviceLocation: Devic
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
         ScreenHeader("Your journey", "No saved journey yet.", "Plan a real bus or Metro journey, then save its schedule and instructions for low-connectivity access.")
         Column(Modifier.padding(horizontal = 20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            StatusPill("No mock journey is shown", Amber)
-            Text("Use the Plan tab to request current production schedule data.", color = Muted, fontSize = 13.sp)
+            StatusPill("Ready when you are", Amber)
+            Text("Use the Plan tab to create your bus and Metro itinerary.", color = Muted, fontSize = 13.sp)
         }
     }
 }

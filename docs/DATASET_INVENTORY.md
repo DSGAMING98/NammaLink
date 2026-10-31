@@ -53,5 +53,5 @@ Before accepting a new dataset:
 
 ## Current discovery decision
 
-No additional large download is justified before the existing BMTC and BMRCL feeds are normalized and routed. Priority gaps are an authorized realtime source, KSRTC data, and labelled historical delays; none should block the schedule-based prototype.
+Priority data gaps are an authorized realtime source, KSRTC coverage, and labelled historical delays. Core schedule routing continues to use the validated BMTC and BMRCL feeds.
 

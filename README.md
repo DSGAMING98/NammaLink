@@ -74,8 +74,8 @@ The installable APK is compiled against the production HTTPS service and has bee
 - Download: [NammaLink Android APK](https://nammalink.vercel.app/downloads/NammaLink-0.1.0.apk)
 - Minimum Android version: Android 8.0 / API 26
 - Package: `in.nammalink.app.presentation`
-- Size: 8,566,697 bytes
-- SHA-256: `D990EAEF5F2C0FF19B705FE3F5D77837231059138DA07393F0612351338E744B`
+- Size: 8,566,693 bytes (8.17 MiB)
+- SHA-256: `1661DAED425E05E1D9589D8EF79A78953664423ECE242F559D6D634187A7D578`
 - Signing: Android debug certificate; suitable for evaluation and internal distribution, not an app-store release
 
 Build locally:
@@ -93,7 +93,7 @@ $env:JAVA_HOME = 'C:\Path\To\JDK'
   -PNAMMALINK_API_BASE_URL=https://nammalink.vercel.app
 ```
 
-Debug builds may use `http://127.0.0.1:3000` with `adb reverse`. Presentation and release builds reject HTTP, loopback, emulator-only, private-network, and placeholder endpoints. Cleartext network traffic is disabled for distributable builds. Store signing requirements are documented in [Android Release](docs/ANDROID_RELEASE.md).
+Debug builds may use `http://127.0.0.1:3000` with `adb reverse`. Distributable builds reject HTTP, loopback, emulator-only, private-network, and placeholder endpoints. Cleartext network traffic is disabled. Store signing requirements are documented in [Android Release](docs/ANDROID_RELEASE.md).
 
 ## Architecture
 
@@ -224,7 +224,7 @@ The current engineering baseline passes:
 - Tracked-file secret hygiene scanning.
 - Next.js production and standalone-service builds.
 - Public health, stop-search, journey, geocoding, walking-route, and APK checksum smoke tests.
-- Android debug and HTTPS presentation builds.
+- Android debug and installable HTTPS builds.
 - Physical-device service-ready, autocomplete, journey-planning, offline, and no-network-tunnel checks.
 - Fatal exception and ANR log scans.
 
@@ -236,7 +236,7 @@ Continuous verification runs through [GitHub Actions](https://github.com/DSGAMIN
 - A CI secret-hygiene gate scans tracked files.
 - API inputs are schema-validated and numerically bounded.
 - Security headers restrict framing, MIME sniffing, referrer leakage, and unnecessary browser permissions.
-- Presentation and release Android builds require public HTTPS endpoints.
+- Distributable Android builds require public HTTPS endpoints.
 - Location is requested only after explicit user action and remains session-local; no location is sent to a ticketing partner.
 - Saved journeys remain on the device.
 - API responses are excluded from service-worker caching.
@@ -249,9 +249,7 @@ Continuous verification runs through [GitHub Actions](https://github.com/DSGAMIN
 - [Deployment](docs/DEPLOYMENT.md)
 - [Android Release](docs/ANDROID_RELEASE.md)
 - [Evaluation Results](docs/EVALUATION_RESULTS.md)
-- [Implementation Status](docs/IMPLEMENTATION_STATUS.md)
 - [ML Training Report](docs/ML_TRAINING_REPORT.md)
-- [Project Audit](docs/PROJECT_AUDIT.md)
 
 ## Licence
 

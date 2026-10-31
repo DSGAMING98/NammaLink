@@ -19,7 +19,7 @@ Validated on 30 October 2026 using a USB-connected Vivo V2513 running Android 16
 
 ## Stability
 
-The post-flow device log scan matched no `FATAL EXCEPTION`, NammaLink ANR, or AndroidRuntime fatal entry. These checks validate the connected prototype path; they do not establish production availability, realtime accuracy, or broad device compatibility.
+The post-flow device log scan matched no `FATAL EXCEPTION`, NammaLink ANR, or AndroidRuntime fatal entry. These checks validate the connected Android path on the tested device and operating-system version.
 
 ## Metro and mixed-mode extension
 

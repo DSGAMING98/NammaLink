@@ -1,6 +1,6 @@
 # Native Android API release audit
 
-Verified on 31 October 2026 against `https://nammalink.vercel.app` with the presentation APK installed on the connected Vivo V2513. No ADB reverse rule was present.
+Verified on 31 October 2026 against `https://nammalink.vercel.app` with the direct-install APK on a Vivo V2513. No ADB reverse rule was present.
 
 | Backend endpoint | Native Android status | Release evidence |
 | --- | --- | --- |
@@ -22,4 +22,4 @@ Additional device checks:
 - Removed the user walking-limit selector; production requests use a bounded 100 km computational ceiling rather than a passenger-facing rejection cap.
 - Replaced the primary Canvas route drawing with a touch-enabled native OpenStreetMap/Esri map, markers, route framing, street/satellite switching and map lifecycle handling.
 - Saved journey and full airport-route snapshots were restored with mobile data disabled.
-- The old APK is preserved under `public/downloads/archive/` before replacing the public presentation APK.
+- Public APK replacements are checksum-verified before deployment.

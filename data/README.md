@@ -1,4 +1,4 @@
-# Committed demonstration data
+# Reference network data
 
 `demo-network.json` is a bounded derivative of the community BMTC GTFS feed published by [Vonter](https://github.com/Vonter/bmtc-gtfs). It contains only routes `8931`, `2704`, and `8950`, their 53 trips, 216 referenced stops, and 1,343 stop-time records. The source snapshot is version `20260907`, valid from 7 September 2026 through 7 September 2027.
 

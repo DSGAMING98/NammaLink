@@ -26,18 +26,18 @@ Invoke-RestMethod "$origin/api/stops?q=Majestic&limit=5"
 Invoke-RestMethod "$origin/api/network-journeys?origin=20921&destination=20707&date=2026-10-30&departAfter=08%3A00&priority=safest&maxWalkingMeters=800"
 ```
 
-Then create the installable presentation APK:
+Then create the direct-install APK:
 
 ```powershell
 Set-Location android
 .\gradlew.bat :app:assemblePresentation -PNAMMALINK_API_BASE_URL=https://your-host
 ```
 
-That build fails unless the origin is public HTTPS. Cleartext traffic is disabled in presentation/release manifests. `debug` is the only variant allowed to use `127.0.0.1` with `adb reverse`.
+That build fails unless the origin is public HTTPS. Cleartext traffic is disabled in distributable manifests. `debug` is the only variant allowed to use `127.0.0.1` with `adb reverse`.
 
 ## Current production deployment
 
-The Git-connected Vercel project `nammalink` (`prj_hDHPsaFmt2af4neb8s8bO5vaXjt6`) is deployed under the personal `dsgaming98` account at `https://nammalink.vercel.app`. Production deployment `dpl_AGv3WmmXkYTuJ6u3GeLKh7jHmFXV` built commit `896bbfc4d120964af0d8fe8005c1ca81613fbf9d` and reached `READY`. Unauthenticated HTTPS checks passed for `/api/health`, stop search, and a real indexed 08:00–08:50 journey. The presentation APK was then built against that origin and passed physical Vivo testing with no ADB reverse rule.
+The Git-connected Vercel project `nammalink` is deployed under the personal `dsgaming98` account at `https://nammalink.vercel.app`. The deployed revision is reported by `/api/health`. Public HTTPS checks cover service health, stop search, journey planning and the downloadable APK. The direct-install Android build is compiled against that origin and tested on a physical Vivo without an ADB reverse rule.
 
 The Vercel connector can create and inspect deployments in this personal scope, but its runtime-error aggregation endpoint returned HTTP 403 for this project. Public API responses and Android logcat were clean; deeper Vercel observability still requires that connector permission.
 

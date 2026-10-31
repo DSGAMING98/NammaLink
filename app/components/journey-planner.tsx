@@ -208,7 +208,7 @@ export function JourneyPlanner() {
             <button className="queueButton" type="button" onClick={queueCurrentReport} disabled={reportQueued}>
               {reportQueued ? "Report queued on this device" : "Queue report for reconnection"}
             </button>
-            <small className="queueNote">Local only. Nothing is uploaded by this prototype.</small>
+            <small className="queueNote">Stored on this device only. Nothing is uploaded.</small>
           </article>
         )}
         {result && <p className="resultProvenance">{result.network.source} · feed {result.network.version} · {result.diagnostics.exploredBoardings} boardings evaluated</p>}

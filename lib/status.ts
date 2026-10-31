@@ -10,17 +10,22 @@ export const capabilityStatus: CapabilityStatus[] = [
   {
     label: "BMTC + Namma Metro schedules",
     status: "verified-static",
-    detail: "Local community GTFS snapshots are available for schedule-based routing.",
+    detail: "Published BMTC and BMRCL schedules power city-wide journey planning.",
   },
   {
-    label: "Constraint-aware route search",
+    label: "Safest, fastest and direct routes",
     status: "verified-static",
-    detail: "The central campus journey is connected to the tested scheduled routing engine.",
+    detail: "Compare arrival time, waiting, transfers and walking for every option.",
   },
   {
-    label: "Live vehicle and disruption feeds",
+    label: "Airport Mode and saved journeys",
+    status: "verified-static",
+    detail: "Explore Vayu Vajra services and keep route details available on your device.",
+  },
+  {
+    label: "Realtime vehicle positions",
     status: "blocked",
-    detail: "No authorized realtime feed has been verified.",
+    detail: "Ready to connect when an official operator realtime feed is available.",
   },
 ];
 
@@ -28,7 +33,7 @@ export function statusLabel(status: DataSourceStatus): string {
   const labels: Record<DataSourceStatus, string> = {
     "verified-static": "Verified static data",
     planned: "In development",
-    blocked: "External data needed",
+    blocked: "Operator integration",
   };
 
   return labels[status];

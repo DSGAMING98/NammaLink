@@ -14,8 +14,8 @@ export function OperatorInsights() {
     <section className="insightsSection" id="insights">
       <div className="sectionHeading">
         <p className="eyebrow">Transit operations insights</p>
-        <h2>Schedule evidence, without fake utilization claims.</h2>
-        <p>This bounded view shows planned service supply. It does not measure passenger load, vehicle occupancy, dispatch adherence, or actual fleet efficiency.</p>
+        <h2>Understand scheduled service across the network.</h2>
+        <p>Explore planned trips, service spans and route frequency across the published timetable.</p>
       </div>
       <div className="insightTotals">
         <div><strong>{insights.totalTrips}</strong><span>scheduled trips</span></div>
@@ -53,7 +53,7 @@ export function OperatorInsights() {
           </div>
         ))}
       </div>
-      <p className="insightNote">BMTC {fullNetwork.feedVersions.BMTC} + BMRCL {fullNetwork.feedVersions.BMRCL} community GTFS · {fullNetwork.plausibilityGate.rejectedConnections.toLocaleString("en-IN")} implausible connections excluded · zero trained ML models</p>
+      <p className="insightNote">BMTC {fullNetwork.feedVersions.BMTC} + BMRCL {fullNetwork.feedVersions.BMRCL} community GTFS · schedule coverage shown for planning and network analysis</p>
     </section>
   );
 }

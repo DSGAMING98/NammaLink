@@ -57,7 +57,7 @@ The committed index contains 61,115 scheduled trips, 1,563,324 admitted connecti
 
 The mixed result demonstrates exact reconstruction of ride and walking segments. Transfer walking is great-circle distance at 1.25 m/s between stops no more than 250 m apart; it is not claimed as accessible or pedestrian-network-valid geometry.
 
-Arrive-by performance includes repeated forward scans rather than one scan. It is measured local prototype evidence, not a hosted latency objective or a claim about realtime punctuality.
+Arrive-by performance includes repeated forward scans rather than one scan. The result is a local routing benchmark and does not measure realtime punctuality.
 
 ## Simulated recovery result
 
@@ -123,4 +123,4 @@ These values describe static schedule records only. They do not measure occupanc
 - A 5 km final walk is rejected by an 800 m hard limit, but actual walking geometry is not yet available.
 - The result uses static schedules and cannot account for cancellation, congestion, or vehicle delay.
 - No labelled arrival observations exist, so MAE/RMSE and delay-model improvement cannot be measured.
-- Arbitrary-coordinate access/egress, pedestrian geometry, fares, accessibility constraints, realtime state, and KSRTC remain outside this checkpoint.
+- Arbitrary-coordinate access/egress, pedestrian geometry, accessibility constraints, realtime state, and KSRTC remain outside the current release.

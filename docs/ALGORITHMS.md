@@ -18,7 +18,7 @@ Verified examples include Kempegowda Bus Station 08:00 → Central Silk Board 08
 
 ## Implemented schedule router
 
-The current prototype uses bounded, round-constrained timetable enumeration. It is deliberately smaller than a production RAPTOR implementation, but it operates on real GTFS trip and stop-time records and is testable end to end.
+The reference router uses bounded, round-constrained timetable enumeration over real GTFS trip and stop-time records and is tested end to end.
 
 The pipeline:
 

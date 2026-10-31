@@ -116,7 +116,6 @@ android {
         create("presentation") {
             initWith(getByName("release"))
             applicationIdSuffix = ".presentation"
-            versionNameSuffix = "-presentation"
             signingConfig = signingConfigs.getByName("debug")
             buildConfigField("String", "API_BASE_URL", "\"$escapedProductionApiBaseUrl\"")
             buildConfigField("boolean", "IS_PRESENTATION_BUILD", "true")

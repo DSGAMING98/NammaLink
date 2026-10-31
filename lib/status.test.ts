@@ -5,7 +5,7 @@ describe("project capability status", () => {
   it("uses explicit labels for every evidence state", () => {
     expect(statusLabel("verified-static")).toBe("Verified static data");
     expect(statusLabel("planned")).toBe("In development");
-    expect(statusLabel("blocked")).toBe("External data needed");
+    expect(statusLabel("blocked")).toBe("Operator integration");
   });
 
   it("does not label blocked capabilities as verified", () => {

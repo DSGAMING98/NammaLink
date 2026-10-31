@@ -5,6 +5,7 @@
 
 # Planned Next.js build and dependencies.
 node_modules/
+AGENTS.md
 .next/
 out/
 coverage/

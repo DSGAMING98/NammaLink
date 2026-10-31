@@ -1,5 +1,4 @@
 import { capabilityStatus, statusLabel } from "@/lib/status";
-import { JourneyPlanner } from "@/app/components/journey-planner";
 import { OperatorInsights } from "@/app/components/operator-insights";
 import { MobilityExperience } from "@/app/components/mobility-experience";
 
@@ -12,7 +11,7 @@ export default function HomePage() {
           <span>NammaLink</span>
         </a>
         <div className="topbarLinks">
-          <a href="#journey">Plan journey</a>
+          <a href="#mobility">Plan journey</a>
           <a href="#android">Android app</a>
           <a href="#evidence">Data evidence</a>
           <span className="locationPill"><span aria-hidden="true">●</span> Bengaluru</span>
@@ -28,12 +27,23 @@ export default function HomePage() {
             from first mile to last.
           </p>
           <div className="heroActions">
-            <a className="primaryButton" href="#journey">Plan a journey</a>
+            <a className="primaryButton" href="#mobility">Plan a journey</a>
             <span className="madeForBengaluru"><span aria-hidden="true">●</span> Made for Bengaluru, with care.</span>
           </div>
         </div>
 
-        <JourneyPlanner />
+        <div className="plannerWrap">
+          <div className="journeyPanel">
+            <p className="smallLabel">One Bengaluru journey</p>
+            <h2>Bus, Metro and Airport</h2>
+            <div className="routeLine" aria-label="NammaLink journey modes">
+              <span className="routeDot originDot" /><div><small>START</small><strong>Your live location</strong><span>Find nearby verified stops</span></div>
+              <span className="routeStem" aria-hidden="true" />
+              <span className="routeDot destinationDot" /><div><small>ARRIVE</small><strong>Your destination</strong><span>Compare safest, fastest and direct routes</span></div>
+            </div>
+            <a className="primaryButton" href="#mobility">Open journey planner</a>
+          </div>
+        </div>
       </section>
 
       <section className="principleStrip" aria-label="Product principles">
@@ -48,26 +58,26 @@ export default function HomePage() {
 
       <section className="downloadSection" id="android">
         <div>
-          <p className="eyebrow">Native Android · presentation build</p>
-          <h2>Take the journey contract onto your phone.</h2>
+          <p className="eyebrow">Native Android app</p>
+          <h2>Take NammaLink with you.</h2>
           <p>
-            This is the physically tested Kotlin/Jetpack Compose preview—not a WebView. It includes the bounded offline
-            demonstration and connects to the verified public NammaLink backend over HTTPS. Android may ask you to allow installs
+            Built with Kotlin and Jetpack Compose, the app includes live-location planning, saved journeys,
+            Airport Mode and full-screen route maps. Android may ask you to allow installs
             from your browser or file manager.
           </p>
-          <p className="downloadHash"><strong>SHA-256</strong> 3D2364081AAF309A54E0A380D21467688CA4F39CA5DAA746773A0EE8CAC368B1</p>
+          <p className="downloadHash"><strong>SHA-256</strong> 1661DAED425E05E1D9589D8EF79A78953664423ECE242F559D6D634187A7D578</p>
         </div>
         <div className="downloadActions">
-          <a className="primaryButton" href="/downloads/NammaLink-0.1.0.apk" download>Download APK · 7.7 MB</a>
-          <span>Version 0.1.0-presentation · HTTPS backend · debug certificate · Android 8+</span>
+          <a className="primaryButton" href="/downloads/NammaLink-0.1.0.apk" download>Download APK · 8.2 MB</a>
+          <span>Version 0.1.0 · Secure HTTPS service · Android 8+</span>
         </div>
       </section>
 
       <section className="evidenceSection" id="evidence">
         <div className="sectionHeading">
-          <p className="eyebrow">Evidence before claims</p>
-          <h2>Built around what the data can actually support.</h2>
-          <p>Every ETA and alert will carry a source label. Scheduled data is never presented as live tracking.</p>
+          <p className="eyebrow">Built for Bengaluru</p>
+          <h2>Useful information, clearly sourced.</h2>
+          <p>Journey times and service details include their data source and update context.</p>
         </div>
 
         <div className="statusGrid">
@@ -84,7 +94,7 @@ export default function HomePage() {
 
       <footer>
         <div><strong>NammaLink</strong><span>Bengaluru public transport planning</span></div>
-        <p>Scheduled journey planning with explicit evidence boundaries</p>
+        <p>Bus, Metro and airport journey planning across Bengaluru</p>
       </footer>
     </main>
   );

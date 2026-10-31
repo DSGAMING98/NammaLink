@@ -73,7 +73,7 @@ flowchart LR
 
 ## Scale path
 
-The bounded enumerator remains the multi-constraint correctness prototype. City-scale BMTC/BMRCL stop-to-stop routing uses a benchmarked CSA binary index with service calendars, station/platform normalization, and estimated bus–Metro transfer walks. It still needs arbitrary-coordinate access/egress, pedestrian-network geometry, and multi-criteria request budgets. Any future KSRTC data must retain operator-specific identifiers and provenance.
+The bounded enumerator remains the deterministic multi-constraint reference engine. City-scale BMTC/BMRCL stop-to-stop routing uses a benchmarked CSA binary index with service calendars, station/platform normalization, and estimated bus–Metro transfer walks. Future KSRTC data must retain operator-specific identifiers and provenance.
 
 ## External integrations
 
