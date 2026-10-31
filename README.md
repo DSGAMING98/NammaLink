@@ -43,6 +43,8 @@ The routing network currently contains 10,043 searchable BMTC and BMRCL stops, 6
 - Arbitrary place discovery with Google Places when authorized and automatic verified-stop fallback.
 - Map-first native planning with continuous device-location updates, clean route endpoints, street/satellite layers, and an expandable full-screen route view.
 - Integrated Vayu Vajra Airport Mode with 44 direction-correct route variants, 1,101 scheduled origin departures, intermediate stops, and dated provenance.
+- Top-level Airport Mode actions for the official Namma BMTC app and Vayu Vajra phone support (`7760991269`).
+- Official Namma Metro ticket and smart-card recharge handoff from the map-first Plan screen.
 - Working English/Kannada switch, device-local language persistence, saved city/airport snapshots, and compass limitations.
 - Official Namma BMTC 2.0 ticket handoff with outbound-click evidence kept separate from conversions and hypothetical revenue.
 
