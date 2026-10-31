@@ -65,7 +65,7 @@ export default function HomePage() {
             Airport Mode and full-screen route maps. Android may ask you to allow installs
             from your browser or file manager.
           </p>
-          <p className="downloadHash"><strong>SHA-256</strong> 1661DAED425E05E1D9589D8EF79A78953664423ECE242F559D6D634187A7D578</p>
+          <p className="downloadHash"><strong>SHA-256</strong> DF5B4AB58B482619011848D3E31B08345C7F6BD0546936E929325604A7DB7C7B</p>
         </div>
         <div className="downloadActions">
           <a className="primaryButton" href="/downloads/NammaLink-0.1.0.apk" download>Download APK · 8.2 MB</a>

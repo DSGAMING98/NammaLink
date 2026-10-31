@@ -81,6 +81,12 @@ private val PurpleLine = Color(0xFF8C2877)
 private val YellowLine = Color(0xFFD6A900)
 private val LocationBlue = Color(0xFF2F6FED)
 
+private fun openOfficialApp(context: Context, packageName: String) {
+    val intent = context.packageManager.getLaunchIntentForPackage(packageName)
+        ?: Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=$packageName"))
+    context.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+}
+
 private data class RouteSupply(val route: String, val agency: String, val trips: Int, val color: Color)
 
 class MainActivity : ComponentActivity() {
@@ -180,6 +186,17 @@ private fun AirportScreen(isKannada: Boolean, onLanguageChange: (Boolean) -> Uni
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
         ScreenHeader(tr("Airport Mode", "ವಿಮಾನ ನಿಲ್ದಾಣ ಮೋಡ್"), tr("Kempegowda, connected.", "ಕೆಂಪೇಗೌಡಕ್ಕೆ ಸಂಪರ್ಕ."), tr("Direction-correct Vayu Vajra schedules from the dated static BMTC feed.", "ದಿನಾಂಕಿತ BMTC ಸ್ಥಿರ ವೇಳಾಪಟ್ಟಿಯಿಂದ ಸರಿಯಾದ ದಿಕ್ಕಿನ ವಾಯು ವಜ್ರ ಸೇವೆಗಳು."))
         Column(Modifier.padding(horizontal = 20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Button(
+                onClick = { openOfficialApp(context, "com.bmtc.bmtcavls.two") },
+                modifier = Modifier.fillMaxWidth().height(52.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Green),
+                shape = RoundedCornerShape(14.dp),
+            ) { Text(tr("Open official Namma BMTC", "ಅಧಿಕೃತ ನಮ್ಮ BMTC ತೆರೆಯಿರಿ"), fontWeight = FontWeight.Bold) }
+            OutlinedButton(
+                onClick = { context.startActivity(Intent(Intent.ACTION_DIAL, Uri.parse("tel:7760991269"))) },
+                modifier = Modifier.fillMaxWidth().height(50.dp),
+                shape = RoundedCornerShape(14.dp),
+            ) { Text(tr("Call Vayu Vajra · 7760991269", "ವಾಯು ವಜ್ರಗೆ ಕರೆ · 7760991269"), fontWeight = FontWeight.Bold) }
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 FilterChip(selected = !isKannada, onClick = { onLanguageChange(false) }, label = { Text("English") })
                 FilterChip(selected = isKannada, onClick = { onLanguageChange(true) }, label = { Text("ಕನ್ನಡ") })
@@ -231,8 +248,7 @@ private fun AirportScreen(isKannada: Boolean, onLanguageChange: (Boolean) -> Uni
                 route.stops.forEach { stop -> ItineraryCard(stop.departure, stop.name, tr("Scheduled stop time", "ವೇಳಾಪಟ್ಟಿಯ ನಿಲ್ದಾಣ ಸಮಯ"), "", Green) }
                 Text(route.minimumFare?.let { minimum -> tr("GTFS published fare range ₹$minimum–₹${route.maximumFare}. Confirm the applicable current fare in the official app.", "GTFS ಪ್ರಕಟಿತ ದರ ₹$minimum–₹${route.maximumFare}. ಪ್ರಸ್ತುತ ದರವನ್ನು ಅಧಿಕೃತ ಆಪ್‌ನಲ್ಲಿ ದೃಢೀಕರಿಸಿ.") } ?: tr("Current fare unavailable. The 2025 PDF is historical and is not presented as current.", "ಪ್ರಸ್ತುತ ದರ ಲಭ್ಯವಿಲ್ಲ. 2025ರ PDF ಐತಿಹಾಸಿಕವಾಗಿದೆ."), color = Muted, fontSize = 12.sp)
                 OutlinedButton(onClick = { preferences.edit().putString("saved_airport_snapshot", route.encodeForStorage()).apply() }, modifier = Modifier.fillMaxWidth()) { Text(tr("Save complete route snapshot", "ಸಂಪೂರ್ಣ ಮಾರ್ಗ ಸ್ನ್ಯಾಪ್‌ಶಾಟ್ ಉಳಿಸಿ")) }
-                Button(onClick = { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=com.bmtc.bmtcavls.two"))) }, modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.buttonColors(containerColor = Green)) { Text(tr("Open official Namma BMTC", "ಅಧಿಕೃತ ನಮ್ಮ BMTC ತೆರೆಯಿರಿ")) }
-                Text(tr("Official external handoff. BMTC manages payment and tickets; NammaLink records no conversion.", "ಅಧಿಕೃತ ಹೊರಗಿನ ಸಂಪರ್ಕ. ಪಾವತಿ ಮತ್ತು ಟಿಕೆಟ್‌ಗಳನ್ನು BMTC ನಿರ್ವಹಿಸುತ್ತದೆ; ನಮ್ಮಲಿಂಕ್ ಪರಿವರ್ತನೆಯನ್ನು ದಾಖಲಿಸುವುದಿಲ್ಲ."), color = Muted, fontSize = 11.sp)
+                Text(tr("Ticketing and payment continue in the official operator app.", "ಟಿಕೆಟ್ ಮತ್ತು ಪಾವತಿ ಅಧಿಕೃತ ಆಪ್‌ನಲ್ಲಿ ಮುಂದುವರಿಯುತ್ತದೆ."), color = Muted, fontSize = 11.sp)
             }
             Spacer(Modifier.height(18.dp))
         }
@@ -366,6 +382,17 @@ private fun PlannerScreen(onPlan: (NetworkJourney) -> Unit, onLocationUpdated: (
                 Text("NammaLink", color = Ink, fontWeight = FontWeight.ExtraBold, fontSize = 20.sp)
                 Text(currentFix?.let { "Live location · ±${it.accuracyMeters.toInt()} m" } ?: "Locating you in Bengaluru…", color = if (currentFix != null) Green else Amber, fontSize = 11.sp, fontWeight = FontWeight.Bold)
             }
+        }
+        Card(
+            Modifier.align(Alignment.TopEnd).padding(14.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = .94f)),
+            shape = RoundedCornerShape(18.dp),
+        ) {
+            OutlinedButton(
+                onClick = { openOfficialApp(context, "com.aum.nammametro") },
+                modifier = Modifier.padding(6.dp),
+                shape = RoundedCornerShape(14.dp),
+            ) { Text("Metro tickets & recharge", fontSize = 11.sp, fontWeight = FontWeight.Bold) }
         }
         Card(
             Modifier.align(Alignment.BottomCenter).fillMaxWidth().height(405.dp).padding(horizontal = 12.dp, vertical = 10.dp),

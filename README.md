@@ -75,7 +75,7 @@ The installable APK is compiled against the production HTTPS service and has bee
 - Minimum Android version: Android 8.0 / API 26
 - Package: `in.nammalink.app.presentation`
 - Size: 8,566,693 bytes (8.17 MiB)
-- SHA-256: `1661DAED425E05E1D9589D8EF79A78953664423ECE242F559D6D634187A7D578`
+- SHA-256: `DF5B4AB58B482619011848D3E31B08345C7F6BD0546936E929325604A7DB7C7B`
 - Signing: Android debug certificate; suitable for evaluation and internal distribution, not an app-store release
 
 Build locally:
