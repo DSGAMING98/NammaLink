@@ -254,7 +254,8 @@ private fun PlannerScreen(onPlan: (NetworkJourney) -> Unit, onLocationUpdated: (
     var from by rememberSaveable { mutableStateOf("Kempegowda Bus Station") }
     var to by rememberSaveable { mutableStateOf("Central Silk Board") }
     var timeMode by rememberSaveable { mutableStateOf("Depart after") }
-    var requestedTime by rememberSaveable { mutableStateOf("08:00") }
+    var departAfterTime by rememberSaveable { mutableStateOf("08:00") }
+    var arriveByTime by rememberSaveable { mutableStateOf("09:30") }
     var ranking by rememberSaveable { mutableStateOf("Safest") }
     var origin by remember { mutableStateOf(StopOption("35931", "Kempegowda Bus Station (Majestic/KBS)", 12.97793, 77.57389)) }
     var destination by remember { mutableStateOf(StopOption("20707", "Central Silk Board", 12.91803, 77.62355)) }
@@ -354,6 +355,7 @@ private fun PlannerScreen(onPlan: (NetworkJourney) -> Unit, onLocationUpdated: (
             mapHeight = 650.dp,
             showDescription = false,
             showControls = false,
+            showExpandButton = false,
         )
         Card(
             Modifier.align(Alignment.TopStart).padding(14.dp),
@@ -386,7 +388,11 @@ private fun PlannerScreen(onPlan: (NetworkJourney) -> Unit, onLocationUpdated: (
                 listOf("Depart after", "Arrive by").forEach { choice ->
                     FilterChip(selected = timeMode == choice, onClick = { timeMode = choice }, label = { Text(choice) })
                 }
-                OutlinedTextField(requestedTime, { requestedTime = it }, label = { Text("Time") }, modifier = Modifier.weight(1f), singleLine = true)
+                if (timeMode == "Arrive by") {
+                    OutlinedTextField(arriveByTime, { arriveByTime = it }, label = { Text("Deadline") }, modifier = Modifier.weight(1f), singleLine = true)
+                } else {
+                    OutlinedTextField(departAfterTime, { departAfterTime = it }, label = { Text("Leave at") }, modifier = Modifier.weight(1f), singleLine = true)
+                }
             }
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 listOf("Safest", "Fastest", "Direct").forEach { choice ->
@@ -401,6 +407,7 @@ private fun PlannerScreen(onPlan: (NetworkJourney) -> Unit, onLocationUpdated: (
                         val maximumWalkingMeters = 100_000
                         val priorityValue = ranking.lowercase()
                         val timeModeValue = if (timeMode == "Arrive by") "arriveBy" else "departAfter"
+                        val requestedTime = if (timeMode == "Arrive by") arriveByTime else departAfterTime
                         val accessLocation = currentFix.takeIf { origin.distanceMeters != null }
                         runCatching { withContext(Dispatchers.IO) { planNetworkJourney(origin, destination, LocalDate.now().toString(), timeModeValue, requestedTime, priorityValue, maximumWalkingMeters, accessLocation) } }
                             .onSuccess(onPlan)
@@ -478,7 +485,7 @@ private fun JourneyScreen(networkJourney: NetworkJourney?, deviceLocation: Devic
                         }
                     }
                 }
-                InteractiveRouteMap(networkJourney.origin, networkJourney.destination, networkJourney.rides, deviceLocation)
+                InteractiveRouteMap(networkJourney.origin, networkJourney.destination, networkJourney.rides, deviceLocation, mapHeight = 300.dp, showDescription = false)
                 networkJourney.rides.forEachIndexed { index, ride ->
                     val waitingMinutes = networkJourney.waitBeforeRideMinutes(index)
                     if (waitingMinutes > 0) {

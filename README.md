@@ -27,6 +27,7 @@ The routing network currently contains 10,043 searchable BMTC and BMRCL stops, 6
 ## Capabilities
 
 - Depart-after and arrive-by journey planning across BMTC and BMRCL services.
+- Independent departure-time and arrival-deadline inputs, with the selected contract enforced by the routing API.
 - Optional walking preferences, transfer/deadline contracts, and direct-only travel without an arbitrary mandatory walking cutoff.
 - Safest, fastest, and direct journey contracts with comparable duration, waiting, changes, and walking.
 - Calendar-filtered Connection Scan routing over the complete indexed network.
@@ -40,7 +41,7 @@ The routing network currently contains 10,043 searchable BMTC and BMRCL stops, 6
 - Server-side Geocoding and Routes gateways with validation, timeouts, caching, rate limits, and normalized errors.
 - Health, revision, dataset-validity, and capability reporting through `/api/health`.
 - Arbitrary place discovery with Google Places when authorized and automatic verified-stop fallback.
-- Real interactive map and satellite layers with GTFS route polylines, stop markers, and transfer context.
+- Map-first native planning with continuous device-location updates, clean route endpoints, street/satellite layers, and an expandable full-screen route view.
 - Integrated Vayu Vajra Airport Mode with 44 direction-correct route variants, 1,101 scheduled origin departures, intermediate stops, and dated provenance.
 - Working English/Kannada switch, device-local language persistence, saved city/airport snapshots, and compass limitations.
 - Official Namma BMTC 2.0 ticket handoff with outbound-click evidence kept separate from conversions and hypothetical revenue.
@@ -61,15 +62,20 @@ Deployment requirements, smoke tests, and release procedures are documented in [
 
 ## Android application
 
-The `android/` directory contains a native Kotlin and Jetpack Compose application; it is not a WebView. It provides stop autocomplete, nearby-stop discovery, journey-contract controls, full-network itinerary rendering, integrated Airport Mode, English/Kannada controls, offline city/airport persistence, compass assistance, recovery handling, and operator schedule insights.
+The `android/` directory contains a native Kotlin and Jetpack Compose application; it is not a WebView. Its primary experience is a live-location map with the search and journey contract presented as a compact bottom sheet. It provides stop autocomplete, nearby-stop discovery, independent depart-after and arrive-by controls, full-network itinerary rendering, full-screen route maps, integrated Airport Mode, English/Kannada controls, offline city/airport persistence, compass assistance, recovery handling, and operator schedule insights.
+
+<p align="center">
+  <img src="research_outputs/android-map-first-home-final.png" alt="NammaLink map-first Android planner" width="300" />
+  <img src="research_outputs/android-fullscreen-map.png" alt="NammaLink expanded journey map" width="300" />
+</p>
 
 The installable APK is compiled against the production HTTPS service and has been tested on a physical Android 16 device with no ADB reverse rule.
 
 - Download: [NammaLink Android APK](https://nammalink.vercel.app/downloads/NammaLink-0.1.0.apk)
 - Minimum Android version: Android 8.0 / API 26
 - Package: `in.nammalink.app.presentation`
-- Size: 8,056,434 bytes
-- SHA-256: `3D2364081AAF309A54E0A380D21467688CA4F39CA5DAA746773A0EE8CAC368B1`
+- Size: 8,566,697 bytes
+- SHA-256: `D990EAEF5F2C0FF19B705FE3F5D77837231059138DA07393F0612351338E744B`
 - Signing: Android debug certificate; suitable for evaluation and internal distribution, not an app-store release
 
 Build locally:

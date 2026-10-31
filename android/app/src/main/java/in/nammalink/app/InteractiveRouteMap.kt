@@ -1,6 +1,7 @@
 package `in`.nammalink.app
 
 import android.graphics.Color as AndroidColor
+import android.graphics.drawable.GradientDrawable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -28,6 +29,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -61,12 +64,14 @@ fun InteractiveRouteMap(
     mapHeight: Dp = 330.dp,
     showDescription: Boolean = true,
     showControls: Boolean = true,
+    showExpandButton: Boolean = true,
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     var satellite by remember { mutableStateOf(false) }
     var recenterNonce by remember { mutableIntStateOf(0) }
     var mapView by remember { mutableStateOf<MapView?>(null) }
+    var fullScreen by remember { mutableStateOf(false) }
     val rendered = remember { mutableMapOf<String, String>() }
     val walkingGeometry = remember { mutableStateMapOf<Int, WalkingRoute>() }
     val geographicRides = rides.filter { it.fromLat.isFinite() && it.fromLon.isFinite() && it.toLat.isFinite() && it.toLon.isFinite() }
@@ -95,13 +100,6 @@ fun InteractiveRouteMap(
 
     Card(colors = CardDefaults.cardColors(containerColor = Color.White)) {
         Column {
-            if (showControls) {
-                Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    FilterChip(selected = !satellite, onClick = { satellite = false }, label = { Text("Street") })
-                    FilterChip(selected = satellite, onClick = { satellite = true }, label = { Text("Satellite") })
-                    OutlinedButton(onClick = { recenterNonce += 1 }) { Text("Recenter") }
-                }
-            }
             AndroidView(
                     modifier = Modifier.fillMaxWidth().height(mapHeight),
                     factory = { viewContext ->
@@ -139,16 +137,21 @@ fun InteractiveRouteMap(
                                 outlinePaint.strokeWidth = if (ride.mode == "walk") 8f else 10f
                                 title = if (verifiedWalk != null) "Verified walking route" else "Scheduled stop alignment"
                             }
-                            if (visibleIndex == 0) view.overlays += Marker(view).apply { position = segment.first(); title = origin; setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM) }
-                            view.overlays += Marker(view).apply {
-                                position = segment.last(); title = if (visibleIndex == geographicRides.lastIndex) destination else ride.to
-                                subDescription = if (visibleIndex == geographicRides.lastIndex) "Destination" else "Transfer / stop"
-                                setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+                            if (visibleIndex == 0) view.overlays += Marker(view).apply {
+                                position = segment.first(); title = origin; subDescription = "Origin"
+                                icon = mapDot(AndroidColor.rgb(47, 111, 237)); setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
+                            }
+                            if (visibleIndex == geographicRides.lastIndex) view.overlays += Marker(view).apply {
+                                position = segment.last(); title = destination; subDescription = "Destination"
+                                icon = mapDot(AndroidColor.rgb(21, 107, 82)); setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
                             }
                         }
                         deviceLocation?.let { fix ->
                             val current = GeoPoint(fix.latitude, fix.longitude); points += current
-                            view.overlays += Marker(view).apply { position = current; title = "Current location"; subDescription = "Last fix ±${fix.accuracyMeters.toInt()} m"; setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM) }
+                            view.overlays += Marker(view).apply {
+                                position = current; title = "Current location"; subDescription = "Last fix ±${fix.accuracyMeters.toInt()} m"
+                                icon = mapDot(AndroidColor.rgb(47, 111, 237), 34); setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
+                            }
                         }
                         if (points.size == 1) view.post { view.controller.setZoom(15.5); view.controller.animateTo(points.first()) }
                         else if (points.size > 1) view.post { runCatching { view.zoomToBoundingBox(BoundingBox.fromGeoPoints(points), true, 70) } }
@@ -156,8 +159,30 @@ fun InteractiveRouteMap(
                         view.invalidate()
                     },
             )
+            if (showControls) {
+                Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    FilterChip(selected = !satellite, onClick = { satellite = false }, label = { Text("Street", fontSize = 12.sp) }, modifier = Modifier.weight(1f))
+                    FilterChip(selected = satellite, onClick = { satellite = true }, label = { Text("Satellite", fontSize = 12.sp) }, modifier = Modifier.weight(1f))
+                    OutlinedButton(onClick = { recenterNonce += 1 }, modifier = Modifier.weight(1f)) { Text("Recenter", fontSize = 12.sp) }
+                }
+            }
             if (showDescription) {
                 Text("Interactive map · pan and pinch to zoom. Walking lines use the Routes API when available; transit lines connect verified scheduled stops and are not street-level vehicle traces.", Modifier.padding(12.dp), fontSize = 11.sp, color = Color(0xFF617068))
+            }
+            if (showExpandButton) {
+                OutlinedButton(onClick = { fullScreen = true }, modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp)) {
+                    Text("Expand map")
+                }
+            }
+        }
+    }
+    if (fullScreen) {
+        Dialog(onDismissRequest = { fullScreen = false }, properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false)) {
+            Card(Modifier.fillMaxWidth().padding(10.dp), colors = CardDefaults.cardColors(containerColor = Color.White)) {
+                Column {
+                    OutlinedButton(onClick = { fullScreen = false }, modifier = Modifier.fillMaxWidth().padding(10.dp)) { Text("Close full-screen map") }
+                    InteractiveRouteMap(origin, destination, rides, deviceLocation, mapHeight = 600.dp, showDescription = false, showControls = true, showExpandButton = false)
+                }
             }
         }
     }
@@ -168,4 +193,11 @@ fun InteractiveRouteMap(
             else deviceLocation?.let { mapView?.controller?.animateTo(GeoPoint(it.latitude, it.longitude)) }
         }
     }
+}
+
+private fun mapDot(color: Int, size: Int = 42) = GradientDrawable().apply {
+    shape = GradientDrawable.OVAL
+    setColor(color)
+    setStroke(5, AndroidColor.WHITE)
+    setSize(size, size)
 }
